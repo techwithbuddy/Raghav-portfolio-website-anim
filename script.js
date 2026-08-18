@@ -10,7 +10,8 @@ const currentFrame = index => (
 const images = [];
 
 const preloadImages = () => {
-  for (let i = 0; i < frameCount; i++) {
+  for (let i = 0; i < frameCount; i++) 
+    {
     const img = new Image();
     img.src = currentFrame(i);
     images.push(img);
