@@ -18,14 +18,12 @@ body {
 
 #video-canvas {
     position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    top: 0;
+    left: 0;
     width: 100vw;
     height: 100vh;
-    object-fit: cover;
-    /* This makes the canvas act like a background cover */
-    z-index: -1;
+    pointer-events: none;
+    z-index: 0;
 }
 
 .scroll-container {
