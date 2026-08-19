@@ -15,7 +15,10 @@ body {
     margin: 0;
     padding: 0;
     width: 100%;
-    background-color: transparent;
+    background:
+        radial-gradient(circle at top left, rgba(157, 78, 221, 0.22), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(244, 114, 182, 0.2), transparent 32%),
+        linear-gradient(135deg, #060816 0%, #0d1021 35%, #120d1d 100%);
     color: #ffffff;
     font-family: 'Outfit', sans-serif;
     overflow-x: hidden;
@@ -72,12 +75,40 @@ section[id] {
     height: 100vh;
     pointer-events: none;
     z-index: 0;
+    opacity: 0.9;
+    filter: saturate(1.2) contrast(1.08) brightness(0.9);
 }
 
 .scroll-container {
     position: relative;
     z-index: 1;
     min-height: 100vh;
+    background: linear-gradient(180deg, rgba(6, 8, 22, 0.08), rgba(6, 8, 22, 0.2));
+}
+
+.scroll-container::before,
+.scroll-container::after {
+    content: '';
+    position: fixed;
+    width: 30rem;
+    height: 30rem;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.35;
+}
+
+.scroll-container::before {
+    top: 8%;
+    left: -8%;
+    background: rgba(157, 78, 221, 0.28);
+}
+
+.scroll-container::after {
+    right: -8%;
+    bottom: 8%;
+    background: rgba(244, 114, 182, 0.22);
 }
 
 .spacer {
