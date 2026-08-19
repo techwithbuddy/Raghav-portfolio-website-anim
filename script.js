@@ -1,48 +1,209 @@
 const html = document.documentElement;
 const canvas = document.getElementById("video-canvas");
 const context = canvas.getContext("2d");
+const cursorDot = document.querySelector('.cursor-dot');
+const cursorRing = document.querySelector('.cursor-ring');
 
-const frameCount = 240;
+const cursor = {
+  x: window.innerWidth / 2,
+  y: window.innerHeight / 2,
+  ringX: window.innerWidth / 2,
+  ringY: window.innerHeight / 2
+};
+
+window.addEventListener('pointermove', (event) => {
+  cursor.x = event.clientX;
+  cursor.y = event.clientY;
+  cursorDot.style.left = `${event.clientX}px`;
+  cursorDot.style.top = `${event.clientY}px`;
+});
+
+const animateCursor = () => {
+  cursor.ringX += (cursor.x - cursor.ringX) * 0.12;
+  cursor.ringY += (cursor.y - cursor.ringY) * 0.12;
+
+  cursorRing.style.left = `${cursor.ringX}px`;
+  cursorRing.style.top = `${cursor.ringY}px`;
+
+  requestAnimationFrame(animateCursor);
+};
+animateCursor();
+
+const interactiveSelectors = 'a, button, input, textarea, .project-card, .achievement-card, .social-icon, .resume-btn, .contact-social-item, .btn-send, .nav-links a, .nav-logo a';
+
+document.querySelectorAll(interactiveSelectors).forEach((element) => {
+  element.addEventListener('mouseenter', () => cursorRing.classList.add('active'));
+  element.addEventListener('mouseleave', () => cursorRing.classList.remove('active'));
+});
+
+const useFrameSequence = true;
+const frameCount = useFrameSequence ? 240 : 1;
 const currentFrame = index => (
-  `frames/video_frames_24fps/frame_${(index + 1).toString().padStart(4, '0')}.png`
+  useFrameSequence
+    ? `Frame/frame_${(index + 1).toString().padStart(4, '0')}.jpg`
+    : "hero_3d.jpg"
 );
 
-const images = [];
+const imageCache = new Map();
+const pendingLoads = new Map();
+const maxCachedFrames = 40;
+let currentFrameIndex = 0;
+let currentZoom = 1;
+let targetFrameFloat = 0;
+let animatedFrameFloat = 0;
+let targetZoom = 1;
+let animationRunning = false;
 
-const preloadImages = () => {
-  for (let i = 0; i < frameCount; i++) {
-    const img = new Image();
-    img.src = currentFrame(i);
-    images.push(img);
+const getViewport = () => ({
+  width: window.innerWidth,
+  height: window.innerHeight
+});
+
+const resizeCanvas = () => {
+  const { width, height } = getViewport();
+  const dpr = Math.max(1, window.devicePixelRatio || 1);
+
+  canvas.width = Math.floor(width * dpr);
+  canvas.height = Math.floor(height * dpr);
+  canvas.style.width = `${width}px`;
+  canvas.style.height = `${height}px`;
+
+  context.setTransform(dpr, 0, 0, dpr, 0, 0);
+};
+
+const trimCache = centerIndex => {
+  if (imageCache.size <= maxCachedFrames) return;
+
+  const safeStart = Math.max(0, centerIndex - 16);
+  const safeEnd = Math.min(frameCount - 1, centerIndex + 24);
+
+  imageCache.forEach((_, key) => {
+    if (key < safeStart || key > safeEnd) {
+      imageCache.delete(key);
+    }
+  });
+};
+
+const loadFrame = index => {
+  if (index < 0 || index >= frameCount) return Promise.resolve(null);
+  if (imageCache.has(index)) return Promise.resolve(imageCache.get(index));
+  if (pendingLoads.has(index)) return pendingLoads.get(index);
+
+  const img = new Image();
+  img.decoding = "async";
+
+  const framePromise = new Promise(resolve => {
+    img.onload = () => {
+      imageCache.set(index, img);
+      pendingLoads.delete(index);
+      trimCache(currentFrameIndex);
+      resolve(img);
+    };
+
+    img.onerror = () => {
+      pendingLoads.delete(index);
+      resolve(null);
+    };
+  });
+
+  pendingLoads.set(index, framePromise);
+  img.src = currentFrame(index);
+
+  return framePromise;
+};
+
+const drawFrame = (index, zoom) => {
+  const image = imageCache.get(index);
+  if (!image) return;
+
+  const { width, height } = getViewport();
+  const imageWidth = image.naturalWidth || image.width;
+  const imageHeight = image.naturalHeight || image.height;
+
+  const coverScale = Math.max(width / imageWidth, height / imageHeight);
+  const drawScale = coverScale * zoom;
+  const drawWidth = imageWidth * drawScale;
+  const drawHeight = imageHeight * drawScale;
+  const offsetX = (width - drawWidth) / 2;
+  const offsetY = (height - drawHeight) / 2;
+
+  context.clearRect(0, 0, width, height);
+  context.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
+};
+
+const preloadAround = index => {
+  if (!useFrameSequence) return;
+
+  loadFrame(index + 1);
+  loadFrame(index + 2);
+  loadFrame(index + 3);
+  loadFrame(index - 1);
+};
+
+const stepAnimation = () => {
+  const frameDelta = targetFrameFloat - animatedFrameFloat;
+  animatedFrameFloat += frameDelta * 0.18;
+  currentZoom += (targetZoom - currentZoom) * 0.15;
+
+  const candidateIndex = Math.round(animatedFrameFloat);
+  const clampedIndex = Math.min(frameCount - 1, Math.max(0, candidateIndex));
+  currentFrameIndex = clampedIndex;
+
+  if (imageCache.has(clampedIndex)) {
+    drawFrame(clampedIndex, currentZoom);
+    preloadAround(clampedIndex);
+  } else {
+    loadFrame(clampedIndex).then(image => {
+      if (image && clampedIndex === currentFrameIndex) {
+        drawFrame(clampedIndex, currentZoom);
+      }
+    });
+  }
+
+  const stillMoving = Math.abs(frameDelta) > 0.01 || Math.abs(targetZoom - currentZoom) > 0.001;
+
+  if (stillMoving) {
+    requestAnimationFrame(stepAnimation);
+  } else {
+    animationRunning = false;
   }
 };
 
-// Preload all images into the array
-preloadImages();
-
-// Draw the very first frame when it loads
-images[0].onload = function () {
-  canvas.width = images[0].width;
-  canvas.height = images[0].height;
-  context.drawImage(images[0], 0, 0);
+const ensureAnimationLoop = () => {
+  if (animationRunning) return;
+  animationRunning = true;
+  requestAnimationFrame(stepAnimation);
 };
 
-const updateImage = index => {
-  if (images[index] && images[index].complete) {
-    context.drawImage(images[index], 0, 0);
+const updateBackgroundFromScroll = () => {
+  const scrollTop = html.scrollTop || document.body.scrollTop;
+  const maxScrollTop = Math.max(1, html.scrollHeight - window.innerHeight);
+  const scrollFraction = Math.min(1, Math.max(0, scrollTop / maxScrollTop));
+  targetFrameFloat = scrollFraction * (frameCount - 1);
+  targetZoom = 1 + scrollFraction * 0.25;
+  ensureAnimationLoop();
+};
+
+const onScroll = () => {
+  updateBackgroundFromScroll();
+};
+
+resizeCanvas();
+loadFrame(0).then(image => {
+  if (image) {
+    animatedFrameFloat = 0;
+    targetFrameFloat = 0;
+    currentZoom = 1;
+    targetZoom = 1;
+    updateBackgroundFromScroll();
+  } else {
+    console.warn("Frame 1 could not be loaded. Check the Frame folder path and image names.");
   }
-};
-
-window.addEventListener('scroll', () => {
-  const scrollTop = html.scrollTop;
-  const maxScrollTop = html.scrollHeight - window.innerHeight;
-  const scrollFraction = scrollTop / maxScrollTop;
-  const frameIndex = Math.min(
-    frameCount - 1,
-    Math.floor(scrollFraction * frameCount)
-  );
-
-  requestAnimationFrame(() => updateImage(frameIndex));
+});
+window.addEventListener('scroll', onScroll, { passive: true });
+window.addEventListener('resize', () => {
+  resizeCanvas();
+  drawFrame(currentFrameIndex, currentZoom);
 });
 
 // Matter.js Physics Animation for Skills Section
