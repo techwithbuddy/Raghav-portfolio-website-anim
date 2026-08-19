@@ -1,6 +1,10 @@
-# Animated Portfolio Website
+# Raghav Portfolio Website
 
-A modern personal portfolio website for Raghav Sharma, built with plain HTML, CSS, and JavaScript. The project includes a dark premium aesthetic, animated background, floating sections, smooth scrolling, and a résumé section with downloadable PDF access.
+A modern personal portfolio website for Raghav Sharma, built with plain HTML, CSS, and JavaScript. The project features a premium dark aesthetic, animated background, glassmorphism styling, smooth scrolling, and a resume section with downloadable PDF access.
+
+## Repository
+
+- GitHub: https://github.com/techwithbuddy/Raghav-portfolio-website-anim
 
 ## Features
 
@@ -31,14 +35,14 @@ A modern personal portfolio website for Raghav Sharma, built with plain HTML, CS
 Open your terminal and run:
 
 ```bash
-git clone https://github.com/your-username/your-portfolio-repo.git
-cd your-portfolio-repo
+git clone https://github.com/techwithbuddy/Raghav-portfolio-website-anim.git
+cd Raghav-portfolio-website-anim
 ```
 
-If you are using GitHub or another Git platform, you can also click the "Code" button and copy the HTTPS or SSH URL, then run:
+You can also use GitHub's "Code" button to copy the HTTPS or SSH URL and clone from there.
 
 ```bash
-git clone <your-repository-url>
+git clone <https://github.com/techwithbuddy/Raghav-portfolio-website-anim>
 ```
 
 ### 2) Open in an IDE
@@ -65,8 +69,7 @@ python -m http.server 8000
 
 Then visit:
 
-```text
-http://localhost:8000
+```https://techwithbuddy.vercel.app/
 ```
 
 ## Customize
