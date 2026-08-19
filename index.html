@@ -14,6 +14,9 @@
 </head>
 
 <body>
+    <div class="cursor-dot"></div>
+    <div class="cursor-ring"></div>
+
     <!-- The background animation canvas -->
     <canvas id="video-canvas"></canvas>
 
@@ -33,7 +36,7 @@
                 <a href="#contact">Contact</a>
             </div>
             <div class="nav-right">
-                <a href="#resume" class="resume-btn">Resume <span class="icon">📄</span></a>
+                <a href="#resume" class="resume-btn">Resume</a>
             </div>
         </nav>
 
@@ -42,7 +45,7 @@
             <div class="hero-container">
                 <div class="hero-text">
                     <div class="badge">
-                        <span class="icon">💻</span> Computer Science Student & Developer
+                        Computer Science Student & Devloper
                     </div>
                     <h1 class="title">Hi, I'm <br><span class="highlight">Raghav Sharma</span></h1>
                     <p class="description">I build scalable web applications and craft engaging digital experiences with
@@ -51,7 +54,6 @@
                     <div class="hero-buttons">
                         <a href="#projects" class="btn-primary">
                             View Projects
-                            <span class="icon-box">↗</span>
                         </a>
                         <a href="#contact" class="btn-secondary">
                             Contact Me
@@ -466,23 +468,11 @@
 
             <div class="resume-card">
                 <div class="resume-preview">
-                    <div class="resume-mock">
-                        <div class="resume-mock-header">
-                            <div class="resume-mock-name">Raghav Sharma</div>
-                            <div class="resume-mock-title">Computer Science Student &amp; Developer</div>
+                    <a href="./resume.pdf" target="_blank" rel="noopener" class="resume-mock-link" aria-label="Open resume PDF">
+                        <div class="resume-mock">
+                            <embed src="./resume.pdf#page=1" type="application/pdf" class="resume-pdf-preview" />
                         </div>
-                        <div class="resume-mock-lines">
-                            <div class="resume-line long"></div>
-                            <div class="resume-line medium"></div>
-                            <div class="resume-line short"></div>
-                            <div class="resume-line long"></div>
-                            <div class="resume-line medium"></div>
-                            <div class="resume-line short"></div>
-                            <div class="resume-line long"></div>
-                            <div class="resume-line medium"></div>
-                        </div>
-                        <div class="resume-mock-icon">📄</div>
-                    </div>
+                    </a>
                 </div>
 
                 <div class="resume-info">
@@ -517,7 +507,6 @@
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                         </a>
                     </div>
-                    <p class="resume-note">📌 Place your <code>resume.pdf</code> in the same folder as <code>index.html</code> for the buttons to work.</p>
                 </div>
             </div>
         </section>

@@ -1,6 +1,40 @@
 const html = document.documentElement;
 const canvas = document.getElementById("video-canvas");
 const context = canvas.getContext("2d");
+const cursorDot = document.querySelector('.cursor-dot');
+const cursorRing = document.querySelector('.cursor-ring');
+
+const cursor = {
+  x: window.innerWidth / 2,
+  y: window.innerHeight / 2,
+  ringX: window.innerWidth / 2,
+  ringY: window.innerHeight / 2
+};
+
+window.addEventListener('pointermove', (event) => {
+  cursor.x = event.clientX;
+  cursor.y = event.clientY;
+  cursorDot.style.left = `${event.clientX}px`;
+  cursorDot.style.top = `${event.clientY}px`;
+});
+
+const animateCursor = () => {
+  cursor.ringX += (cursor.x - cursor.ringX) * 0.12;
+  cursor.ringY += (cursor.y - cursor.ringY) * 0.12;
+
+  cursorRing.style.left = `${cursor.ringX}px`;
+  cursorRing.style.top = `${cursor.ringY}px`;
+
+  requestAnimationFrame(animateCursor);
+};
+animateCursor();
+
+const interactiveSelectors = 'a, button, input, textarea, .project-card, .achievement-card, .social-icon, .resume-btn, .contact-social-item, .btn-send, .nav-links a, .nav-logo a';
+
+document.querySelectorAll(interactiveSelectors).forEach((element) => {
+  element.addEventListener('mouseenter', () => cursorRing.classList.add('active'));
+  element.addEventListener('mouseleave', () => cursorRing.classList.remove('active'));
+});
 
 const useFrameSequence = true;
 const frameCount = useFrameSequence ? 240 : 1;
