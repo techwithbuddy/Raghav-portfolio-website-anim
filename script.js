@@ -3,6 +3,78 @@ const canvas = document.getElementById("video-canvas");
 const context = canvas.getContext("2d");
 const cursorDot = document.querySelector('.cursor-dot');
 const cursorRing = document.querySelector('.cursor-ring');
+const typingText = document.querySelector('.typing-text');
+
+if (typingText) {
+  const roles = ['Developer', 'Full Stack Engineer', 'Problem Solver', 'Creator'];
+  let roleIndex = 0;
+  let charIndex = 0;
+  let isDeleting = false;
+
+  const typeLoop = () => {
+    const currentWord = roles[roleIndex];
+
+    if (!isDeleting) {
+      charIndex++;
+      typingText.textContent = currentWord.slice(0, charIndex);
+      if (charIndex === currentWord.length) {
+        isDeleting = true;
+        setTimeout(typeLoop, 1200);
+        return;
+      }
+    } else {
+      charIndex--;
+      typingText.textContent = currentWord.slice(0, charIndex);
+      if (charIndex === 0) {
+        isDeleting = false;
+        roleIndex = (roleIndex + 1) % roles.length;
+      }
+    }
+
+    const speed = isDeleting ? 60 : 110;
+    setTimeout(typeLoop, speed);
+  };
+
+  typeLoop();
+}
+
+const heroImage = document.querySelector('.image-wrapper');
+
+if (heroImage) {
+  const heroMotion = {
+    targetX: 0,
+    targetY: 0,
+    currentX: 0,
+    currentY: 0,
+    scrollY: 0
+  };
+
+  const updateHeroMotion = () => {
+    heroMotion.currentX += (heroMotion.targetX - heroMotion.currentX) * 0.08;
+    heroMotion.currentY += (heroMotion.targetY - heroMotion.currentY) * 0.08;
+    heroMotion.scrollY += ((window.scrollY * 0.035) - heroMotion.scrollY) * 0.08;
+
+    heroImage.style.setProperty('--hero-tilt-x', `${heroMotion.currentY.toFixed(2)}deg`);
+    heroImage.style.setProperty('--hero-tilt-y', `${heroMotion.currentX.toFixed(2)}deg`);
+    heroImage.style.setProperty('--hero-shift-y', `${heroMotion.scrollY.toFixed(2)}px`);
+    requestAnimationFrame(updateHeroMotion);
+  };
+
+  heroImage.addEventListener('pointermove', (event) => {
+    const bounds = heroImage.getBoundingClientRect();
+    const relativeX = (event.clientX - bounds.left) / bounds.width - 0.5;
+    const relativeY = (event.clientY - bounds.top) / bounds.height - 0.5;
+    heroMotion.targetX = relativeX * 5;
+    heroMotion.targetY = relativeY * -5;
+  });
+
+  heroImage.addEventListener('pointerleave', () => {
+    heroMotion.targetX = 0;
+    heroMotion.targetY = 0;
+  });
+
+  updateHeroMotion();
+}
 
 const cursor = {
   x: window.innerWidth / 2,
@@ -41,12 +113,13 @@ const frameCount = useFrameSequence ? 240 : 1;
 const currentFrame = index => (
   useFrameSequence
     ? `Frame/frame_${(index + 1).toString().padStart(4, '0')}.jpg`
-    : "hero_3d.jpg"
+    : "Screenshot 2026-08-18 024744.png"
 );
 
 const imageCache = new Map();
 const pendingLoads = new Map();
-const maxCachedFrames = 40;
+const maxCachedFrames = 48;
+
 let currentFrameIndex = 0;
 let currentZoom = 1;
 let targetFrameFloat = 0;
@@ -411,3 +484,54 @@ const initSkillsPhysics = () => {
 
 // Initialize after a small delay to ensure container dimensions are set
 setTimeout(initSkillsPhysics, 500);
+
+const animatedSections = [...document.querySelectorAll('section[id]')];
+const animatedTargets = '.about-card, .project-card, .timeline-item, .achievement-card, .resume-card, .contact-social-item, .contact-form';
+const sectionLinks = [...document.querySelectorAll('.nav-links a[href^="#"]')];
+
+animatedSections.forEach(section => {
+  section.querySelectorAll(animatedTargets).forEach((element, index) => {
+    element.classList.add('reveal-item');
+    element.style.transitionDelay = `${Math.min(index * 0.07, 0.35)}s`;
+  });
+});
+
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (!entry.isIntersecting) return;
+
+    entry.target.classList.add('is-visible');
+    entry.target.querySelectorAll('.reveal-item').forEach(element => {
+      element.classList.add('is-visible');
+    });
+  });
+}, { threshold: 0.16, rootMargin: '-8% 0px -8% 0px' });
+
+const heroSection = document.querySelector('.hero');
+heroSection?.classList.add('is-visible');
+animatedSections.forEach(section => revealObserver.observe(section));
+
+let sectionJumpTimer;
+const playSectionJump = () => {
+  document.body.classList.remove('section-jump');
+  window.clearTimeout(sectionJumpTimer);
+  requestAnimationFrame(() => document.body.classList.add('section-jump'));
+  sectionJumpTimer = window.setTimeout(() => document.body.classList.remove('section-jump'), 750);
+};
+
+sectionLinks.forEach(link => {
+  link.addEventListener('click', () => {
+    playSectionJump();
+  });
+});
+
+const sectionObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (!entry.isIntersecting) return;
+
+    const activeLink = sectionLinks.find(link => link.getAttribute('href') === `#${entry.target.id}`);
+    sectionLinks.forEach(link => link.classList.toggle('active', link === activeLink));
+  });
+}, { threshold: 0.45, rootMargin: '-12% 0px -45% 0px' });
+
+animatedSections.forEach(section => sectionObserver.observe(section));
