@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quantum - Stop Guessing, Start Scaling</title>
+    <title>RAGHAV OS | Personal Developer Environment</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -14,13 +14,58 @@
 </head>
 
 <body>
+    <div class="boot-screen" id="boot-screen" role="dialog" aria-modal="true" aria-labelledby="boot-title">
+        <div class="boot-panel">
+            <div class="boot-mark" aria-hidden="true">R/OS</div>
+            <p class="boot-kicker">PERSONAL DEVELOPER ENVIRONMENT</p>
+            <h1 id="boot-title">RAGHAV OS</h1>
+            <p class="boot-status" id="boot-status">SYSTEM INITIALIZATION</p>
+            <div class="boot-log" id="boot-log" aria-live="polite">
+                <span>Loading personal environment...</span>
+            </div>
+            <div class="boot-progress" aria-hidden="true"><span id="boot-progress-bar"></span></div>
+            <div class="boot-footer">
+                <span id="boot-progress-label">0%</span>
+                <button class="boot-enter" id="boot-enter" type="button">ENTER RAGHAV OS</button>
+            </div>
+        </div>
+    </div>
+
+    <main class="os-environment" id="os-environment" aria-label="Raghav OS desktop">
+        <header class="system-bar">
+            <div class="system-brand"><span class="system-dot" aria-hidden="true"></span><strong>RAGHAV OS</strong><span class="system-state">SYSTEM ONLINE</span></div>
+            <div class="system-meta"><time id="system-time" datetime="">00:00</time><span class="system-status"><span class="status-dot" aria-hidden="true"></span>READY</span></div>
+        </header>
+
+        <section class="desktop" aria-labelledby="desktop-title">
+            <div class="desktop-heading">
+                <p class="eyebrow">PERSONAL WORKSPACE / 2026</p>
+                <h2 id="desktop-title">RAGHAV OS</h2>
+                <p>Welcome back. Select an environment to explore.</p>
+            </div>
+            <div class="desktop-icons" role="list" aria-label="Raghav OS applications">
+                <button class="desktop-icon" type="button" data-app="projects"><span class="app-glyph" aria-hidden="true">📁</span><span>PROJECTS</span></button>
+                <button class="desktop-icon" type="button" data-app="skills"><span class="app-glyph" aria-hidden="true">🧩</span><span>SKILLS</span></button>
+                <button class="desktop-icon" type="button" data-app="experience"><span class="app-glyph" aria-hidden="true">◈</span><span>EXPERIENCE</span></button>
+                <button class="desktop-icon" type="button" data-app="resume"><span class="app-glyph" aria-hidden="true">📄</span><span>RESUME</span></button>
+                <button class="desktop-icon" type="button" data-app="achievements"><span class="app-glyph" aria-hidden="true">🏆</span><span>ACHIEVEMENTS</span></button>
+                <button class="desktop-icon" type="button" data-app="about"><span class="app-glyph" aria-hidden="true">👤</span><span>ABOUT</span></button>
+                <button class="desktop-icon" type="button" data-app="contact"><span class="app-glyph" aria-hidden="true">📡</span><span>CONTACT</span></button>
+            </div>
+            <div class="desktop-prompt" id="desktop-prompt" role="status" aria-live="polite">Select an application to initialize a module.</div>
+            <button class="archive-toggle" id="archive-toggle" type="button">OPEN PORTFOLIO ARCHIVE</button>
+        </section>
+        <div class="os-window-layer" id="os-window-layer" aria-live="polite"></div>
+        <nav class="os-taskbar" id="os-taskbar" aria-label="Open Raghav OS applications"></nav>
+    </main>
+
     <div class="cursor-dot"></div>
     <div class="cursor-ring"></div>
 
     <!-- The background animation canvas -->
     <canvas id="video-canvas"></canvas>
 
-    <div class="scroll-container" id="top">
+    <div class="scroll-container legacy-portfolio" id="top" hidden>
         <!-- Navigation -->
         <nav class="navbar">
             <div class="nav-logo">
