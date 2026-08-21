@@ -44,6 +44,7 @@
                 <p>Welcome back. Select an environment to explore.</p>
             </div>
             <div class="desktop-icons" role="list" aria-label="Raghav OS applications">
+                <button class="desktop-icon" type="button" data-app="core"><span class="app-glyph" aria-hidden="true">🧠</span><span>RAGHAV CORE</span></button>
                 <button class="desktop-icon" type="button" data-app="projects"><span class="app-glyph" aria-hidden="true">📁</span><span>PROJECTS</span></button>
                 <button class="desktop-icon" type="button" data-app="skills"><span class="app-glyph" aria-hidden="true">🧩</span><span>SKILLS</span></button>
                 <button class="desktop-icon" type="button" data-app="experience"><span class="app-glyph" aria-hidden="true">◈</span><span>EXPERIENCE</span></button>
@@ -64,6 +65,38 @@
 
     <!-- The background animation canvas -->
     <canvas id="video-canvas"></canvas>
+
+    <!-- Raghav Digital Brain (Phase 5) Source Node -->
+    <section id="core" style="display:none;" aria-hidden="true">
+        <div class="digital-brain-container">
+            <div class="brain-graph-panel">
+                <canvas class="brain-canvas" aria-label="Raghav Digital Brain Neural Graph"></canvas>
+                <div class="brain-hud-label" aria-hidden="true"></div>
+            </div>
+            <div class="brain-console-panel">
+                <div class="brain-console-header">
+                    <span class="console-title">COGNITIVE_CORE_v1.0.5</span>
+                    <span class="console-status"><span class="pulse-dot"></span>ONLINE</span>
+                </div>
+                <div class="brain-console-output">
+                    <div class="terminal-history"></div>
+                    <div class="terminal-typing-line">
+                        <span class="prompt-symbol">guest@raghav_core:~$ </span>
+                        <span class="typing-text">Neural interface online. Select a node or trigger queries below.</span>
+                        <span class="terminal-cursor"></span>
+                    </div>
+                </div>
+                <div class="brain-console-questions">
+                    <span class="questions-header">AVAILABLE COGNITIVE QUEUES:</span>
+                    <button type="button" class="question-btn" data-query="build"><span class="query-cmd">run</span> what_does_raghav_build</button>
+                    <button type="button" class="question-btn" data-query="skills"><span class="query-cmd">run</span> strongest_skillsets</button>
+                    <button type="button" class="question-btn" data-query="projects"><span class="query-cmd">run</span> list_featured_projects</button>
+                    <button type="button" class="question-btn" data-query="experience"><span class="query-cmd">run</span> experience_timeline</button>
+                    <button type="button" class="question-btn" data-query="hire"><span class="query-cmd">run</span> why_hire_raghav</button>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <div class="scroll-container legacy-portfolio" id="top" hidden>
         <!-- Navigation -->
@@ -658,8 +691,17 @@
         <section class="spacer"></section>
     </div>
 
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"
+      }
+    }
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
-    <script src="script.js"></script>
+    <script type="module" src="universe.js"></script>
+    <script src="script.js" defer></script>
 </body>
 
 </html>
