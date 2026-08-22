@@ -185,6 +185,7 @@ const osEnvironment = document.getElementById('os-environment');
 const systemTime = document.getElementById('system-time');
 const desktopPrompt = document.getElementById('desktop-prompt');
 const archiveToggle = document.getElementById('archive-toggle');
+const protocolHint = document.getElementById('protocol-hint');
 const legacyPortfolio = document.querySelector('.legacy-portfolio');
 const windowLayer = document.getElementById('os-window-layer');
 const taskbar = document.getElementById('os-taskbar');
@@ -197,7 +198,8 @@ const appDefinitions = {
   achievements: { title: 'ACHIEVEMENTS', icon: '🏆', source: '#achievements', width: 800, label: 'MILESTONE MODULE', intro: 'Selected milestones, certifications, and recognition.' },
   resume: { title: 'RESUME', icon: '📄', source: '#resume', width: 800, label: 'PROFILE MODULE', intro: 'A complete professional snapshot, ready for inspection.' },
   contact: { title: 'CONTACT', icon: '📡', source: '#contact', width: 760, label: 'OPEN CHANNEL MODULE', intro: 'A direct channel for projects, opportunities, and conversation.' },
-  terminal: { title: 'TERMINAL', icon: '⌘', source: '#terminal', width: 860, label: 'RAGHAV TERMINAL', intro: 'A safe, simulated command line for exploring this portfolio.' }
+  terminal: { title: 'TERMINAL', icon: '⌘', source: '#terminal', width: 860, label: 'RAGHAV TERMINAL', intro: 'A safe, simulated command line for exploring this portfolio.' },
+  debug: { title: 'DEBUG THE SYSTEM', icon: '⚡', source: '#debug', width: 760, label: 'HIDDEN PROTOCOL', intro: 'Catch corrupted code fragments before the system loses integrity.' }
 };
 
 const readProjectData = source => [...source.querySelectorAll('.project-card')].map(card => {
@@ -479,6 +481,16 @@ const createDigitalBrain = (source, windowElement) => {
     if (!state.hoveredNode) return;
     const node = state.hoveredNode;
     state.selectedNode = node.id;
+
+    if (node.id === 'CORE') {
+      state.coreTapCount = (state.coreTapCount || 0) + 1;
+      window.clearTimeout(state.coreTapTimer);
+      state.coreTapTimer = window.setTimeout(() => { state.coreTapCount = 0; }, 1400);
+      if (state.coreTapCount === 3) {
+        state.coreTapCount = 0;
+        triggerEasterEgg('RAGHAV.EXE', 'Neural core resonance detected. You found the hidden handshake.');
+      }
+    }
 
     // Smooth camera pan toward clicked node
     const panStrength = node.isCore ? 0 : 0.45;
@@ -1816,6 +1828,96 @@ const createUniverseModule = (appId, source, windowElement) => {
   return content;
 };
 
+const triggerEasterEgg = (title, detail, launchDebug = false) => {
+  document.querySelector('.easter-egg-overlay')?.remove();
+  const overlay = document.createElement('div');
+  overlay.className = 'easter-egg-overlay';
+  overlay.setAttribute('role', 'status');
+  overlay.setAttribute('aria-live', 'assertive');
+  overlay.innerHTML = `<div class="easter-egg-scan"></div><div class="easter-egg-content"><span>RAGHAV OS / HIDDEN PROTOCOL</span><strong>${title}</strong><p>${detail}</p></div>`;
+  document.body.append(overlay);
+  window.setTimeout(() => {
+    overlay.classList.add('is-leaving');
+    window.setTimeout(() => overlay.remove(), prefersReducedMotion.matches ? 0 : 420);
+    if (launchDebug) windowManager.create('debug');
+  }, prefersReducedMotion.matches ? 500 : 1800);
+};
+
+const createDebugGame = (windowElement) => {
+  const game = document.createElement('section');
+  game.className = 'debug-game';
+  game.innerHTML = `<div class="debug-game-header"><div><span>RAGHAV.EXE / DEBUG THE SYSTEM</span><h2>Catch corrupted code</h2></div><div class="debug-game-score" aria-live="polite">SCORE <b>0</b> · INTEGRITY <b>100%</b></div></div><p class="debug-game-instructions">Click or tap corrupted fragments before they reach production. Press <kbd>Space</kbd> to start or restart.</p><canvas class="debug-game-canvas" aria-label="Debug the System game. Click falling corrupted code fragments to fix them." tabindex="0"></canvas><button class="debug-game-start" type="button">START DEBUGGING</button>`;
+  const canvas = game.querySelector('.debug-game-canvas');
+  const ctx = canvas.getContext('2d');
+  const scoreEl = game.querySelector('.debug-game-score');
+  const startButton = game.querySelector('.debug-game-start');
+  const fragments = ['null;', '!=', '404', 'TODO', '∞ loop', 'NaN', '};', 'bug();'];
+  const state = { active: false, paused: false, animationId: null, items: [], score: 0, integrity: 100, lastSpawn: 0, startedAt: 0 };
+
+  const resize = () => {
+    const bounds = canvas.getBoundingClientRect();
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    canvas.width = Math.max(1, Math.floor(bounds.width * dpr));
+    canvas.height = Math.max(1, Math.floor(bounds.height * dpr));
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  };
+  const updateScore = () => { scoreEl.innerHTML = `SCORE <b>${state.score}</b> · INTEGRITY <b>${state.integrity}%</b>`; };
+  const finish = won => {
+    state.active = false;
+    startButton.hidden = false;
+    startButton.textContent = won ? 'SYSTEM STABLE — PLAY AGAIN' : 'REBOOT DEBUGGER';
+    if (won) triggerEasterEgg('SYSTEM STABLE', 'Corrupted fragments neutralized. Clean code wins.');
+  };
+  const start = () => {
+    state.active = true; state.paused = false; state.items = []; state.score = 0; state.integrity = 100; state.lastSpawn = 0; state.startedAt = performance.now();
+    startButton.hidden = true; updateScore(); canvas.focus();
+    if (!state.animationId) state.animationId = requestAnimationFrame(render);
+  };
+  const render = time => {
+    state.animationId = null;
+    const width = canvas.clientWidth, height = canvas.clientHeight;
+    ctx.clearRect(0, 0, width, height);
+    ctx.fillStyle = '#07140f'; ctx.fillRect(0, 0, width, height);
+    ctx.strokeStyle = 'rgba(91, 241, 154, 0.08)'; ctx.lineWidth = 1;
+    for (let x = 0; x < width; x += 28) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke(); }
+    for (let y = 0; y < height; y += 28) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke(); }
+    if (state.active && !state.paused) {
+      if (time - state.lastSpawn > Math.max(360, 760 - state.score * 8)) {
+        state.items.push({ text: fragments[Math.floor(Math.random() * fragments.length)], x: 22 + Math.random() * Math.max(1, width - 100), y: -25, speed: 0.75 + Math.random() * 1.1 + state.score * 0.012 });
+        state.lastSpawn = time;
+      }
+      state.items.forEach(item => { item.y += item.speed; });
+      state.items = state.items.filter(item => {
+        if (item.y < height + 25) return true;
+        state.integrity = Math.max(0, state.integrity - 12); updateScore();
+        return false;
+      });
+      if (state.integrity <= 0) finish(false);
+      if (time - state.startedAt > 30000) finish(true);
+    }
+    ctx.font = '700 15px Courier New, monospace'; ctx.textBaseline = 'middle';
+    state.items.forEach(item => { ctx.fillStyle = '#ff8091'; ctx.shadowColor = '#ff4f6d'; ctx.shadowBlur = 11; ctx.fillText(item.text, item.x, item.y); });
+    ctx.shadowBlur = 0;
+    if (state.active) { ctx.fillStyle = 'rgba(181, 255, 209, 0.66)'; ctx.font = '12px Courier New, monospace'; ctx.fillText('UPTIME TARGET: 30s', 15, height - 18); }
+    if (!state.paused && (state.active || state.items.length)) state.animationId = requestAnimationFrame(render);
+  };
+  const hit = event => {
+    if (!state.active) return;
+    const rect = canvas.getBoundingClientRect();
+    const point = event.touches ? event.touches[0] : event;
+    const x = point.clientX - rect.left, y = point.clientY - rect.top;
+    const index = state.items.findIndex(item => x >= item.x - 8 && x <= item.x + 70 && y >= item.y - 18 && y <= item.y + 18);
+    if (index >= 0) { state.items.splice(index, 1); state.score += 10; state.integrity = Math.min(100, state.integrity + 2); updateScore(); }
+  };
+  canvas.addEventListener('pointerdown', hit);
+  canvas.addEventListener('keydown', event => { if (event.code === 'Space') { event.preventDefault(); start(); } });
+  startButton.addEventListener('click', start);
+  const observer = new ResizeObserver(resize); observer.observe(canvas); resize();
+  game.addEventListener('keydown', event => { if (event.code === 'Space' && event.target !== canvas) { event.preventDefault(); start(); } });
+  windowElement.debugGame = { pause: () => { state.paused = true; }, resume: () => { if (state.active) { state.paused = false; if (!state.animationId) state.animationId = requestAnimationFrame(render); } }, dispose: () => { cancelAnimationFrame(state.animationId); observer.disconnect(); } };
+  return game;
+};
+
 const createRaghavTerminal = (windowElement) => {
   // This terminal is intentionally self-contained: it never evaluates input or accesses the host system.
   const commands = ['help', 'about', 'projects', 'skills', 'experience', 'achievements', 'resume', 'contact', 'github', 'linkedin', 'clear', 'neofetch', 'whoami', 'pwd', 'ls', 'date', 'sudo hire-raghav', 'coffee', 'matrix', 'secret', 'sudo', 'rm -rf /', 'hack'];
@@ -1885,7 +1987,7 @@ const createRaghavTerminal = (windowElement) => {
       neofetch: () => print('      RRRR    RAGHAV OS\n     RR  RR   ─────────────\n     RRRR     User: raghav\n     RR RR    Role: Developer / Builder\n     RR  RR   Stack: HTML · CSS · JavaScript\n              Status: Online'),
       coffee: () => print('  ( (\n   ) )   Brewing focus...\n........\n|      |]  Coffee deployed. ☕'),
       matrix: () => print(Array.from({ length: 8 }, () => Array.from({ length: 34 }, () => Math.random() > 0.55 ? '1' : '0').join('')).join('\n'), 'terminal-matrix'),
-      secret: () => print('🔐 SECRET UNLOCKED\nThe best interfaces make people feel capable.\nNow go build something memorable.'),
+      secret: () => { print('🔐 SECRET UNLOCKED\nThe best interfaces make people feel capable.\nNow go build something memorable.\n\nCLUE: Some system overrides respond to a developer shortcut.'); triggerEasterEgg('SECRET MODE UNLOCKED', 'The terminal remembers those who explore beyond the prompt.'); },
       sudo: () => print('sudo: a portfolio terminal has no superuser privileges. Nice try. 🙂'),
       'rm -rf /': () => print('🛡️ SAFETY SHIELD ACTIVE\nNothing was removed. This is a simulated terminal with no filesystem access.'),
       hack: () => print('Initiating cinematic hacking sequence...\n[▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100%\nAccess granted: you found a harmless easter egg. 😎'),
@@ -1939,6 +2041,7 @@ const windowManager = {
     });
     instance.element.projectUniverse?.resume();
     instance.element.digitalBrain?.resume();
+    instance.element.debugGame?.resume();
     this.activeId = id;
   },
   create(appId) {
@@ -1985,6 +2088,8 @@ const windowManager = {
       createDigitalBrain(content, element);
     } else if (appId === 'terminal') {
       body.append(createRaghavTerminal(element));
+    } else if (appId === 'debug') {
+      body.append(createDebugGame(element));
     } else {
       body.append(createUniverseModule(appId, content, element));
     }
@@ -2001,6 +2106,7 @@ const windowManager = {
       this.focus(id);
       instance.element.projectUniverse?.resume();
       instance.element.digitalBrain?.resume();
+      instance.element.debugGame?.resume();
     });
 
     const instance = { id, appId, element, task, drag: null };
@@ -2027,6 +2133,7 @@ const windowManager = {
       event.stopPropagation();
       element.projectUniverse?.pause();
       element.digitalBrain?.pause();
+      element.debugGame?.pause();
       this.close(id);
     });
     element.querySelector('.window-minimize').addEventListener('click', event => {
@@ -2035,6 +2142,7 @@ const windowManager = {
       instance.task.classList.remove('is-active');
       element.projectUniverse?.pause();
       element.digitalBrain?.pause();
+      element.debugGame?.pause();
     });
     element.querySelector('.window-maximize').addEventListener('click', event => {
       event.stopPropagation();
@@ -2070,6 +2178,7 @@ const windowManager = {
       instance.element.remove();
       instance.element.projectUniverse?.dispose();
       instance.element.digitalBrain?.dispose();
+      instance.element.debugGame?.dispose();
       instance.task.remove();
       this.instances.delete(id);
       const next = [...this.instances.values()].pop();
@@ -2155,6 +2264,82 @@ document.addEventListener('keydown', event => {
     if (windowManager.activeId) windowManager.closeActive();
     if (desktopPrompt) desktopPrompt.textContent = 'Select an application to initialize a module.';
     document.querySelectorAll('.desktop-icon').forEach(icon => icon.classList.remove('is-selected'));
+  }
+});
+
+const usesCoarsePointer = window.matchMedia('(hover: none), (pointer: coarse)').matches;
+const protocolHints = [
+  'SIGNAL DETECTED',
+  usesCoarsePointer ? 'HINT 01: Press and hold an empty area of the OS desktop.' : 'HINT 01: Sweep your cursor across every corner of the OS desktop.',
+  'HINT 02: Not every folder follows the grid.',
+  'HINT 03: Developers sometimes keep a shortcut for debugging.',
+  'HINT 04: The Terminal knows more than its first prompt reveals.'
+];
+let protocolHintIndex = 0;
+protocolHint?.addEventListener('click', () => {
+  protocolHintIndex = (protocolHintIndex + 1) % protocolHints.length;
+  protocolHint.lastChild.textContent = ` ${protocolHints[protocolHintIndex]}`;
+});
+
+const hiddenDebugIcon = document.querySelector('.hidden-debug-icon');
+if (hiddenDebugIcon) {
+  // Its position changes on each page load, while staying clear of the system bar and task controls.
+  hiddenDebugIcon.style.setProperty('--debug-x', `${18 + Math.random() * 68}%`);
+  hiddenDebugIcon.style.setProperty('--debug-y', `${27 + Math.random() * 50}%`);
+}
+
+const desktopSurface = document.querySelector('.desktop');
+let touchDiscoveryTimer;
+let hideTouchDiscoveryTimer;
+const revealHiddenDebugIcon = () => {
+  if (!hiddenDebugIcon) return;
+  hiddenDebugIcon.classList.add('is-revealed');
+  if (desktopPrompt) desktopPrompt.textContent = 'An unknown folder has surfaced. Tap it before the signal fades.';
+  window.clearTimeout(hideTouchDiscoveryTimer);
+  hideTouchDiscoveryTimer = window.setTimeout(() => {
+    hiddenDebugIcon.classList.remove('is-revealed');
+    if (desktopPrompt) desktopPrompt.textContent = 'Select an application to initialize a module.';
+  }, 5000);
+};
+desktopSurface?.addEventListener('pointerdown', event => {
+  const isEmptyDesktop = event.target === desktopSurface || event.target.closest('.desktop-heading, .desktop-prompt') || event.target === desktopSurface.querySelector('.desktop-icons');
+  if (event.pointerType !== 'touch' || !isEmptyDesktop) return;
+  window.clearTimeout(touchDiscoveryTimer);
+  touchDiscoveryTimer = window.setTimeout(revealHiddenDebugIcon, 650);
+});
+['pointerup', 'pointercancel', 'pointermove'].forEach(eventName => desktopSurface?.addEventListener(eventName, () => window.clearTimeout(touchDiscoveryTimer)));
+
+// Phase 7 hidden protocols: passive listeners only; they never block normal navigation.
+const konamiSequence = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+let konamiIndex = 0;
+document.addEventListener('keydown', event => {
+  if (event.target.matches('input, textarea, select')) return;
+  if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'd') {
+    event.preventDefault();
+    triggerEasterEgg('DEBUG PROTOCOL', 'A concealed coding challenge is now available.', true);
+    return;
+  }
+  if (event.key === konamiSequence[konamiIndex]) {
+    konamiIndex += 1;
+    if (konamiIndex === konamiSequence.length) {
+      konamiIndex = 0;
+      triggerEasterEgg('SYSTEM OVERRIDE', 'Legacy input accepted. Debug mode unlocked.', true);
+    }
+  } else {
+    konamiIndex = event.key === konamiSequence[0] ? 1 : 0;
+  }
+});
+
+const systemBrand = document.querySelector('.system-brand');
+let logoPresses = 0;
+let logoPressTimer;
+systemBrand?.addEventListener('click', () => {
+  logoPresses += 1;
+  window.clearTimeout(logoPressTimer);
+  logoPressTimer = window.setTimeout(() => { logoPresses = 0; }, 1500);
+  if (logoPresses === 5) {
+    logoPresses = 0;
+    triggerEasterEgg('SECRET MODE UNLOCKED', 'The OS logo was listening. Keep exploring.');
   }
 });
 

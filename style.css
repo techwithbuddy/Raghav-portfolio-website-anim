@@ -4328,3 +4328,96 @@ body.archive-open .desktop {
     .raghav-terminal-prompt { font-size: 0.67rem; }
     .raghav-terminal-run { padding-inline: 0.55rem; }
 }
+
+/* ─── Phase 7: hidden protocol effects and debug game ─────────────────── */
+.system-brand { cursor: pointer; user-select: none; }
+.hidden-debug-icon {
+    position: absolute;
+    left: var(--debug-x, 74%);
+    top: var(--debug-y, 58%);
+    z-index: 4;
+    opacity: 0.025;
+    filter: blur(1px);
+    transition: opacity 0.25s ease, filter 0.25s ease;
+}
+.hidden-debug-icon:hover, .hidden-debug-icon:focus-visible { opacity: 0.82; filter: none; }
+.hidden-debug-icon.is-revealed { opacity: 0.9; filter: none; animation: hiddenFolderSignal 0.7s ease-in-out infinite alternate; }
+
+@keyframes hiddenFolderSignal {
+    from { box-shadow: 0 0 0 rgba(98, 214, 255, 0); }
+    to { box-shadow: 0 0 22px rgba(98, 214, 255, 0.42); }
+}
+
+.easter-egg-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    color: #dcfff0;
+    background: rgba(1, 9, 7, 0.93);
+    animation: eggOverlayIn 0.28s ease both;
+    pointer-events: none;
+}
+
+.easter-egg-overlay.is-leaving { animation: eggOverlayOut 0.42s ease both; }
+.easter-egg-scan { position: absolute; inset: -30%; background: repeating-linear-gradient(0deg, transparent 0 4px, rgba(102, 255, 164, 0.09) 5px 6px); animation: eggScan 1.1s linear infinite; }
+.easter-egg-content { position: relative; width: min(88vw, 640px); padding: clamp(1.6rem, 6vw, 3.4rem); border: 1px solid rgba(116, 255, 173, 0.64); background: rgba(7, 33, 21, 0.86); box-shadow: 0 0 0 8px rgba(116, 255, 173, 0.04), 0 0 60px rgba(74, 255, 150, 0.2); text-align: center; font-family: "Courier New", ui-monospace, monospace; }
+.easter-egg-content span { display: block; color: #82e9ae; font-size: 0.68rem; letter-spacing: 0.16em; }
+.easter-egg-content strong { display: block; margin: 0.8rem 0; color: #f1fff6; font-size: clamp(1.5rem, 5vw, 3rem); letter-spacing: 0.08em; text-shadow: 0 0 18px rgba(108, 255, 169, 0.8); }
+.easter-egg-content p { margin: 0; color: #c7f9d8; line-height: 1.5; }
+
+@keyframes eggOverlayIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes eggOverlayOut { to { opacity: 0; } }
+@keyframes eggScan { to { transform: translateY(24px); } }
+
+.debug-game { min-height: 100%; padding: clamp(1rem, 4vw, 2rem); color: #dcfff0; background: radial-gradient(circle at 50% 0%, rgba(69, 255, 143, 0.13), transparent 38%), #06110d; font-family: "Courier New", ui-monospace, monospace; }
+.debug-game-header { display: flex; justify-content: space-between; gap: 1rem; align-items: start; margin-bottom: 0.8rem; }
+.debug-game-header span { color: #7df1ae; font-size: 0.68rem; letter-spacing: 0.12em; }
+.debug-game-header h2 { margin: 0.5rem 0 0; font-family: "Syncopate", sans-serif; font-size: clamp(1rem, 3vw, 1.45rem); }
+.debug-game-score { color: #c6f8d8; font-size: 0.74rem; line-height: 1.6; text-align: right; white-space: nowrap; }
+.debug-game-score b { color: #83ffb4; }
+.debug-game-instructions { margin: 0 0 1rem; color: #9dccae; font-size: 0.78rem; line-height: 1.5; }
+.debug-game-instructions kbd { padding: 0.1rem 0.25rem; border: 1px solid rgba(126, 255, 178, 0.4); color: #ddffea; }
+.debug-game-canvas { display: block; width: 100%; height: min(48vh, 370px); border: 1px solid rgba(117, 255, 173, 0.35); background: #07140f; cursor: crosshair; touch-action: manipulation; }
+.debug-game-canvas:focus-visible { outline: 2px solid #83ffb4; outline-offset: 3px; }
+.debug-game-start { display: block; margin: 1rem auto 0; padding: 0.8rem 1.15rem; color: #07140f; border: 0; background: #83ffb4; font: 700 0.76rem "Courier New", ui-monospace, monospace; letter-spacing: 0.08em; cursor: pointer; }
+.debug-game-start:hover, .debug-game-start:focus-visible { background: #d4ffe4; }
+
+@media (max-width: 600px) {
+    .debug-game-header { display: block; }
+    .debug-game-score { margin-top: 0.6rem; text-align: left; }
+    .debug-game-canvas { height: 330px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .easter-egg-overlay, .easter-egg-overlay.is-leaving, .easter-egg-scan { animation: none; }
+}
+
+.protocol-hint {
+    position: fixed;
+    right: clamp(0.8rem, 3vw, 1.5rem);
+    bottom: 1rem;
+    z-index: 30;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    max-width: min(80vw, 330px);
+    padding: 0.4rem 0.55rem;
+    color: rgba(157, 229, 201, 0.58);
+    border: 1px solid rgba(126, 231, 196, 0.15);
+    background: rgba(6, 15, 25, 0.38);
+    font: 0.58rem "Courier New", ui-monospace, monospace;
+    letter-spacing: 0.07em;
+    text-align: left;
+    cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.protocol-hint > span { color: #7ee7c4; font-size: 0.85rem; font-weight: 700; }
+.protocol-hint:hover, .protocol-hint:focus-visible { color: #d7ffed; border-color: rgba(126, 231, 196, 0.55); background: rgba(31, 103, 79, 0.2); }
+
+@media (max-width: 700px) {
+    .protocol-hint { right: 0.7rem; bottom: 3.4rem; max-width: 75vw; }
+}

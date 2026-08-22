@@ -54,8 +54,10 @@
                 <button class="desktop-icon" type="button" data-app="contact"><span class="app-glyph" aria-hidden="true">📡</span><span>CONTACT</span></button>
                 <button class="desktop-icon" type="button" data-app="terminal"><span class="app-glyph" aria-hidden="true">⌘</span><span>TERMINAL</span></button>
             </div>
+            <button class="desktop-icon hidden-debug-icon" type="button" data-app="debug" aria-label="Unknown system module"><span class="app-glyph" aria-hidden="true">?</span><span>UNKNOWN</span></button>
             <div class="desktop-prompt" id="desktop-prompt" role="status" aria-live="polite">Select an application to initialize a module.</div>
             <button class="archive-toggle" id="archive-toggle" type="button">OPEN PORTFOLIO ARCHIVE</button>
+            <button class="protocol-hint" id="protocol-hint" type="button" aria-live="polite"><span aria-hidden="true">?</span> SIGNAL DETECTED</button>
         </section>
         <div class="os-window-layer" id="os-window-layer" aria-live="polite"></div>
         <nav class="os-taskbar" id="os-taskbar" aria-label="Open Raghav OS applications"></nav>
@@ -101,6 +103,7 @@
 
     <!-- Raghav Terminal (Phase 6) source node; all commands are simulated in script.js. -->
     <section id="terminal" style="display:none;" aria-hidden="true"></section>
+    <section id="debug" style="display:none;" aria-hidden="true"></section>
 
     <div class="scroll-container legacy-portfolio" id="top" hidden>
         <!-- Navigation -->
