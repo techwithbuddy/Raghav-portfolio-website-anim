@@ -84,10 +84,19 @@ const cursor = {
 };
 
 window.addEventListener('pointermove', (event) => {
+  const now = performance.now();
+  const elapsed = Math.max(16, now - (cursor.lastMovedAt || now));
+  const distance = Math.hypot(event.clientX - cursor.x, event.clientY - cursor.y);
   cursor.x = event.clientX;
   cursor.y = event.clientY;
+  cursor.lastMovedAt = now;
   cursorDot.style.left = `${event.clientX}px`;
   cursorDot.style.top = `${event.clientY}px`;
+  if (typeof backgroundState !== 'undefined') {
+    backgroundState.pointerX = (event.clientX / Math.max(1, window.innerWidth)) - 0.5;
+    backgroundState.pointerY = (event.clientY / Math.max(1, window.innerHeight)) - 0.5;
+    backgroundState.motionEnergy = Math.min(1, backgroundState.motionEnergy + (distance / elapsed) * 0.09);
+  }
 });
 
 const animateCursor = () => {
@@ -109,7 +118,15 @@ document.querySelectorAll(interactiveSelectors).forEach((element) => {
 });
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-const backgroundState = { width: 0, height: 0, particles: [], animationId: null, paused: false };
+const lowPowerDevice = window.matchMedia('(pointer: coarse)').matches || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) || (navigator.deviceMemory && navigator.deviceMemory <= 4);
+const atmosphereProfiles = {
+  default: { fill: '5, 8, 18', glow: '98, 214, 255', boost: 1, drift: 1 },
+  projects: { fill: '7, 11, 25', glow: '244, 114, 182', boost: 1.24, drift: 1.22 },
+  core: { fill: '7, 10, 25', glow: '178, 154, 255', boost: 0.78, drift: 0.72 },
+  terminal: { fill: '4, 15, 10', glow: '126, 231, 196', boost: 0.86, drift: 0.78 },
+  contact: { fill: '7, 14, 20', glow: '126, 231, 196', boost: 0.68, drift: 0.62 }
+};
+const backgroundState = { width: 0, height: 0, particles: [], animationId: null, paused: false, pointerX: 0, pointerY: 0, motionEnergy: 0, depth: 0, atmosphere: 'default' };
 
 const resizeCanvas = () => {
   const dpr = Math.min(2, Math.max(1, window.devicePixelRatio || 1));
@@ -123,7 +140,7 @@ const resizeCanvas = () => {
 };
 
 const createParticles = () => {
-  const count = prefersReducedMotion.matches ? 18 : Math.min(46, Math.max(24, Math.floor(window.innerWidth / 28)));
+  const count = prefersReducedMotion.matches ? 14 : lowPowerDevice ? Math.min(24, Math.max(14, Math.floor(window.innerWidth / 46))) : Math.min(42, Math.max(22, Math.floor(window.innerWidth / 32)));
   backgroundState.particles = Array.from({ length: count }, (_, index) => ({
     x: Math.random(),
     y: Math.random(),
@@ -137,17 +154,29 @@ const createParticles = () => {
 const drawAmbientBackground = time => {
   if (backgroundState.paused) return;
   const { width, height, particles } = backgroundState;
+  const profile = atmosphereProfiles[backgroundState.atmosphere] || atmosphereProfiles.default;
+  const motionAllowed = !prefersReducedMotion.matches && !lowPowerDevice;
+  backgroundState.motionEnergy *= 0.94;
   context.clearRect(0, 0, width, height);
-  context.fillStyle = 'rgba(5, 8, 18, 0.32)';
+  context.fillStyle = `rgba(${profile.fill}, 0.36)`;
+  context.fillRect(0, 0, width, height);
+
+  const glowX = width * (0.5 + backgroundState.pointerX * (motionAllowed ? 0.12 : 0.035));
+  const glowY = height * (0.38 + backgroundState.pointerY * (motionAllowed ? 0.08 : 0.02) + backgroundState.depth * 0.025);
+  const glow = context.createRadialGradient(glowX, glowY, 0, glowX, glowY, Math.max(width, height) * 0.52);
+  glow.addColorStop(0, `rgba(${profile.glow}, ${0.06 + backgroundState.motionEnergy * 0.045})`);
+  glow.addColorStop(1, `rgba(${profile.glow}, 0)`);
+  context.fillStyle = glow;
   context.fillRect(0, 0, width, height);
 
   particles.forEach(particle => {
-    const drift = prefersReducedMotion.matches ? 0 : Math.sin(time * particle.speed + particle.phase) * 0.018;
-    const x = (particle.x + drift) * width;
-    const y = (particle.y + Math.cos(time * particle.speed + particle.phase) * 0.012) * height;
+    const drift = motionAllowed ? Math.sin(time * particle.speed * profile.drift * (1 + backgroundState.motionEnergy * 0.8) + particle.phase) * 0.018 : 0;
+    const parallax = motionAllowed ? particle.radius * 5 : 0;
+    const x = (particle.x + drift) * width + backgroundState.pointerX * parallax;
+    const y = (particle.y + Math.cos(time * particle.speed * profile.drift + particle.phase) * (motionAllowed ? 0.012 : 0)) * height + backgroundState.pointerY * parallax + backgroundState.depth * particle.radius * 0.6;
     context.beginPath();
-    context.fillStyle = `rgba(${particle.color}, 0.42)`;
-    context.arc(x, y, particle.radius, 0, Math.PI * 2);
+    context.fillStyle = `rgba(${particle.color}, ${0.29 + backgroundState.motionEnergy * 0.16})`;
+    context.arc(x, y, particle.radius * profile.boost, 0, Math.PI * 2);
     context.fill();
   });
 
@@ -200,6 +229,13 @@ const appDefinitions = {
   contact: { title: 'CONTACT', icon: '📡', source: '#contact', width: 760, label: 'OPEN CHANNEL MODULE', intro: 'A direct channel for projects, opportunities, and conversation.' },
   terminal: { title: 'TERMINAL', icon: '⌘', source: '#terminal', width: 860, label: 'RAGHAV TERMINAL', intro: 'A safe, simulated command line for exploring this portfolio.' },
   debug: { title: 'DEBUG THE SYSTEM', icon: '⚡', source: '#debug', width: 760, label: 'HIDDEN PROTOCOL', intro: 'Catch corrupted code fragments before the system loses integrity.' }
+};
+
+const setOsAtmosphere = appId => {
+  const atmosphere = ['projects', 'core', 'terminal', 'contact'].includes(appId) ? appId : 'default';
+  backgroundState.atmosphere = atmosphere;
+  document.body.dataset.osAtmosphere = atmosphere;
+  osEnvironment?.style.setProperty('--atmosphere-intensity', atmosphere === 'projects' ? '1' : atmosphere === 'default' ? '0' : '0.65');
 };
 
 const readProjectData = source => [...source.querySelectorAll('.project-card')].map(card => {
@@ -2043,6 +2079,13 @@ const windowManager = {
     instance.element.digitalBrain?.resume();
     instance.element.debugGame?.resume();
     this.activeId = id;
+    setOsAtmosphere(instance.appId);
+    this.instances.forEach(other => {
+      if (other.id === id) return;
+      other.element.projectUniverse?.pause();
+      other.element.digitalBrain?.pause();
+      other.element.debugGame?.pause();
+    });
   },
   create(appId) {
     const definition = appDefinitions[appId];
@@ -2143,6 +2186,10 @@ const windowManager = {
       element.projectUniverse?.pause();
       element.digitalBrain?.pause();
       element.debugGame?.pause();
+      if (this.activeId === id) {
+        this.activeId = null;
+        setOsAtmosphere('default');
+      }
     });
     element.querySelector('.window-maximize').addEventListener('click', event => {
       event.stopPropagation();
@@ -2183,7 +2230,10 @@ const windowManager = {
       this.instances.delete(id);
       const next = [...this.instances.values()].pop();
       if (next) this.focus(next.id);
-      else this.activeId = null;
+      else {
+        this.activeId = null;
+        setOsAtmosphere('default');
+      }
     }, prefersReducedMotion.matches ? 0 : 220);
   },
   closeActive() {
@@ -2266,6 +2316,10 @@ document.addEventListener('keydown', event => {
     document.querySelectorAll('.desktop-icon').forEach(icon => icon.classList.remove('is-selected'));
   }
 });
+window.addEventListener('scroll', () => {
+  backgroundState.depth = Math.min(1, window.scrollY / Math.max(1, window.innerHeight * 2));
+  osEnvironment?.style.setProperty('--environment-depth', `${(backgroundState.depth * 12).toFixed(2)}%`);
+}, { passive: true });
 
 const usesCoarsePointer = window.matchMedia('(hover: none), (pointer: coarse)').matches;
 const protocolHints = [
@@ -2329,6 +2383,18 @@ document.addEventListener('keydown', event => {
     konamiIndex = event.key === konamiSequence[0] ? 1 : 0;
   }
 });
+
+let ambientIdleTimer;
+const scheduleAmbientIdle = () => {
+  if (prefersReducedMotion.matches) return;
+  document.body.classList.remove('is-os-idle');
+  window.clearTimeout(ambientIdleTimer);
+  ambientIdleTimer = window.setTimeout(() => {
+    if (!document.hidden) document.body.classList.add('is-os-idle');
+  }, lowPowerDevice ? 11000 : 8000);
+};
+['pointermove', 'pointerdown', 'keydown', 'scroll', 'touchstart'].forEach(eventName => window.addEventListener(eventName, scheduleAmbientIdle, { passive: eventName !== 'keydown' }));
+scheduleAmbientIdle();
 
 const systemBrand = document.querySelector('.system-brand');
 let logoPresses = 0;
