@@ -4203,4 +4203,128 @@ body.archive-open .desktop {
         transform: none !important;
     }
 }
-
+
+/* ─── Phase 6: RAGHAV TERMINAL ─────────────────────────────────────────── */
+.raghav-terminal {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    color: #d8f8e6;
+    background:
+        linear-gradient(rgba(90, 255, 168, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(90, 255, 168, 0.02) 1px, transparent 1px),
+        radial-gradient(circle at 50% 0%, rgba(55, 190, 128, 0.14), transparent 42%),
+        #06100d;
+    background-size: 24px 24px, 24px 24px, auto, auto;
+    font-family: "Courier New", ui-monospace, monospace;
+}
+
+.raghav-terminal-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-height: 42px;
+    padding: 0.7rem 1rem;
+    color: #bfffd4;
+    border-bottom: 1px solid rgba(105, 255, 169, 0.2);
+    background: rgba(9, 30, 21, 0.9);
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+}
+
+.terminal-window-dot { width: 9px; height: 9px; border-radius: 50%; }
+.terminal-window-dot--red { background: #ff6d72; }
+.terminal-window-dot--yellow { background: #f9c74f; }
+.terminal-window-dot--green { background: #69ecad; }
+
+.terminal-safe-state {
+    margin-left: auto;
+    color: #74d89c;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+}
+
+.raghav-terminal-output {
+    flex: 1;
+    min-height: 330px;
+    max-height: 510px;
+    overflow: auto;
+    padding: 1.15rem clamp(0.9rem, 3vw, 1.5rem);
+    scrollbar-color: rgba(105, 255, 169, 0.35) transparent;
+}
+
+.raghav-terminal-line {
+    margin: 0 0 0.85rem;
+    color: #d8f8e6;
+    font: inherit;
+    font-size: clamp(0.75rem, 1.8vw, 0.88rem);
+    line-height: 1.55;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.terminal-command { color: #80ffb5; font-weight: 700; }
+.terminal-help, .terminal-suggestion { color: #9be8ff; }
+.terminal-success { color: #84f5ab; }
+.terminal-error { color: #ff9da2; }
+.terminal-matrix { color: #55ed90; letter-spacing: 0.12em; text-shadow: 0 0 8px rgba(85, 237, 144, 0.5); }
+.terminal-link-line a { color: #9be8ff; text-decoration: underline; text-underline-offset: 3px; }
+.terminal-link-line a:hover, .terminal-link-line a:focus-visible { color: #fff; }
+
+.raghav-terminal-form {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.85rem 1rem;
+    border-top: 1px solid rgba(105, 255, 169, 0.2);
+    background: rgba(5, 18, 12, 0.92);
+}
+
+.raghav-terminal-prompt { color: #80ffb5; font-size: 0.78rem; font-weight: 700; white-space: nowrap; }
+
+.raghav-terminal-input {
+    min-width: 0;
+    flex: 1;
+    min-height: 38px;
+    color: #ecfff4;
+    border: 1px solid transparent;
+    outline: none;
+    background: transparent;
+    font: 0.9rem "Courier New", ui-monospace, monospace;
+}
+
+.raghav-terminal-input::placeholder { color: rgba(194, 240, 209, 0.43); }
+.raghav-terminal-input:focus { border-bottom-color: #69ecad; }
+
+.raghav-terminal-run {
+    min-height: 34px;
+    padding: 0.35rem 0.7rem;
+    color: #06100d;
+    border: 0;
+    background: #79f5ac;
+    font: 700 0.67rem "Courier New", ui-monospace, monospace;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+}
+
+.raghav-terminal-run:hover, .raghav-terminal-run:focus-visible { background: #c7ffdb; }
+
+.raghav-terminal-hint {
+    margin: 0;
+    padding: 0.55rem 1rem 0.7rem;
+    color: rgba(194, 240, 209, 0.55);
+    border-top: 1px solid rgba(105, 255, 169, 0.1);
+    background: rgba(5, 18, 12, 0.92);
+    font: 0.64rem "Courier New", ui-monospace, monospace;
+}
+
+.raghav-terminal-hint kbd { padding: 0.06rem 0.24rem; color: #bfffd4; border: 1px solid rgba(105, 255, 169, 0.3); }
+
+@media (max-width: 700px) {
+    .raghav-terminal-output { min-height: 280px; max-height: none; }
+    .raghav-terminal-bar { padding-inline: 0.75rem; }
+    .terminal-safe-state { display: none; }
+    .raghav-terminal-form { gap: 0.35rem; padding-inline: 0.75rem; }
+    .raghav-terminal-prompt { font-size: 0.67rem; }
+    .raghav-terminal-run { padding-inline: 0.55rem; }
+}

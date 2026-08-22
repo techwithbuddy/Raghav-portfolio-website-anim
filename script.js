@@ -196,7 +196,8 @@ const appDefinitions = {
   experience: { title: 'EXPERIENCE', icon: '◈', source: '#experience', width: 800, label: 'FIELD LOG MODULE', intro: 'A timeline of real-world involvement, leadership, and contribution.' },
   achievements: { title: 'ACHIEVEMENTS', icon: '🏆', source: '#achievements', width: 800, label: 'MILESTONE MODULE', intro: 'Selected milestones, certifications, and recognition.' },
   resume: { title: 'RESUME', icon: '📄', source: '#resume', width: 800, label: 'PROFILE MODULE', intro: 'A complete professional snapshot, ready for inspection.' },
-  contact: { title: 'CONTACT', icon: '📡', source: '#contact', width: 760, label: 'OPEN CHANNEL MODULE', intro: 'A direct channel for projects, opportunities, and conversation.' }
+  contact: { title: 'CONTACT', icon: '📡', source: '#contact', width: 760, label: 'OPEN CHANNEL MODULE', intro: 'A direct channel for projects, opportunities, and conversation.' },
+  terminal: { title: 'TERMINAL', icon: '⌘', source: '#terminal', width: 860, label: 'RAGHAV TERMINAL', intro: 'A safe, simulated command line for exploring this portfolio.' }
 };
 
 const readProjectData = source => [...source.querySelectorAll('.project-card')].map(card => {
@@ -1815,6 +1816,111 @@ const createUniverseModule = (appId, source, windowElement) => {
   return content;
 };
 
+const createRaghavTerminal = (windowElement) => {
+  // This terminal is intentionally self-contained: it never evaluates input or accesses the host system.
+  const commands = ['help', 'about', 'projects', 'skills', 'experience', 'achievements', 'resume', 'contact', 'github', 'linkedin', 'clear', 'neofetch', 'whoami', 'pwd', 'ls', 'date', 'sudo hire-raghav', 'coffee', 'matrix', 'secret', 'sudo', 'rm -rf /', 'hack'];
+  const terminal = document.createElement('section');
+  terminal.className = 'raghav-terminal';
+  terminal.setAttribute('aria-label', 'Raghav simulated terminal');
+  terminal.innerHTML = `
+    <div class="raghav-terminal-bar"><span class="terminal-window-dot terminal-window-dot--red"></span><span class="terminal-window-dot terminal-window-dot--yellow"></span><span class="terminal-window-dot terminal-window-dot--green"></span><span>RAGHAV@OS:~$</span><span class="terminal-safe-state">SIMULATION MODE</span></div>
+    <div class="raghav-terminal-output" role="log" aria-live="polite" aria-label="Terminal output"></div>
+    <form class="raghav-terminal-form" autocomplete="off">
+      <label class="raghav-terminal-prompt" for="raghav-terminal-input-${windowElement.id}">RAGHAV@OS:~$</label>
+      <input id="raghav-terminal-input-${windowElement.id}" class="raghav-terminal-input" type="text" inputmode="text" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Type a simulated terminal command" placeholder="Type help to see commands" />
+      <button type="submit" class="raghav-terminal-run">RUN</button>
+    </form>
+    <p class="raghav-terminal-hint">↑↓ history · Tab autocomplete · <kbd>Enter</kbd> run · simulated portfolio terminal only</p>`;
+
+  const output = terminal.querySelector('.raghav-terminal-output');
+  const form = terminal.querySelector('.raghav-terminal-form');
+  const input = terminal.querySelector('.raghav-terminal-input');
+  const history = [];
+  let historyIndex = 0;
+
+  const print = (text = '', className = '') => {
+    const line = document.createElement('pre');
+    line.className = `raghav-terminal-line ${className}`.trim();
+    line.textContent = text;
+    output.append(line);
+    output.scrollTop = output.scrollHeight;
+    return line;
+  };
+  const printLink = (label, href) => {
+    const line = document.createElement('p');
+    line.className = 'raghav-terminal-line terminal-link-line';
+    const link = document.createElement('a');
+    link.href = href;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.textContent = label;
+    line.append(link);
+    output.append(line);
+    output.scrollTop = output.scrollHeight;
+  };
+  const showHelp = () => print(`AVAILABLE COMMANDS\n\nhelp          show this command reference\nabout         profile summary\nprojects      featured project directory\nskills        technical capabilities\nexperience    experience timeline\nachievements  selected milestones\nresume        resume details\ncontact       contact channels\ngithub        open GitHub profile\nlinkedin      open LinkedIn profile\nwhoami        identity details\npwd           current simulated location\nls            list portfolio modules\ndate          local date and time\nneofetch      RAGHAV OS system card\nclear         clear this terminal\n\nFUN COMMANDS\nsudo hire-raghav · coffee · matrix · secret · sudo · rm -rf / · hack`, 'terminal-help');
+
+  const run = rawCommand => {
+    const command = rawCommand.trim().toLowerCase().replace(/\s+/g, ' ');
+    if (!command) return;
+    print(`RAGHAV@OS:~$ ${rawCommand.trim()}`, 'terminal-command');
+    if (!history.length || history.at(-1) !== rawCommand.trim()) history.push(rawCommand.trim());
+    historyIndex = history.length;
+
+    const results = {
+      help: showHelp,
+      about: () => print('Raghav Sharma\nB.Tech CSE student and developer focused on clean, useful digital experiences.\nBuilder · problem solver · open-source contributor.'),
+      projects: () => print('FEATURED PROJECTS\n• AuraSense — accessibility-focused AI assistance\n• ShikshaFlow — streamlined EdTech platform\n• NetProbe — port scanner\n• GNDU Attendance System — attendance management'),
+      skills: () => print('LANGUAGES: C, C++, Python, JavaScript\nWEB: HTML, CSS, React\nFOUNDATIONS: DSA, OOP, MySQL, Networks\nTOOLS: Git, AI/ML, Cybersecurity'),
+      experience: () => print('EXPERIENCE LOG\n• Acmegrade — Aug 2026–Present\n• SmartED Innovations — Aug 2026–Present\n• Open Source Connect India — Aug 2026–Present\n• GirlScript Summer of Code — May 2026–Present'),
+      achievements: () => print('MILESTONES\n• Open-source and leadership contributions\n• Technical certifications in Java and AI\n• Community and internship recognition'),
+      resume: () => { print('RESUME READY\nA PDF profile is available for viewing or download.'); printLink('Open resume.pdf ↗', './resume.pdf'); },
+      contact: () => { print('OPEN CHANNELS\nEmail: raghavsharmahhps07@gmail.com\nGitHub: techwithbuddy\nLinkedIn: raghavsharma1402'); },
+      github: () => { print('Opening GitHub profile...'); printLink('github.com/techwithbuddy ↗', 'https://github.com/techwithbuddy'); },
+      linkedin: () => { print('Opening LinkedIn profile...'); printLink('linkedin.com/in/raghavsharma1402 ↗', 'https://www.linkedin.com/in/raghavsharma1402/'); },
+      whoami: () => print('Raghav Sharma\nB.Tech CSE\nDeveloper\nBuilder\nOpen Source Contributor'),
+      pwd: () => print('/home/raghav/portfolio  (simulated)'),
+      ls: () => print('about/  achievements/  contact/  experience/  projects/  resume.pdf  skills/'),
+      date: () => print(new Date().toLocaleString([], { dateStyle: 'full', timeStyle: 'medium' })),
+      neofetch: () => print('      RRRR    RAGHAV OS\n     RR  RR   ─────────────\n     RRRR     User: raghav\n     RR RR    Role: Developer / Builder\n     RR  RR   Stack: HTML · CSS · JavaScript\n              Status: Online'),
+      coffee: () => print('  ( (\n   ) )   Brewing focus...\n........\n|      |]  Coffee deployed. ☕'),
+      matrix: () => print(Array.from({ length: 8 }, () => Array.from({ length: 34 }, () => Math.random() > 0.55 ? '1' : '0').join('')).join('\n'), 'terminal-matrix'),
+      secret: () => print('🔐 SECRET UNLOCKED\nThe best interfaces make people feel capable.\nNow go build something memorable.'),
+      sudo: () => print('sudo: a portfolio terminal has no superuser privileges. Nice try. 🙂'),
+      'rm -rf /': () => print('🛡️ SAFETY SHIELD ACTIVE\nNothing was removed. This is a simulated terminal with no filesystem access.'),
+      hack: () => print('Initiating cinematic hacking sequence...\n[▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100%\nAccess granted: you found a harmless easter egg. 😎'),
+      'sudo hire-raghav': () => {
+        print('Checking permissions...');
+        print('████████████████████ 100%', 'terminal-success');
+        print('Permission granted.\n\nOpening contact...', 'terminal-success');
+        window.setTimeout(() => windowManager.create('contact'), prefersReducedMotion.matches ? 0 : 350);
+      }
+    };
+    if (command === 'clear') {
+      output.replaceChildren();
+      return;
+    }
+    (results[command] || (() => print(`command not found: ${rawCommand.trim()}\nType help to view the available simulated commands.`, 'terminal-error')))();
+  };
+
+  form.addEventListener('submit', event => { event.preventDefault(); run(input.value); input.value = ''; });
+  input.addEventListener('keydown', event => {
+    if (event.key === 'ArrowUp') { event.preventDefault(); if (history.length) { historyIndex = Math.max(0, historyIndex - 1); input.value = history[historyIndex]; } }
+    if (event.key === 'ArrowDown') { event.preventDefault(); historyIndex = Math.min(history.length, historyIndex + 1); input.value = history[historyIndex] || ''; }
+    if (event.key === 'Tab') {
+      event.preventDefault();
+      const typed = input.value.trim().toLowerCase();
+      const matches = commands.filter(item => item.startsWith(typed));
+      if (matches.length === 1) input.value = matches[0];
+      else if (matches.length > 1) print(matches.join('    '), 'terminal-suggestion');
+    }
+  });
+  terminal.addEventListener('pointerdown', event => { if (event.target === terminal || event.target === output) input.focus(); });
+  print('RAGHAV TERMINAL v6.0.0 — SIMULATION MODE\nNo operating-system commands or filesystem access are available.\nType help to explore the portfolio.');
+  window.setTimeout(() => input.focus(), prefersReducedMotion.matches ? 0 : 100);
+  return terminal;
+};
+
 const windowManager = {
   instances: new Map(),
   activeId: null,
@@ -1877,6 +1983,8 @@ const windowManager = {
       // then wire up the brain logic
       body.append(content);
       createDigitalBrain(content, element);
+    } else if (appId === 'terminal') {
+      body.append(createRaghavTerminal(element));
     } else {
       body.append(createUniverseModule(appId, content, element));
     }
