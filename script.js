@@ -213,6 +213,11 @@ const readProjectData = source => [...source.querySelectorAll('.project-card')].
 });
 
 const createDigitalBrain = (source, windowElement) => {
+  // Ensure content is appended before querying sub-elements
+  if (!source.parentElement) {
+    const tempBody = windowElement.querySelector('.os-window-body') || windowElement;
+    tempBody.append(source);
+  }
   const container = windowElement.querySelector('.digital-brain-container');
   const canvas = windowElement.querySelector('.brain-canvas');
   const ctx = canvas.getContext('2d');
@@ -232,44 +237,55 @@ const createDigitalBrain = (source, windowElement) => {
     expandedCategory: null
   };
 
+  // ── Helpers ──────────────────────────────────────────────────────────────
+  // Get all neighbour node IDs for a given nodeId (via connections)
+  const getNeighbours = (nodeId) => {
+    const neighbours = new Set();
+    connections.forEach(conn => {
+      if (conn.from === nodeId) neighbours.add(conn.to);
+      if (conn.to === nodeId) neighbours.add(conn.from);
+    });
+    return neighbours;
+  };
+
   // Structured response data
   const ANSWERS = {
     build: "Raghav builds modern, responsive and user-friendly web applications, AI/ML tools, and backend utilities. Highlighted builds:\n\n" +
-           "• **AuraSense**: AI/ML accessibility assistant for visually impaired users. Built with Python, featuring custom audio feedback.\n" +
-           "• **ShikshaFlow**: Unified EdTech remote learning platform designed to streamline educational workflows.\n" +
-           "• **NetProbe**: Concurrent multi-threaded port scanner for security auditing. Built with raw socket programming.\n" +
-           "• **GNDU Attendance System**: University management platform with normalized database schemas.",
+      "• **AuraSense**: AI/ML accessibility assistant for visually impaired users. Built with Python, featuring custom audio feedback.\n" +
+      "• **ShikshaFlow**: Unified EdTech remote learning platform designed to streamline educational workflows.\n" +
+      "• **NetProbe**: Concurrent multi-threaded port scanner for security auditing. Built with raw socket programming.\n" +
+      "• **GNDU Attendance System**: University management platform with normalized database schemas.",
     skills: "Raghav's strongest skills cover full-stack engineering and systems:\n\n" +
-            "• **Languages**: Python, JavaScript, Java, C, C++\n" +
-            "• **Web Frontend**: HTML5, CSS3, ES6+ JavaScript, React\n" +
-            "• **Backend & Databases**: Data Structures & Algorithms (DSA), OOP, MySQL, Computer Networks\n" +
-            "• **Specialized Tools**: Git/GitHub, AI/ML basics, Cybersecurity basics.",
+      "• **Languages**: Python, JavaScript, Java, C, C++\n" +
+      "• **Web Frontend**: HTML5, CSS3, ES6+ JavaScript, React\n" +
+      "• **Backend & Databases**: Data Structures & Algorithms (DSA), OOP, MySQL, Computer Networks\n" +
+      "• **Specialized Tools**: Git/GitHub, AI/ML basics, Cybersecurity basics.",
     projects: "Raghav has engineered multiple practical projects:\n\n" +
-              "• **AuraSense** — Deployed AI Assistant [Vercel]\n" +
-              "• **ShikshaFlow** — EdTech Platform [Vercel]\n" +
-              "• **NetProbe** — Multi-threaded Port Scanner [Python/CLI]\n" +
-              "• **GNDU Attendance** — University attendance dashboard [Vercel]\n\n" +
-              "Click on the PROJECTS nodes or trigger the Projects application to view detailed case-studies.",
+      "• **AuraSense** — Deployed AI Assistant [Vercel]\n" +
+      "• **ShikshaFlow** — EdTech Platform [Vercel]\n" +
+      "• **NetProbe** — Multi-threaded Port Scanner [Python/CLI]\n" +
+      "• **GNDU Attendance** — University attendance dashboard [Vercel]\n\n" +
+      "Click on the PROJECTS nodes or trigger the Projects application to view detailed case-studies.",
     experience: "Raghav's professional involvement and leadership includes:\n\n" +
-                "• **Data Science Intern** @ Acmegrade (Aug 2026 - Present) — Data analysis using Python and Pandas.\n" +
-                "• **Campus Lead** @ Open Source Connect India (Aug 2026 - Present) — Representing OSCI'26, promoting open-source.\n" +
-                "• **Campus Ambassador** @ SmartED Innovations (Aug 2026 - Present) — Full-time project management and community outreach.\n" +
-                "• **Open Source Contributor** @ GirlScript Summer of Code (May 2026 - Present) — Frontend developer tasks.",
+      "• **Data Science Intern** @ Acmegrade (Aug 2026 - Present) — Data analysis using Python and Pandas.\n" +
+      "• **Campus Lead** @ Open Source Connect India (Aug 2026 - Present) — Representing OSCI'26, promoting open-source.\n" +
+      "• **Campus Ambassador** @ SmartED Innovations (Aug 2026 - Present) — Full-time project management and community outreach.\n" +
+      "• **Open Source Contributor** @ GirlScript Summer of Code (May 2026 - Present) — Frontend developer tasks.",
     hire: "Why hire Raghav?\n\n" +
-          "1. **Full-Stack Mastery**: Practical knowledge of Java, Python, JavaScript, and database systems (MySQL).\n" +
-          "2. **Proven Commitment**: Active in open source programs (GSSoC, OSCI'26) and student leadership.\n" +
-          "3. **Focus on Quality**: Passionate about clean code, performance optimization, and responsive design systems."
+      "1. **Full-Stack Mastery**: Practical knowledge of Java, Python, JavaScript, and database systems (MySQL).\n" +
+      "2. **Proven Commitment**: Active in open source programs (GSSoC, OSCI'26) and student leadership.\n" +
+      "3. **Focus on Quality**: Passionate about clean code, performance optimization, and responsive design systems."
   };
 
   const NODE_ANSWERS = {
-    'RAGHAV': "RAGHAV SHARMA — B.Tech Computer Science student, full stack developer, and open-source contributor. Currently learning Kotlin, backend architecture, and MySQL.",
-    'PROJECTS': "Featured projects: AuraSense, ShikshaFlow, NetProbe, and GNDU Attendance. Click PROJECTS on your desktop to explore full 3D case studies.",
-    'SKILLS': "Proficient in Python, JavaScript, React, Java, MySQL, DSA, OOP, Git, AI/ML, and Cybersecurity.",
-    'EXPERIENCE': "Hands-on experience as Data Science Intern @ Acmegrade, Campus Lead @ OSCI'26, and Campus Ambassador @ SmartED.",
-    'EDUCATION': "Currently pursuing B.Tech in Computer Science & Engineering. Strong foundations in DSA, Networks, and OOP.",
-    'ACHIEVEMENTS': "GSSoC 2026 Contributor badge, OSCI'26 Campus Lead role, SmartPro Java and Web Development certifications.",
-    'OPEN SOURCE': "Active contributor at GirlScript Summer of Code 2026 and Open Source Connect India '26 campus lead.",
-    'CONTACT': "Connect with Raghav:\n• Email: raghavsharmahhps07@gmail.com\n• LinkedIn: raghavsharma1402\n• GitHub: techwithbuddy"
+    'RAGHAV': "**RAGHAV SHARMA** — B.Tech Computer Science student, full-stack developer, and open-source contributor.\n\nCurrently mastering **Kotlin**, **backend architecture**, and **MySQL**. Passionate about clean code and building things that matter.",
+    'PROJECTS': "**4 live projects** engineered and deployed:\n\n• **AuraSense** — AI accessibility assistant for visually impaired users\n• **ShikshaFlow** — Unified EdTech remote learning platform\n• **NetProbe** — Multi-threaded port scanner for cybersecurity auditing\n• **GNDU Attendance** — University attendance management system\n\nClick any project sub-node to open its full case study.",
+    'SKILLS': "**Core Tech Stack:**\n\n• Languages: **Python, JavaScript, Java, C, C++**\n• Web: **HTML5, CSS3, ES6+, React**\n• Backend / DB: **MySQL, DSA, OOP, Computer Networks**\n• Tools: **Git/GitHub, AI/ML, Cybersecurity**\n\nClick SKILLS node to expand skill tree.",
+    'EXPERIENCE': "**Professional Experience:**\n\n• **Data Science Intern** @ Acmegrade — Aug 2026 – Present\n• **Campus Lead** @ OSCI'26 — Aug 2026 – Present\n• **Campus Ambassador** @ SmartED Innovations — Aug 2026 – Present\n• **Open Source Contributor** @ GSSoC 2026 — May 2026 – Present\n• **Web Dev & SmartPro Java** @ Aptech Learning — Apr 2023 – Present",
+    'EDUCATION': "Currently pursuing **B.Tech Computer Science & Engineering**.\n\nStrong foundations in **Data Structures & Algorithms**, **Computer Networks**, **OOP**, and **Database Management Systems**.",
+    'ACHIEVEMENTS': "**Milestones & Certifications:**\n\n🏆 **GSSoC 2026 Contributor Badge** — India's largest open-source program\n🌐 **OSCI'26 Campus Lead** — Prestigious leadership role\n📜 **Web Development Cert** — Aptech Learning (2023)\n☕ **SmartPro Java Cert** — Aptech Learning (2023)\n🚀 **Campus Ambassador** — SmartED Innovations (Full-time)",
+    'OPEN SOURCE': "**Active Open-Source Contributions:**\n\n• **GirlScript Summer of Code 2026** — Frontend developer tasks & UI improvements\n• **Open Source Connect India '26** — Campus Lead promoting open-source culture\n• Working on real-world features using **structured Git/GitHub workflows**",
+    'CONTACT': "**Connect with Raghav:**\n\n📧 raghavsharmahhps07@gmail.com\n💼 LinkedIn: **raghavsharma1402**\n🐙 GitHub: **techwithbuddy**\n📸 Instagram: **raghavsharma1504**\n\nAlways open to new opportunities and collaborations!"
   };
 
   // Node structures
@@ -305,9 +321,19 @@ const createDigitalBrain = (source, windowElement) => {
 
   // Subnodes for projects (expandable)
   const subNodes = [
-    { parentId: 'PROJECTS', id: 'SUB_AURA', label: 'AuraSense', x: 170, y: -160, radius: 14, color: '#62d6ff', isProject: true, projectIndex: 0 },
-    { parentId: 'PROJECTS', id: 'SUB_SHIKSHA', label: 'ShikshaFlow', x: 200, y: -110, radius: 14, color: '#62d6ff', isProject: true, projectIndex: 1 },
-    { parentId: 'PROJECTS', id: 'SUB_NETPROBE', label: 'NetProbe', x: 150, y: -70, radius: 14, color: '#62d6ff', isProject: true, projectIndex: 2 }
+    { parentId: 'PROJECTS', id: 'SUB_AURA', label: 'AuraSense', x: 185, y: -175, radius: 15, color: '#62d6ff', isProject: true, projectIndex: 0 },
+    { parentId: 'PROJECTS', id: 'SUB_SHIKSHA', label: 'ShikshaFlow', x: 215, y: -118, radius: 15, color: '#62d6ff', isProject: true, projectIndex: 1 },
+    { parentId: 'PROJECTS', id: 'SUB_NETPROBE', label: 'NetProbe', x: 175, y: -68, radius: 15, color: '#62d6ff', isProject: true, projectIndex: 2 },
+    { parentId: 'PROJECTS', id: 'SUB_GNDU', label: 'GNDU Attend', x: 130, y: -35, radius: 15, color: '#62d6ff', isProject: true, projectIndex: 3 }
+  ];
+
+  // Skill subnodes (shown when SKILLS node selected)
+  const skillSubNodes = [
+    { parentId: 'SKILLS', id: 'SK_PY', label: 'Python', x: 218, y: 20, radius: 12, color: '#f472b6' },
+    { parentId: 'SKILLS', id: 'SK_JS', label: 'JS', x: 228, y: 55, radius: 12, color: '#f472b6' },
+    { parentId: 'SKILLS', id: 'SK_JAVA', label: 'Java', x: 205, y: 86, radius: 12, color: '#f472b6' },
+    { parentId: 'SKILLS', id: 'SK_DSA', label: 'DSA', x: 175, y: 108, radius: 12, color: '#38bdf8' },
+    { parentId: 'SKILLS', id: 'SK_SQL', label: 'MySQL', x: 145, y: 120, radius: 12, color: '#38bdf8' }
   ];
 
   // Pulses traveling down connections
@@ -317,46 +343,66 @@ const createDigitalBrain = (source, windowElement) => {
     speed: 0.005 + Math.random() * 0.008
   }));
 
-  // Helper to type text into terminal
+  // Helper to render markdown-ish bold text (**text**) as HTML
+  const parseMarkdown = (text) => {
+    return text
+      .replace(/\*\*(.+?)\*\*/g, '<strong style="color:#b29aff">$1</strong>')
+      .replace(/\n/g, '<br>')
+      .replace(/•/g, '<span style="color:#9d4edd">▸</span>');
+  };
+
+  // Helper to type text into terminal (character by character, with markdown)
   const typeText = (queryLabel, fullText) => {
     if (state.isTyping) return;
     state.isTyping = true;
     questionBtns.forEach(btn => btn.disabled = true);
 
     // Save previous output to history
-    const currentText = typingText.innerHTML;
-    if (currentText.trim() && !currentText.includes("Neural interface online")) {
+    const currentHTML = typingText.innerHTML;
+    if (currentHTML.trim() && !currentHTML.includes('Neural interface online') && !currentHTML.includes('cognitive systems')) {
       const historyEntry = document.createElement('div');
       historyEntry.className = 'terminal-history-entry';
-      
       const lastQuery = terminalHistory.dataset.lastQuery || 'Command Query';
-      historyEntry.innerHTML = `<span class="history-query">&gt; ${lastQuery}</span><span class="history-response">${currentText}</span>`;
+      historyEntry.innerHTML = `<span class="history-query">▸ ${lastQuery}</span><div class="history-response">${currentHTML}</div>`;
       terminalHistory.appendChild(historyEntry);
+      // Cap history at 6 entries
+      const entries = terminalHistory.querySelectorAll('.terminal-history-entry');
+      if (entries.length > 6) entries[0].remove();
     }
 
     terminalHistory.dataset.lastQuery = queryLabel.toUpperCase();
     typingText.innerHTML = '';
-    
-    let index = 0;
+
+    // Build typed output char-by-char, but flush markdown tags atomically
+    const parsed = parseMarkdown(fullText);
+    // Convert to array of tokens (plain chars + html tags)
+    const tokens = [];
+    let i = 0;
+    while (i < parsed.length) {
+      if (parsed[i] === '<') {
+        const end = parsed.indexOf('>', i);
+        if (end !== -1) { tokens.push(parsed.slice(i, end + 1)); i = end + 1; continue; }
+      }
+      tokens.push(parsed[i]);
+      i++;
+    }
+
+    let idx = 0;
+    const outputPanel = windowElement.querySelector('.brain-console-output');
     const interval = setInterval(() => {
-      if (index < fullText.length) {
-        // If markdown style link or list, translate formatting easily
-        let char = fullText[index];
-        if (char === '\n') {
-          typingText.innerHTML += '<br>';
-        } else {
-          typingText.innerHTML += char;
+      if (idx < tokens.length) {
+        // Batch several tokens per tick for speed
+        const batchSize = prefersReducedMotion.matches ? tokens.length : 2;
+        for (let b = 0; b < batchSize && idx < tokens.length; b++, idx++) {
+          typingText.innerHTML += tokens[idx];
         }
-        index++;
-        // Auto-scroll console output to bottom
-        const outputPanel = windowElement.querySelector('.brain-console-output');
         if (outputPanel) outputPanel.scrollTop = outputPanel.scrollHeight;
       } else {
         clearInterval(interval);
         state.isTyping = false;
         questionBtns.forEach(btn => btn.disabled = false);
       }
-    }, prefersReducedMotion.matches ? 0 : 15);
+    }, prefersReducedMotion.matches ? 0 : 18);
   };
 
   // Click handler for preset questions
@@ -394,21 +440,22 @@ const createDigitalBrain = (source, windowElement) => {
     const coords = getCanvasCoords(e);
     let found = null;
 
-    // Check subnodes first if expanded
+    // Check project subnodes first
     if (state.expandedCategory === 'PROJECTS') {
       subNodes.forEach(node => {
-        if (Math.hypot(node.x - coords.x, node.y - coords.y) < node.radius + 4) {
-          found = node;
-        }
+        if (Math.hypot(node.x - coords.x, node.y - coords.y) < node.radius + 5) found = node;
       });
     }
-
+    // Check skill subnodes
+    if (!found && state.expandedCategory === 'SKILLS') {
+      skillSubNodes.forEach(node => {
+        if (Math.hypot(node.x - coords.x, node.y - coords.y) < node.radius + 5) found = node;
+      });
+    }
     // Check main nodes
     if (!found) {
       nodes.forEach(node => {
-        if (Math.hypot(node.x - coords.x, node.y - coords.y) < node.radius + 4) {
-          found = node;
-        }
+        if (Math.hypot(node.x - coords.x, node.y - coords.y) < node.radius + 5) found = node;
       });
     }
 
@@ -416,11 +463,12 @@ const createDigitalBrain = (source, windowElement) => {
     canvas.style.cursor = found ? 'pointer' : 'default';
 
     if (found) {
-      hudLabel.textContent = `${found.label} [NODE_INDEX_ACTIVE]`;
+      const tag = found.isProject ? 'PROJECT NODE' : found.id === 'CORE' ? 'NEURAL CORE' : 'KNOWLEDGE NODE';
+      hudLabel.textContent = `${found.label || found.id}  [${tag}]`;
       hudLabel.classList.add('is-visible');
       const r = canvas.getBoundingClientRect();
-      hudLabel.style.left = `${e.clientX - r.left + 16}px`;
-      hudLabel.style.top = `${e.clientY - r.top - 12}px`;
+      hudLabel.style.left = `${Math.min(e.clientX - r.left + 18, r.width - 200)}px`;
+      hudLabel.style.top = `${Math.max(e.clientY - r.top - 16, 8)}px`;
     } else {
       hudLabel.classList.remove('is-visible');
     }
@@ -431,47 +479,42 @@ const createDigitalBrain = (source, windowElement) => {
     const node = state.hoveredNode;
     state.selectedNode = node.id;
 
-    // Move camera focus to clicked node
-    state.targetOffset = { x: -node.x * 0.5, y: -node.y * 0.5 };
+    // Smooth camera pan toward clicked node
+    const panStrength = node.isCore ? 0 : 0.45;
+    state.targetOffset = { x: -node.x * panStrength, y: -node.y * panStrength };
 
     if (node.isProject) {
-      // Open case study directly
-      typeText(`LOAD_PROJECT_${node.label}`, `Navigating neural bridge to project: ${node.label} case-study...`);
+      typeText(`LOAD_PROJECT_${node.label}`, `**NEURAL BRIDGE ACTIVATED**\n\nNavigating to project: **${node.label}**\n\nOpening project universe case study...`);
       setTimeout(() => {
         windowManager.create('projects');
-        // Let PROJECTS window open, then trigger its showProject
         setTimeout(() => {
-          const projectWindows = document.querySelectorAll('.os-window');
-          projectWindows.forEach(win => {
-            if (win.id.includes('projects') && win.projectUniverse) {
-              win.projectUniverse.selected = node.projectIndex;
-              win.projectUniverse.focusIndex = node.projectIndex;
-              const accessBtns = win.querySelectorAll('.access-btn');
-              if (accessBtns[node.projectIndex]) accessBtns[node.projectIndex].click();
+          document.querySelectorAll('.os-window').forEach(win => {
+            if (win.projectUniverse) {
+              const btns = win.querySelectorAll('[class*="access"] button');
+              if (btns[node.projectIndex]) btns[node.projectIndex].click();
             }
           });
-        }, 300);
-      }, 400);
+        }, 350);
+      }, 450);
       return;
     }
 
+    // Toggle expanded subnodes
     if (node.id === 'PROJECTS') {
       state.expandedCategory = (state.expandedCategory === 'PROJECTS') ? null : 'PROJECTS';
+    } else if (node.id === 'SKILLS') {
+      state.expandedCategory = (state.expandedCategory === 'SKILLS') ? null : 'SKILLS';
     } else {
       state.expandedCategory = null;
     }
 
-    // Type out answers for main category nodes
+    // Type out node answers
     const nodeResponse = NODE_ANSWERS[node.id];
-    if (nodeResponse) {
-      typeText(`INSPECT_NODE_${node.id}`, nodeResponse);
-    }
+    if (nodeResponse) typeText(`INSPECT_NODE_${node.id}`, nodeResponse);
 
-    // Open corresponding window in desktop after a slight delay
+    // Open corresponding OS window
     if (node.targetApp) {
-      setTimeout(() => {
-        windowManager.create(node.targetApp);
-      }, 600);
+      setTimeout(() => windowManager.create(node.targetApp), 650);
     }
   });
 
@@ -508,37 +551,88 @@ const createDigitalBrain = (source, windowElement) => {
     // Gentle floating offset
     const floatOffset = Math.sin(time * 0.0015) * 4;
 
+    // Precompute hovered neighbours for illumination
+    const hoveredNeighbours = state.hoveredNode ? getNeighbours(state.hoveredNode.id) : new Set();
+    const selectedNeighbours = state.selectedNode ? getNeighbours(state.selectedNode) : new Set();
+
     // Draw connecting lines
     connections.forEach(conn => {
       const fromNode = nodes.find(n => n.id === conn.from);
       const toNode = nodes.find(n => n.id === conn.to);
       if (!fromNode || !toNode) return;
 
-      const isHoveredConn = (state.hoveredNode && (state.hoveredNode.id === conn.from || state.hoveredNode.id === conn.to));
-      ctx.beginPath();
-      ctx.strokeStyle = isHoveredConn ? 'rgba(180, 110, 255, 0.45)' : 'rgba(157, 78, 221, 0.12)';
-      ctx.lineWidth = isHoveredConn ? 2 : 1;
-      
+      const isHoveredConn = state.hoveredNode && (state.hoveredNode.id === conn.from || state.hoveredNode.id === conn.to);
+      const isSelectedConn = state.selectedNode && (state.selectedNode === conn.from || state.selectedNode === conn.to);
+
       const fx = fromNode.x;
       const fy = fromNode.isCore ? fromNode.y + floatOffset : fromNode.y;
       const tx = toNode.x;
       const ty = toNode.isCore ? toNode.y + floatOffset : toNode.y;
 
-      ctx.moveTo(fx, fy);
-      ctx.lineTo(tx, ty);
-      ctx.stroke();
+      if (isHoveredConn) {
+        // Glowing illuminated edge
+        ctx.save();
+        ctx.shadowColor = 'rgba(157, 78, 221, 0.9)';
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(200, 140, 255, 0.6)';
+        ctx.lineWidth = 2;
+        ctx.moveTo(fx, fy);
+        ctx.lineTo(tx, ty);
+        ctx.stroke();
+        ctx.restore();
+      } else if (isSelectedConn) {
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(157, 78, 221, 0.3)';
+        ctx.lineWidth = 1.5;
+        ctx.moveTo(fx, fy);
+        ctx.lineTo(tx, ty);
+        ctx.stroke();
+      } else {
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(157, 78, 221, 0.09)';
+        ctx.lineWidth = 0.8;
+        ctx.moveTo(fx, fy);
+        ctx.lineTo(tx, ty);
+        ctx.stroke();
+      }
     });
 
-    // Draw expandable subnode lines
+    // Draw expandable subnode lines — PROJECTS
     if (state.expandedCategory === 'PROJECTS') {
       const projectsNode = nodes.find(n => n.id === 'PROJECTS');
       subNodes.forEach(sub => {
+        ctx.save();
+        ctx.shadowColor = 'rgba(98, 214, 255, 0.5)';
+        ctx.shadowBlur = 4;
         ctx.beginPath();
-        ctx.strokeStyle = 'rgba(98, 214, 255, 0.3)';
+        ctx.strokeStyle = 'rgba(98, 214, 255, 0.35)';
         ctx.lineWidth = 1;
+        ctx.setLineDash([4, 4]);
         ctx.moveTo(projectsNode.x, projectsNode.y);
         ctx.lineTo(sub.x, sub.y);
         ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.restore();
+      });
+    }
+
+    // Draw expandable subnode lines — SKILLS
+    if (state.expandedCategory === 'SKILLS') {
+      const skillsNode = nodes.find(n => n.id === 'SKILLS');
+      skillSubNodes.forEach(sub => {
+        ctx.save();
+        ctx.shadowColor = 'rgba(244, 114, 182, 0.5)';
+        ctx.shadowBlur = 4;
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(244, 114, 182, 0.35)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 4]);
+        ctx.moveTo(skillsNode.x, skillsNode.y);
+        ctx.lineTo(sub.x, sub.y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.restore();
       });
     }
 
@@ -572,68 +666,111 @@ const createDigitalBrain = (source, windowElement) => {
       const isCore = node.isCore;
       const isSelected = state.selectedNode === node.id;
       const isHovered = state.hoveredNode && state.hoveredNode.id === node.id;
-      
+      const isNeighbour = hoveredNeighbours.has(node.id) || selectedNeighbours.has(node.id);
+
       const ny = isCore ? node.y + floatOffset : node.y;
-      const radius = isCore ? node.radius + Math.sin(time * 0.002) * 2 : node.radius;
+      const radius = isCore ? node.radius + Math.sin(time * 0.002) * 3 : node.radius;
+
+      // Outer illumination halo for hovered/selected/neighbour nodes
+      if (isHovered || isSelected || isNeighbour) {
+        const haloAlpha = isHovered ? 0.22 : isSelected ? 0.18 : 0.09;
+        const haloRadius = radius + (isHovered ? 14 : isSelected ? 12 : 8);
+        const halo = ctx.createRadialGradient(node.x, ny, radius * 0.5, node.x, ny, haloRadius);
+        halo.addColorStop(0, `${node.color}${Math.round(haloAlpha * 255).toString(16).padStart(2, '0')}`);
+        halo.addColorStop(1, `${node.color}00`);
+        ctx.beginPath();
+        ctx.fillStyle = halo;
+        ctx.arc(node.x, ny, haloRadius, 0, Math.PI * 2);
+        ctx.fill();
+      }
 
       ctx.save();
       ctx.shadowColor = node.color;
-      ctx.shadowBlur = isSelected ? 22 : (isHovered ? 16 : (isCore ? 14 : 5));
+      ctx.shadowBlur = isSelected ? 28 : isHovered ? 20 : isNeighbour ? 14 : (isCore ? 16 : 4);
 
-      // Node background/fill
+      // Node background fill
       ctx.beginPath();
-      ctx.fillStyle = isCore ? 'rgba(15, 8, 38, 0.95)' : 'rgba(4, 6, 15, 0.9)';
-      ctx.strokeStyle = isSelected ? '#fff' : node.color;
-      ctx.lineWidth = isSelected ? 3 : (isHovered ? 2 : 1.5);
+      ctx.fillStyle = isCore ? 'rgba(20, 8, 50, 0.97)' : 'rgba(6, 8, 20, 0.92)';
+      ctx.strokeStyle = isSelected ? '#fff' : isHovered ? '#fff' : node.color;
+      ctx.lineWidth = isSelected ? 2.5 : isHovered ? 2 : isNeighbour ? 1.8 : 1.2;
       ctx.arc(node.x, ny, radius, 0, Math.PI * 2);
       ctx.fill();
       ctx.stroke();
       ctx.restore();
 
-      // Core neural graphics
+      // Core neural inner graphics
       if (isCore) {
+        // Rotating inner rings
+        ctx.save();
+        ctx.translate(node.x, ny);
+        ctx.rotate(time * 0.0004);
         ctx.beginPath();
-        ctx.strokeStyle = 'rgba(157, 78, 221, 0.3)';
-        ctx.arc(node.x, ny, radius - 8, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(157, 78, 221, 0.35)';
+        ctx.lineWidth = 0.8;
+        ctx.arc(0, 0, radius - 8, 0, Math.PI * 1.5);
         ctx.stroke();
+        ctx.rotate(-time * 0.0008);
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(98, 214, 255, 0.2)';
+        ctx.lineWidth = 0.6;
+        ctx.arc(0, 0, radius - 15, 0, Math.PI * 1.0);
+        ctx.stroke();
+        ctx.restore();
 
         ctx.beginPath();
-        ctx.fillStyle = 'rgba(157, 78, 221, 0.15)';
-        ctx.arc(node.x, ny, radius - 16, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(157, 78, 221, 0.12)';
+        ctx.arc(node.x, ny, radius - 18, 0, Math.PI * 2);
         ctx.fill();
       }
 
-      // Node labels
-      ctx.fillStyle = isSelected ? '#fff' : 'rgba(230, 240, 255, 0.88)';
-      ctx.font = isCore ? 'bold 10px Outfit, sans-serif' : '500 9px Outfit, sans-serif';
+      // Node label
+      ctx.save();
+      if (isHovered || isSelected) {
+        ctx.shadowColor = node.color;
+        ctx.shadowBlur = 8;
+      }
+      ctx.fillStyle = isSelected ? '#fff' : isHovered ? '#fff' : isNeighbour ? 'rgba(230,240,255,0.95)' : 'rgba(200,215,255,0.8)';
+      ctx.font = isCore ? 'bold 9.5px Outfit, sans-serif' : isHovered || isSelected ? '600 8.5px Outfit, sans-serif' : '500 8px Outfit, sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(node.label, node.x, ny);
+      ctx.restore();
     });
 
-    // Draw subnodes if active
-    if (state.expandedCategory === 'PROJECTS') {
-      subNodes.forEach(node => {
-        const isHovered = state.hoveredNode && state.hoveredNode.id === node.id;
+    // Draw subnodes — helper
+    const drawSubnodes = (list) => {
+      list.forEach(node => {
+        const isHov = state.hoveredNode && state.hoveredNode.id === node.id;
+        // Halo
+        if (isHov) {
+          const halo = ctx.createRadialGradient(node.x, node.y, node.radius * 0.5, node.x, node.y, node.radius + 10);
+          halo.addColorStop(0, `${node.color}30`);
+          halo.addColorStop(1, `${node.color}00`);
+          ctx.beginPath();
+          ctx.fillStyle = halo;
+          ctx.arc(node.x, node.y, node.radius + 10, 0, Math.PI * 2);
+          ctx.fill();
+        }
         ctx.save();
         ctx.shadowColor = node.color;
-        ctx.shadowBlur = isHovered ? 14 : 4;
+        ctx.shadowBlur = isHov ? 16 : 5;
         ctx.beginPath();
-        ctx.fillStyle = 'rgba(8, 14, 40, 0.9)';
-        ctx.strokeStyle = isHovered ? '#fff' : node.color;
-        ctx.lineWidth = isHovered ? 2 : 1.2;
+        ctx.fillStyle = 'rgba(6, 10, 30, 0.92)';
+        ctx.strokeStyle = isHov ? '#fff' : node.color;
+        ctx.lineWidth = isHov ? 1.8 : 1;
         ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
         ctx.restore();
-
-        ctx.fillStyle = 'rgba(230, 240, 255, 0.95)';
-        ctx.font = '500 8px Outfit, sans-serif';
+        ctx.fillStyle = isHov ? '#fff' : 'rgba(230, 240, 255, 0.9)';
+        ctx.font = '500 7.5px Outfit, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(node.label, node.x, node.y);
       });
-    }
+    };
+    if (state.expandedCategory === 'PROJECTS') drawSubnodes(subNodes);
+    if (state.expandedCategory === 'SKILLS') drawSubnodes(skillSubNodes);
 
     ctx.restore();
 
@@ -663,28 +800,162 @@ const createDigitalBrain = (source, windowElement) => {
 
   // Launch initial display greeting
   setTimeout(() => {
-    typeText("SYSTEM_INIT", "Neural interface online. RAGHAV CORE cognitive systems calibrated.\n\nAsk a query below or select a node in the graph to inspect portfolio knowledge.");
+    typeText("SYSTEM_INIT", "Neural interface online. **RAGHAV CORE** cognitive systems calibrated.\n\nSelect a node in the graph or run a query below to inspect portfolio knowledge.");
   }, 100);
 
   state.resume();
   windowElement.digitalBrain = state;
-  return content;
+  return source;
 };
 
-const createProjectUniverse = (source, windowElement) => {
-  const projects = readProjectData(source);
+const createUniverseModule = (appId, source, windowElement) => {
+  const PLANET_COLORS = ['#62d6ff', '#b29aff', '#7ee7c4', '#ffb86b', '#a3e635', '#f472b6'];
+  const PLANET_COLORS_HEX = [0x62d6ff, 0xb29aff, 0x7ee7c4, 0xffb86b, 0xa3e635, 0xf472b6];
+
+  const readAboutData = source => [...source.querySelectorAll('.about-card')].map(card => {
+    const title = card.querySelector('h3')?.textContent.trim() || 'About Topic';
+    const icon = card.querySelector('.card-icon')?.textContent.trim() || '👤';
+    const text = card.querySelector('p')?.textContent.trim() || '';
+    const highlight = card.querySelector('.card-highlight')?.textContent.trim() || '';
+    return { title, icon, text, highlight };
+  });
+
+  const readExperienceData = source => [...source.querySelectorAll('.timeline-item')].map(item => {
+    const role = item.querySelector('h3')?.textContent.trim() || 'Role';
+    const date = item.querySelector('.exp-date')?.textContent.trim() || '';
+    const company = item.querySelector('.exp-company-row a')?.textContent.trim() || item.querySelector('.exp-company-link')?.textContent.trim() || 'Company';
+    const companyUrl = item.querySelector('.exp-company-row a')?.href || item.querySelector('.exp-company-link')?.href || '';
+    const companyLogo = item.querySelector('.company-logo')?.src || '';
+    const details = [...item.querySelectorAll('.exp-details li')].map(li => li.textContent.trim());
+    return { role, date, company, companyUrl, companyLogo, details };
+  });
+
+  const readAchievementsData = source => [...source.querySelectorAll('.achievement-card')].map(card => {
+    const title = card.querySelector('h3')?.textContent.trim() || 'Achievement';
+    const icon = card.querySelector('.achievement-icon')?.textContent.trim() || '🏆';
+    const tag = card.querySelector('.achievement-tag')?.textContent.trim() || '';
+    const description = card.querySelector('p')?.textContent.trim() || '';
+    const year = card.querySelector('.achievement-year')?.textContent.trim() || '';
+    return { title, icon, tag, description, year };
+  });
+
+  const skillsData = [
+    { name: 'Languages', color: '#9d4edd', items: ['C', 'C++', 'Python', 'JavaScript'] },
+    { name: 'Web Frontend', color: '#f472b6', items: ['HTML', 'CSS', 'React'] },
+    { name: 'Backend & DB', color: '#38bdf8', items: ['DSA', 'OOP', 'MySQL', 'Networks'] },
+    { name: 'Tools & Specialized', color: '#a3e635', items: ['Git', 'AI/ML', 'Cybersec'] }
+  ];
+
+  const contactData = [
+    { name: 'Email', icon: '✉️', color: '#ea4335', value: 'raghavsharmahhps07@gmail.com', url: 'mailto:raghavsharmahhps07@gmail.com' },
+    { name: 'LinkedIn', icon: '💼', color: '#0a66c2', value: 'raghavsharma1402', url: 'https://www.linkedin.com/in/raghavsharma1402/' },
+    { name: 'GitHub', icon: '🐙', color: '#24292e', value: 'techwithbuddy', url: 'https://github.com/techwithbuddy' },
+    { name: 'Instagram', icon: '📸', color: '#fd1d1d', value: 'raghavsharma1504', url: 'https://www.instagram.com/raghavsharma1504/' },
+    { name: 'Send Message', icon: '💬', color: '#7ee7c4', isForm: true }
+  ];
+
+  let planetItems = [];
+  let orbitalText = "RAGHAV SHARMA • B.TECH CSE • DEVELOPER • OPEN SOURCE CONNECT INDIA LEAD •";
+
+  if (appId === 'projects') {
+    const rawProjects = readProjectData(source);
+    planetItems = rawProjects.map((p, i) => ({
+      name: p.name,
+      description: p.description,
+      color: PLANET_COLORS[i % PLANET_COLORS.length],
+      colorHex: PLANET_COLORS_HEX[i % PLANET_COLORS_HEX.length],
+      data: p,
+      type: 'project'
+    }));
+  } else if (appId === 'about') {
+    const rawAbout = readAboutData(source);
+    planetItems = rawAbout.map((a, i) => ({
+      name: a.title,
+      description: a.text,
+      color: PLANET_COLORS[i % PLANET_COLORS.length],
+      colorHex: PLANET_COLORS_HEX[i % PLANET_COLORS_HEX.length],
+      data: a,
+      type: 'about'
+    }));
+    orbitalText = "RAGHAV SHARMA • ABOUT ME • IDENTITY MODULE • B.TECH CSE STUDENT •";
+  } else if (appId === 'skills') {
+    planetItems = skillsData.map((s, i) => ({
+      name: s.name,
+      description: `Core capabilities in ${s.name}`,
+      color: s.color,
+      colorHex: parseInt(s.color.replace('#', '0x'), 16),
+      data: s,
+      type: 'skills'
+    }));
+    orbitalText = "RAGHAV SHARMA • SKILLS MODULE • CAPABILITY MAP • TECH STACK •";
+  } else if (appId === 'experience') {
+    const rawExp = readExperienceData(source);
+    planetItems = rawExp.map((e, i) => ({
+      name: e.role,
+      description: `${e.company} (${e.date})`,
+      color: PLANET_COLORS[i % PLANET_COLORS.length],
+      colorHex: PLANET_COLORS_HEX[i % PLANET_COLORS_HEX.length],
+      data: e,
+      type: 'experience'
+    }));
+    orbitalText = "RAGHAV SHARMA • EXPERIENCE TIMELINE • FIELD LOG MODULE •";
+  } else if (appId === 'achievements') {
+    const rawAch = readAchievementsData(source);
+    planetItems = rawAch.map((a, i) => ({
+      name: a.title,
+      description: `${a.tag} (${a.year})`,
+      color: PLANET_COLORS[i % PLANET_COLORS.length],
+      colorHex: PLANET_COLORS_HEX[i % PLANET_COLORS_HEX.length],
+      data: a,
+      type: 'achievements'
+    }));
+    orbitalText = "RAGHAV SHARMA • MILESTONE MODULE • CERTIFICATIONS & HONOURS •";
+  } else if (appId === 'resume') {
+    planetItems = [
+      {
+        name: 'Download Resume',
+        description: 'Download Raghav\'s complete resume PDF',
+        color: '#62d6ff',
+        colorHex: 0x62d6ff,
+        data: { action: 'download', file: './resume.pdf' },
+        type: 'resume'
+      },
+      {
+        name: 'View PDF Document',
+        description: 'Open the resume in a new tab for inspection',
+        color: '#b29aff',
+        colorHex: 0xb29aff,
+        data: { action: 'view', file: './resume.pdf' },
+        type: 'resume'
+      }
+    ];
+    orbitalText = "RAGHAV SHARMA • RESUME PROFILE • B.TECH CSE • PROFESSIONAL SNAPSHOT •";
+  } else if (appId === 'contact') {
+    planetItems = contactData.map((c, i) => ({
+      name: c.name,
+      description: c.value || 'Send an instant email message',
+      color: c.color,
+      colorHex: parseInt(c.color.replace('#', '0x'), 16),
+      data: c,
+      type: 'contact'
+    }));
+    orbitalText = "RAGHAV SHARMA • CONTACT INFO • LET'S CONNECT • OPEN CHANNELS •";
+  }
+
+  const definition = appDefinitions[appId] || { title: appId.toUpperCase(), label: 'SYSTEM GALAXY', intro: 'Interactive module details.' };
+
   const content = document.createElement('div');
   content.className = 'project-universe';
   content.innerHTML = `
-    <div class="universe-stage" role="region" aria-label="Interactive project universe">
-      <canvas class="universe-canvas" tabindex="0" aria-label="Project galaxy — use Tab to navigate projects by keyboard"></canvas>
+    <div class="universe-stage" role="region" aria-label="Interactive module universe">
+      <canvas class="universe-canvas" tabindex="0" aria-label="Module galaxy — use Tab to navigate by keyboard"></canvas>
       <div class="universe-hud" aria-hidden="true">
         <div class="universe-hud-left">
-          <span class="universe-kicker">PROJECT GALAXY / RAGHAV OS</span>
-          <h2 class="universe-title">RAGHAV<span class="universe-title-accent"> CORE</span></h2>
-          <p class="universe-subtitle">Select a planet to explore a project.</p>
+          <span class="universe-kicker">${definition.label || 'SYSTEM GALAXY'} / RAGHAV OS</span>
+          <h2 class="universe-title">${definition.title.split(' ')[0]}<span class="universe-title-accent">${definition.title.split(' ').slice(1).join(' ') ? ' ' + definition.title.split(' ').slice(1).join(' ') : ''}</span></h2>
+          <p class="universe-subtitle">Select a node to explore details.</p>
         </div>
-        <button class="universe-reset" type="button" aria-label="Reset project universe view">⟳ RESET</button>
+        <button class="universe-reset" type="button" aria-label="Reset universe view">⟳ RESET</button>
       </div>
       <div class="universe-hover-label" aria-hidden="true">
         <span class="hover-label-name"></span>
@@ -692,18 +963,18 @@ const createProjectUniverse = (source, windowElement) => {
       </div>
       <div class="universe-loading" role="status" aria-live="polite">CALIBRATING ORBITS<span class="loading-dots"></span></div>
     </div>
-    <nav class="universe-access-list" aria-label="Project keyboard navigation">
-      <span class="access-list-label">PLANETS</span>
+    <nav class="universe-access-list" aria-label="Keyboard navigation">
+      <span class="access-list-label">NODES</span>
     </nav>
     <section class="universe-case-study" hidden aria-live="polite" aria-labelledby="case-study-title">
       <div class="case-study-top">
-        <span class="universe-kicker">PROJECT FILE / NODE <span class="case-study-index"></span></span>
-        <button class="case-study-close" type="button" aria-label="Close project and return to universe">×</button>
+        <span class="universe-kicker">${definition.title} / NODE <span class="case-study-index"></span></span>
+        <button class="case-study-close" type="button" aria-label="Close details">×</button>
       </div>
       <div class="case-study-heading">
         <div class="case-study-planet-dot" aria-hidden="true"></div>
         <div>
-          <p class="case-study-kicker">RAGHAV OS — PROJECT DOCUMENTARY</p>
+          <p class="case-study-kicker">RAGHAV OS — MODULE DOCUMENTARY</p>
           <h3 class="case-study-name" id="case-study-title" tabindex="-1"></h3>
           <p class="case-study-description"></p>
         </div>
@@ -712,11 +983,11 @@ const createProjectUniverse = (source, windowElement) => {
         <div class="case-study-sections"></div>
         <div class="case-study-footer">
           <div class="case-study-footer-group">
-            <span class="universe-kicker">TECH STACK</span>
+            <span class="universe-kicker">METADATA</span>
             <div class="case-study-tech"></div>
           </div>
           <div class="case-study-footer-group">
-            <span class="universe-kicker">LINKS</span>
+            <span class="universe-kicker">ACTIONS / LINKS</span>
             <div class="case-study-links"></div>
           </div>
         </div>
@@ -732,9 +1003,6 @@ const createProjectUniverse = (source, windowElement) => {
   const hoverLabel = content.querySelector('.universe-hover-label');
   const hoverName = content.querySelector('.hover-label-name');
   const planetDot = content.querySelector('.case-study-planet-dot');
-
-  const PLANET_COLORS = ['#62d6ff', '#b29aff', '#7ee7c4', '#ffb86b'];
-  const PLANET_COLORS_HEX = [0x62d6ff, 0xb29aff, 0x7ee7c4, 0xffb86b];
 
   const PROJECT_META = [
     {
@@ -786,43 +1054,173 @@ const createProjectUniverse = (source, windowElement) => {
     idleCamPos: null
   };
 
-  const showProject = (index) => {
-    const project = projects[index];
-    const meta = PROJECT_META[index] || {};
-    if (!project) return;
+  const showPlanet = (index) => {
+    const item = planetItems[index];
+    if (!item) return;
     state.selected = index;
     state.focusIndex = index;
 
     panel.querySelector('.case-study-index').textContent = String(index + 1).padStart(2, '0');
-    panel.querySelector('.case-study-name').textContent = project.name;
-    panel.querySelector('.case-study-description').textContent = project.description;
-    planetDot.style.background = PLANET_COLORS[index] || '#62d6ff';
-    planetDot.style.boxShadow = `0 0 20px ${PLANET_COLORS[index] || '#62d6ff'}80`;
+    panel.querySelector('.case-study-name').textContent = item.name;
+    panel.querySelector('.case-study-description').textContent = item.description;
+    planetDot.style.background = item.color;
+    planetDot.style.boxShadow = `0 0 20px ${item.color}80`;
 
-    const facts = [
-      ['01', 'THE PROBLEM', meta.problem || project.description],
-      ['02', 'THE IDEA', meta.idea || ''],
-      ['03', 'THE BUILD', meta.build || ''],
-      ['04', 'THE CHALLENGE', meta.challenge || ''],
-      ['05', 'THE SOLUTION', meta.solution || ''],
-      ['06', 'THE RESULT', meta.result || '']
-    ].filter(([, , text]) => text);
+    let sectionsHtml = '';
+    let techTagsHtml = '';
+    let linksHtml = '';
 
-    panel.querySelector('.case-study-sections').innerHTML = facts.map(([num, title, text]) =>
-      `<article class="case-study-section">
-        <div class="cs-num">${num}</div>
-        <div class="cs-body"><h4>${title}</h4><p>${text}</p></div>
-      </article>`
-    ).join('');
+    if (appId === 'projects') {
+      const p = item.data;
+      const meta = PROJECT_META[index] || {};
+      const facts = [
+        ['01', 'THE PROBLEM', meta.problem || p.description],
+        ['02', 'THE IDEA', meta.idea || ''],
+        ['03', 'THE BUILD', meta.build || ''],
+        ['04', 'THE CHALLENGE', meta.challenge || ''],
+        ['05', 'THE SOLUTION', meta.solution || ''],
+        ['06', 'THE RESULT', meta.result || '']
+      ].filter(([, , text]) => text);
 
-    panel.querySelector('.case-study-tech').innerHTML =
-      project.technologies.map(t => `<span class="tech-tag">${t}</span>`).join('');
+      sectionsHtml = facts.map(([num, title, text]) =>
+        `<article class="case-study-section">
+          <div class="cs-num">${num}</div>
+          <div class="cs-body"><h4>${title}</h4><p>${text}</p></div>
+        </article>`
+      ).join('');
 
-    const links = [
-      project.github ? `<a href="${project.github}" target="_blank" rel="noopener noreferrer" class="cs-link cs-link--github"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>GitHub ↗</a>` : '',
-      project.demo && project.demo !== '#' ? `<a href="${project.demo}" target="_blank" rel="noopener noreferrer" class="cs-link cs-link--demo">🌐 Live Demo ↗</a>` : ''
-    ].filter(Boolean).join('');
-    panel.querySelector('.case-study-links').innerHTML = links;
+      techTagsHtml = p.technologies.map(t => `<span class="tech-tag" style="border-color:${item.color}80; color:${item.color}">${t}</span>`).join('');
+      linksHtml = [
+        p.github ? `<a href="${p.github}" target="_blank" rel="noopener noreferrer" class="cs-link cs-link--github"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>GitHub ↗</a>` : '',
+        p.demo && p.demo !== '#' ? `<a href="${p.demo}" target="_blank" rel="noopener noreferrer" class="cs-link cs-link--demo">🌐 Live Demo ↗</a>` : ''
+      ].filter(Boolean).join('');
+
+    } else if (appId === 'about') {
+      const a = item.data;
+      sectionsHtml = `
+        <article class="case-study-section">
+          <div class="cs-num">${a.icon}</div>
+          <div class="cs-body"><h4>SUMMARY</h4><p>${a.text}</p></div>
+        </article>
+        <article class="case-study-section">
+          <div class="cs-num">⚡</div>
+          <div class="cs-body"><h4>HIGHLIGHT</h4><p>${a.highlight}</p></div>
+        </article>`;
+      techTagsHtml = `<span class="tech-tag" style="border-color:${item.color}80; color:${item.color}">Identity</span>`;
+
+    } else if (appId === 'skills') {
+      const s = item.data;
+      sectionsHtml = `
+        <article class="case-study-section">
+          <div class="cs-num">🧩</div>
+          <div class="cs-body"><h4>${s.name.toUpperCase()}</h4><p>Here are Raghav's skills and languages mapped to this capability node.</p></div>
+        </article>`;
+      techTagsHtml = s.items.map(skill => `<span class="tech-tag" style="border-color:${item.color}80; color:${item.color}">${skill}</span>`).join('');
+
+    } else if (appId === 'experience') {
+      const e = item.data;
+      sectionsHtml = `
+        <article class="case-study-section">
+          <div class="cs-num">💼</div>
+          <div class="cs-body">
+            <h4>${e.company.toUpperCase()}</h4>
+            <p><strong>Role:</strong> ${e.role}</p>
+            <p><strong>Timeline:</strong> ${e.date}</p>
+          </div>
+        </article>
+        <article class="case-study-section">
+          <div class="cs-num">▸</div>
+          <div class="cs-body">
+            <h4>KEY RESPONSIBILITIES</h4>
+            <ul style="padding-left:1.2rem; margin:0.5rem 0 0; color:#aabbd0; font-size:0.82rem; line-height:1.5;">
+              ${e.details.map(bullet => `<li>${bullet}</li>`).join('')}
+            </ul>
+          </div>
+        </article>`;
+      techTagsHtml = `<span class="tech-tag" style="border-color:${item.color}80; color:${item.color}">Experience</span>`;
+      if (e.companyUrl) {
+        linksHtml = `<a href="${e.companyUrl}" target="_blank" rel="noopener noreferrer" class="cs-link cs-link--demo">🌐 Company Page ↗</a>`;
+      }
+
+    } else if (appId === 'achievements') {
+      const a = item.data;
+      sectionsHtml = `
+        <article class="case-study-section">
+          <div class="cs-num">${a.icon}</div>
+          <div class="cs-body">
+            <h4>${a.tag.toUpperCase()}</h4>
+            <p>${a.description}</p>
+            <p><strong>Year achieved:</strong> ${a.year}</p>
+          </div>
+        </article>`;
+      techTagsHtml = `<span class="tech-tag" style="border-color:${item.color}80; color:${item.color}">${a.tag}</span>`;
+
+    } else if (appId === 'resume') {
+      sectionsHtml = `
+        <article class="case-study-section">
+          <div class="cs-num">📄</div>
+          <div class="cs-body">
+            <h4>RESUME SNAPSHOT</h4>
+            <p><strong>Raghav Sharma</strong></p>
+            <p>B.Tech Computer Science & Engineering student, full stack developer, and open-source contributor.</p>
+            <p>• <strong>Internships/Leadership:</strong> Data Science @ Acmegrade, Campus Ambassador @ SmartED, Campus Lead @ OSCI\'26, GSSoC Contributor.</p>
+            <p>• <strong>Live Deployed Projects:</strong> AuraSense, ShikshaFlow, NetProbe, GNDU Attendance.</p>
+          </div>
+        </article>
+        <article class="case-study-section" style="padding:0;">
+          <div class="resume-preview" style="height:280px; width:100%; margin-top:15px; border-radius:8px; overflow:hidden; border:1px solid rgba(255,255,255,0.1);">
+            <embed src="./resume.pdf#page=1" type="application/pdf" style="width:100%; height:100%; border:none;" />
+          </div>
+        </article>`;
+      techTagsHtml = `
+        <span class="tech-tag" style="border-color:${item.color}80; color:${item.color}">B.Tech CSE</span>
+        <span class="tech-tag" style="border-color:${item.color}80; color:${item.color}">Resume PDF</span>`;
+      linksHtml = `
+        <a href="./resume.pdf" download="Raghav_Sharma_Resume.pdf" class="cs-link cs-link--demo">📥 Download PDF</a>
+        <a href="./resume.pdf" target="_blank" class="cs-link cs-link--github">👁️ View Fullscreen</a>`;
+
+    } else if (appId === 'contact') {
+      const c = item.data;
+      if (c.isForm) {
+        sectionsHtml = `
+          <article class="case-study-section" style="width:100%;">
+            <div class="cs-body" style="width:100%;">
+              <h4>SEND A DIRECT MESSAGE</h4>
+              <p style="margin-bottom: 1.5rem;">Fill out the form below to reach me instantly through Formspree.</p>
+              <div class="contact-form-container" style="width:100%;"></div>
+            </div>
+          </article>`;
+        techTagsHtml = `<span class="tech-tag" style="border-color:${item.color}80; color:${item.color}">Message Portal</span>`;
+      } else {
+        sectionsHtml = `
+          <article class="case-study-section">
+            <div class="cs-num">${c.icon}</div>
+            <div class="cs-body">
+              <h4>${c.name.toUpperCase()}</h4>
+              <p><strong>Handle/Address:</strong></p>
+              <code style="display:block; padding:8px 12px; background:rgba(255,255,255,0.05); border-radius:4px; font-family:monospace; font-size:0.85rem; color:#fff; word-break:break-all;">${c.value}</code>
+            </div>
+          </article>`;
+        techTagsHtml = `<span class="tech-tag" style="border-color:${item.color}80; color:${item.color}">${c.name}</span>`;
+        linksHtml = `<a href="${c.url}" target="_blank" rel="noopener noreferrer" class="cs-link cs-link--demo">🌐 Open Link ↗</a>`;
+      }
+    }
+
+    panel.querySelector('.case-study-sections').innerHTML = sectionsHtml;
+    panel.querySelector('.case-study-tech').innerHTML = techTagsHtml;
+    panel.querySelector('.case-study-links').innerHTML = linksHtml;
+
+    if (appId === 'contact' && item.data.isForm) {
+      const formContainer = panel.querySelector('.contact-form-container');
+      if (formContainer) {
+        const originalForm = source.querySelector('.contact-form');
+        if (originalForm) {
+          const formClone = originalForm.cloneNode(true);
+          formClone.id = 'cloned-contact-form';
+          formContainer.appendChild(formClone);
+        }
+      }
+    }
 
     const scrollRoot = windowElement.querySelector('.os-window-body');
     if (state.caseStudyScrollHandler) scrollRoot?.removeEventListener('scroll', state.caseStudyScrollHandler);
@@ -839,11 +1237,10 @@ const createProjectUniverse = (source, windowElement) => {
     scrollRoot.addEventListener('scroll', revealSections, { passive: true });
     window.requestAnimationFrame(revealSections);
     window.setTimeout(revealSections, 120);
-    panel.querySelector('.case-study-tech').innerHTML = project.technologies.map(tech => `<span>${tech}</span>`).join('');
-    panel.querySelector('.case-study-links').innerHTML = [
-      project.github ? `<a href="${project.github}" target="_blank" rel="noopener noreferrer">GITHUB ↗</a>` : '',
-      project.demo && project.demo !== '#' ? `<a href="${project.demo}" target="_blank" rel="noopener noreferrer">LIVE DEMO ↗</a>` : ''
-    ].filter(Boolean).join('');
+
+    panel.hidden = false;
+    content.classList.add('is-case-study-open');
+
     accessList.querySelectorAll('button').forEach((button, buttonIndex) => button.classList.toggle('is-selected', buttonIndex === index));
     if (state.planets?.[index]?.material) state.planets[index].material.emissiveIntensity = 0.75;
     panel.querySelector('.case-study-name').focus?.();
@@ -859,162 +1256,561 @@ const createProjectUniverse = (source, windowElement) => {
     accessList.querySelectorAll('button').forEach(button => button.classList.remove('is-selected'));
   };
 
-  projects.forEach((project, index) => {
+  planetItems.forEach((planet, index) => {
     const button = document.createElement('button');
     button.type = 'button';
-    button.innerHTML = `<span class="access-orb" aria-hidden="true"></span><span>${project.name}</span>`;
-    button.addEventListener('click', () => showProject(index));
+    button.className = 'access-btn';
+    const colorHex = planet.color;
+    button.innerHTML = `<span class="access-orb" style="background:${colorHex};box-shadow:0 0 8px ${colorHex}88" aria-hidden="true"></span><span class="access-name">${planet.name}</span>`;
+    button.addEventListener('click', () => showPlanet(index));
     accessList.append(button);
   });
+
   content.querySelector('.universe-reset').addEventListener('click', closeProject);
   content.querySelector('.case-study-close').addEventListener('click', closeProject);
   content.querySelector('.back-to-universe').addEventListener('click', closeProject);
 
+  const drawBrain2D = (ctx, cx, cy, size, pulse) => {
+    ctx.save();
+    ctx.shadowColor = '#d946ef';
+    ctx.shadowBlur = 18 + pulse * 4;
+
+    // Left Hemisphere
+    ctx.beginPath();
+    ctx.fillStyle = 'rgba(236, 72, 153, 0.35)';
+    ctx.strokeStyle = '#d946ef';
+    ctx.lineWidth = 1.8;
+    ctx.ellipse(cx - 9, cy - 2, 14, 18, -0.05, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // Right Hemisphere
+    ctx.beginPath();
+    ctx.fillStyle = 'rgba(236, 72, 153, 0.35)';
+    ctx.strokeStyle = '#d946ef';
+    ctx.lineWidth = 1.8;
+    ctx.ellipse(cx + 9, cy - 2, 14, 18, 0.05, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // Cerebellum
+    ctx.beginPath();
+    ctx.fillStyle = 'rgba(139, 92, 246, 0.35)';
+    ctx.strokeStyle = '#a78bfa';
+    ctx.lineWidth = 1.5;
+    ctx.ellipse(cx, cy + 12, 11, 8, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // Central Core Node
+    ctx.beginPath();
+    ctx.fillStyle = '#62d6ff';
+    ctx.shadowColor = '#62d6ff';
+    ctx.shadowBlur = 10;
+    ctx.arc(cx, cy + 2, 5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Draw neural connection patterns inside the hemispheres
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    ctx.moveTo(cx - 15, cy - 10);
+    ctx.lineTo(cx - 8, cy);
+    ctx.lineTo(cx, cy - 8);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(cx + 15, cy - 10);
+    ctx.lineTo(cx + 8, cy);
+    ctx.lineTo(cx, cy - 8);
+    ctx.stroke();
+
+    ctx.restore();
+  };
+
   const fallback = () => {
     stage.classList.add('is-fallback');
-    loading.textContent = '2D PROJECT MAP READY';
-    const context = canvas.getContext('2d');
+    if (loadingEl) loadingEl.textContent = '2D GALAXY ACTIVE';
+    const context = uCanvas.getContext('2d');
     state.mapZoom = 1;
     state.targetZoom = 1;
-    const points = Array.from({ length: 52 }, () => ({ x: Math.random(), y: Math.random(), radius: Math.random() * 1.4 + 0.4 }));
-    state.planets = projects.map((project, index) => ({ index, angle: (index / projects.length) * Math.PI * 2, radius: 0.29 + (index % 2) * 0.09, speed: 0.00008 + index * 0.00001, x: 0, y: 0 }));
-    const resize = () => { const rect = stage.getBoundingClientRect(); const width = Math.max(1, Math.floor(rect.width)); const height = Math.max(1, Math.floor(rect.height)); const dpr = Math.min(2, window.devicePixelRatio || 1); canvas.style.width = `${width}px`; canvas.style.height = `${height}px`; canvas.width = Math.max(1, Math.floor(width * dpr)); canvas.height = Math.max(1, Math.floor(height * dpr)); context.setTransform(dpr, 0, 0, dpr, 0, 0); };
-    const hitTest = event => { const rect = canvas.getBoundingClientRect(); const x = event.clientX - rect.left; const y = event.clientY - rect.top; const hit = state.planets.find(planet => Math.hypot(planet.x - x, planet.y - y) < 28); canvas.style.cursor = hit ? 'pointer' : 'default'; hoverLabel.textContent = hit ? projects[hit.index].name : ''; hoverLabel.classList.toggle('is-visible', Boolean(hit)); return hit; };
-    canvas.addEventListener('pointermove', hitTest);
-    canvas.addEventListener('click', event => { const hit = hitTest(event); if (hit) showProject(hit.index); });
+    const points = Array.from({ length: 64 }, () => ({
+      x: Math.random(),
+      y: Math.random(),
+      radius: Math.random() * 1.5 + 0.5,
+      alpha: Math.random() * 0.5 + 0.2
+    }));
+    state.planets = planetItems.map((planet, index) => ({
+      index,
+      angle: (index / planetItems.length) * Math.PI * 2,
+      radius: 0.28 + (index % 2) * 0.08,
+      speed: 0.00012 + index * 0.00003,
+      x: 0,
+      y: 0,
+      color: planet.color
+    }));
+
+    const resize = () => {
+      const rect = stage.getBoundingClientRect();
+      const width = Math.max(1, Math.floor(rect.width));
+      const height = Math.max(1, Math.floor(rect.height));
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      uCanvas.style.width = `${width}px`;
+      uCanvas.style.height = `${height}px`;
+      uCanvas.width = Math.max(1, Math.floor(width * dpr));
+      uCanvas.height = Math.max(1, Math.floor(height * dpr));
+      context.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+
+    const hitTest = event => {
+      const rect = uCanvas.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+      const hit = state.planets.find(planet => Math.hypot(planet.x - x, planet.y - y) < 32);
+      uCanvas.style.cursor = hit ? 'pointer' : 'default';
+      if (hit) {
+        hoverName.textContent = planetItems[hit.index].name;
+        hoverLabel.classList.add('is-visible');
+        hoverLabel.style.left = `${Math.min(x + 16, rect.width - 160)}px`;
+        hoverLabel.style.top = `${Math.max(y - 20, 10)}px`;
+      } else {
+        hoverLabel.classList.remove('is-visible');
+      }
+      return hit;
+    };
+
+    uCanvas.addEventListener('pointermove', hitTest);
+    uCanvas.addEventListener('click', event => {
+      const hit = hitTest(event);
+      if (hit) showPlanet(hit.index);
+    });
+
     state.resizeObserver = new ResizeObserver(resize);
     state.resizeObserver.observe(stage);
     resize();
     window.setTimeout(resize, 100);
-    window.setTimeout(resize, 500);
+    window.setTimeout(resize, 400);
+
     const render = time => {
       if (state.paused) return;
       const rect = stage.getBoundingClientRect();
       const width = rect.width;
       const height = rect.height;
       const centerX = width / 2;
-      const centerY = height / 2 + 24;
+      const centerY = height / 2 + 20;
+
       state.mapZoom += (state.targetZoom - state.mapZoom) * 0.08;
       context.clearRect(0, 0, width, height);
       context.save();
       context.translate(centerX, centerY);
       context.scale(state.mapZoom, state.mapZoom);
       context.translate(-centerX, -centerY);
-      points.forEach(point => { context.beginPath(); context.fillStyle = 'rgba(139, 201, 255, 0.42)'; context.arc(point.x * width, point.y * height, point.radius, 0, Math.PI * 2); context.fill(); });
-      context.strokeStyle = 'rgba(125, 164, 214, 0.16)';
-      [0.25, 0.36, 0.47].forEach(radius => { context.beginPath(); context.ellipse(centerX, centerY, width * radius, height * radius * 0.42, -0.12, 0, Math.PI * 2); context.stroke(); });
-      const corePulse = 32 + Math.sin(time * 0.002) * 3;
-      const coreGlow = context.createRadialGradient(centerX, centerY, 4, centerX, centerY, corePulse * 2.4);
-      coreGlow.addColorStop(0, 'rgba(98, 214, 255, 0.58)'); coreGlow.addColorStop(1, 'rgba(98, 214, 255, 0)'); context.fillStyle = coreGlow; context.beginPath(); context.arc(centerX, centerY, corePulse * 2.4, 0, Math.PI * 2); context.fill();
-      context.fillStyle = '#9caeff'; context.beginPath(); context.arc(centerX, centerY, corePulse, 0, Math.PI * 2); context.fill();
-      context.fillStyle = '#081020'; context.font = '600 10px Outfit, sans-serif'; context.textAlign = 'center'; context.fillText('CORE', centerX, centerY + 3);
-      state.planets.forEach(planet => { const angle = planet.angle + time * planet.speed; planet.x = centerX + Math.cos(angle) * width * planet.radius; planet.y = centerY + Math.sin(angle) * height * planet.radius * 0.42; const selected = state.selected === planet.index; const size = selected ? 25 : 19; context.fillStyle = ['#62d6ff', '#b29aff', '#7ee7c4', '#ffb86b'][planet.index]; context.shadowColor = context.fillStyle; context.shadowBlur = selected ? 20 : 10; context.beginPath(); context.arc(planet.x, planet.y, size, 0, Math.PI * 2); context.fill(); context.shadowBlur = 0; });
+
+      // Starfield
+      points.forEach(point => {
+        context.beginPath();
+        context.fillStyle = `rgba(139, 201, 255, ${point.alpha})`;
+        context.arc(point.x * width, point.y * height, point.radius, 0, Math.PI * 2);
+        context.fill();
+      });
+
+      // Orbit lines
+      context.strokeStyle = 'rgba(125, 164, 214, 0.14)';
+      context.lineWidth = 1;
+      [0.26, 0.36, 0.44].forEach(radius => {
+        context.beginPath();
+        context.ellipse(centerX, centerY, width * radius, height * radius * 0.45, -0.1, 0, Math.PI * 2);
+        context.stroke();
+      });
+
+      // Core Brain in 2D
+      const corePulse = Math.sin(time * 0.002);
+      drawBrain2D(context, centerX, centerY, 32, corePulse);
+
+      // Text Orbit Pill revolving close to core
+      const textPillAngle = time * 0.00015;
+      const pillX = centerX + Math.cos(textPillAngle) * width * 0.18;
+      const pillY = centerY + Math.sin(textPillAngle) * height * 0.18 * 0.45;
+
+      context.save();
+      context.fillStyle = 'rgba(157, 78, 221, 0.85)';
+      context.strokeStyle = '#d946ef';
+      context.lineWidth = 1.2;
+      context.shadowColor = '#d946ef';
+      context.shadowBlur = 10;
+      context.beginPath();
+
+      context.font = '500 8px Outfit, sans-serif';
+      const displayVal = "RAGHAV SHARMA • DEV PROFILE";
+      const displayW = context.measureText(displayVal).width;
+      context.roundRect(pillX - displayW / 2 - 6, pillY - 7, displayW + 12, 14, 7);
+      context.fill();
+      context.stroke();
+
+      context.fillStyle = '#ffffff';
+      context.textAlign = 'center';
+      context.textBaseline = 'middle';
+      context.fillText(displayVal, pillX, pillY);
+      context.restore();
+
+      // Orbiting planets
+      state.planets.forEach(planet => {
+        const angle = planet.angle + time * planet.speed;
+        planet.x = centerX + Math.cos(angle) * width * planet.radius;
+        planet.y = centerY + Math.sin(angle) * height * planet.radius * 0.45;
+        const selected = state.selected === planet.index;
+        const size = selected ? 24 : 18;
+
+        context.save();
+        context.fillStyle = planet.color;
+        context.shadowColor = planet.color;
+        context.shadowBlur = selected ? 24 : 12;
+        context.beginPath();
+        context.arc(planet.x, planet.y, size, 0, Math.PI * 2);
+        context.fill();
+        context.restore();
+
+        context.fillStyle = '#ffffff';
+        context.font = '600 9px Outfit, sans-serif';
+        context.textAlign = 'center';
+        context.textBaseline = 'middle';
+        context.fillText(planetItems[planet.index].name.slice(0, 5), planet.x, planet.y);
+      });
+
       context.restore();
       state.animationId = prefersReducedMotion.matches ? null : requestAnimationFrame(render);
     };
-    state.resume = () => { if (state.paused || state.animationId) return; if (prefersReducedMotion.matches) { render(0); return; } state.animationId = requestAnimationFrame(render); };
-    state.pause = () => { state.paused = true; window.cancelAnimationFrame(state.animationId); state.animationId = null; };
+
+    state.resume = () => {
+      if (state.paused || state.animationId) return;
+      state.paused = false;
+      if (prefersReducedMotion.matches) render(0);
+      else state.animationId = requestAnimationFrame(render);
+    };
+    state.pause = () => {
+      state.paused = true;
+      window.cancelAnimationFrame(state.animationId);
+      state.animationId = null;
+    };
     state.paused = document.hidden;
     state.resume();
   };
 
-  if (!window.THREE || prefersReducedMotion.matches || window.matchMedia('(max-width: 700px)').matches) fallback();
-  else {
-    const THREE = window.THREE;
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
-    camera.position.set(0, 1.5, 11);
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'low-power' });
-    renderer.setPixelRatio(Math.min(1.5, window.devicePixelRatio || 1));
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
-    state.scene = scene;
-    state.camera = camera;
-    state.renderer = renderer;
-    state.planets = [];
-    const universe = new THREE.Group();
-    scene.add(universe);
-    scene.add(new THREE.AmbientLight(0x8ba9d6, 1.4));
-    const core = new THREE.Mesh(new THREE.IcosahedronGeometry(1.05, 2), new THREE.MeshStandardMaterial({ color: 0x8da5ff, emissive: 0x274b91, emissiveIntensity: 0.9, roughness: 0.25, metalness: 0.45 }));
-    universe.add(core);
-    const coreGlow = new THREE.Mesh(new THREE.SphereGeometry(1.35, 24, 24), new THREE.MeshBasicMaterial({ color: 0x62d6ff, transparent: true, opacity: 0.08 }));
-    universe.add(coreGlow);
-    const orbitRings = [2.5, 3.5, 4.45].map(radius => {
-      const ring = new THREE.Mesh(new THREE.RingGeometry(radius - 0.006, radius, 96), new THREE.MeshBasicMaterial({ color: 0x6d9ad0, transparent: true, opacity: 0.12, side: THREE.DoubleSide }));
-      ring.rotation.x = Math.PI / 2.4;
-      universe.add(ring);
-      return ring;
+  const createBrainMesh = (THREE) => {
+    const brainGroup = new THREE.Group();
+
+    // Left Hemisphere
+    const leftGeo = new THREE.SphereGeometry(0.7, 24, 24);
+    leftGeo.scale(0.85, 0.95, 1.25);
+    const leftMat = new THREE.MeshStandardMaterial({
+      color: 0xec4899,
+      emissive: 0xd946ef,
+      emissiveIntensity: 0.9,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.6
     });
-    const particleGeometry = new THREE.BufferGeometry();
-    const particlePositions = new Float32Array(180 * 3);
-    for (let index = 0; index < particlePositions.length; index += 3) {
-      particlePositions[index] = (Math.random() - 0.5) * 16;
-      particlePositions[index + 1] = (Math.random() - 0.5) * 10;
-      particlePositions[index + 2] = (Math.random() - 0.5) * 10;
+    const leftHemisphere = new THREE.Mesh(leftGeo, leftMat);
+    leftHemisphere.position.set(-0.35, 0.1, 0);
+    brainGroup.add(leftHemisphere);
+
+    // Right Hemisphere
+    const rightGeo = new THREE.SphereGeometry(0.7, 24, 24);
+    rightGeo.scale(0.85, 0.95, 1.25);
+    const rightMat = new THREE.MeshStandardMaterial({
+      color: 0xec4899,
+      emissive: 0xd946ef,
+      emissiveIntensity: 0.9,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.6
+    });
+    const rightHemisphere = new THREE.Mesh(rightGeo, rightMat);
+    rightHemisphere.position.set(0.35, 0.1, 0);
+    brainGroup.add(rightHemisphere);
+
+    // Cerebellum
+    const cerebellumGeo = new THREE.SphereGeometry(0.42, 16, 16);
+    cerebellumGeo.scale(1.0, 0.75, 0.85);
+    const cerebellumMat = new THREE.MeshStandardMaterial({
+      color: 0x8b5cf6,
+      emissive: 0xa78bfa,
+      emissiveIntensity: 0.8,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.55
+    });
+    const cerebellum = new THREE.Mesh(cerebellumGeo, cerebellumMat);
+    cerebellum.position.set(0, -0.4, -0.3);
+    brainGroup.add(cerebellum);
+
+    // Pineal gland / core stem
+    const coreGeo = new THREE.SphereGeometry(0.32, 16, 16);
+    const coreMat = new THREE.MeshBasicMaterial({
+      color: 0x62d6ff,
+      transparent: true,
+      opacity: 0.85
+    });
+    const coreMesh = new THREE.Mesh(coreGeo, coreMat);
+    coreMesh.position.set(0, -0.2, 0);
+    brainGroup.add(coreMesh);
+
+    // Outer soft glowing aura sphere
+    const auraGeo = new THREE.SphereGeometry(1.35, 16, 16);
+    const auraMat = new THREE.MeshBasicMaterial({
+      color: 0xd946ef,
+      transparent: true,
+      opacity: 0.08
+    });
+    const auraMesh = new THREE.Mesh(auraGeo, auraMat);
+    brainGroup.add(auraMesh);
+
+    return brainGroup;
+  };
+
+  const createTextOrbit = (THREE, text) => {
+    const textCanvas = document.createElement('canvas');
+    textCanvas.width = 1024;
+    textCanvas.height = 64;
+    const textCtx = textCanvas.getContext('2d');
+
+    textCtx.clearRect(0, 0, 1024, 64);
+
+    textCtx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+    textCtx.shadowColor = '#62d6ff';
+    textCtx.shadowBlur = 8;
+    textCtx.font = 'bold 20px Outfit, sans-serif';
+    textCtx.textAlign = 'center';
+    textCtx.textBaseline = 'middle';
+
+    const repeatedText = `${text}    ${text}    `;
+    textCtx.fillText(repeatedText, 512, 32);
+
+    const textTexture = new THREE.CanvasTexture(textCanvas);
+    textTexture.wrapS = THREE.RepeatWrapping;
+    textTexture.wrapT = THREE.ClampToEdgeWrapping;
+
+    const textMaterial = new THREE.MeshBasicMaterial({
+      map: textTexture,
+      transparent: true,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending
+    });
+
+    const textGeometry = new THREE.CylinderGeometry(2.0, 2.0, 0.4, 64, 1, true);
+    const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+
+    textMesh.rotation.x = Math.PI / 2.3;
+    textMesh.rotation.y = 0.1;
+
+    return textMesh;
+  };
+
+  const initThree = () => {
+    try {
+      const THREE = window.THREE;
+      if (!THREE) { fallback(); return; }
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
+      camera.position.set(0, 1.5, 11);
+      const renderer = new THREE.WebGLRenderer({ canvas: uCanvas, antialias: true, alpha: true, powerPreference: 'low-power' });
+      renderer.setPixelRatio(Math.min(1.5, window.devicePixelRatio || 1));
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      state.scene = scene;
+      state.camera = camera;
+      state.renderer = renderer;
+      state.planets = [];
+      const universe = new THREE.Group();
+      scene.add(universe);
+      scene.add(new THREE.AmbientLight(0x8ba9d6, 1.6));
+
+      const pointLight = new THREE.PointLight(0x62d6ff, 2, 20);
+      pointLight.position.set(0, 0, 0);
+      scene.add(pointLight);
+
+      // Programmatic 3D Brain Core
+      const brainMesh = createBrainMesh(THREE);
+      universe.add(brainMesh);
+
+      // Rotating Text details orbit
+      const textOrbit = createTextOrbit(THREE, orbitalText);
+      universe.add(textOrbit);
+
+      const leftH = brainMesh.children[0];
+      const rightH = brainMesh.children[1];
+      const cereb = brainMesh.children[2];
+
+      const orbitRings = [2.8, 3.6, 4.5].map(radius => {
+        const ring = new THREE.Mesh(
+          new THREE.RingGeometry(radius - 0.008, radius, 96),
+          new THREE.MeshBasicMaterial({ color: 0x6d9ad0, transparent: true, opacity: 0.15, side: THREE.DoubleSide })
+        );
+        ring.rotation.x = Math.PI / 2.3;
+        universe.add(ring);
+        return ring;
+      });
+
+      const particleGeometry = new THREE.BufferGeometry();
+      const particlePositions = new Float32Array(200 * 3);
+      for (let i = 0; i < particlePositions.length; i += 3) {
+        particlePositions[i] = (Math.random() - 0.5) * 18;
+        particlePositions[i + 1] = (Math.random() - 0.5) * 12;
+        particlePositions[i + 2] = (Math.random() - 0.5) * 12;
+      }
+      particleGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+      scene.add(new THREE.Points(particleGeometry, new THREE.PointsMaterial({ color: 0x8bc9ff, size: 0.03, transparent: true, opacity: 0.7 })));
+
+      planetItems.forEach((planet, index) => {
+        const angle = (index / planetItems.length) * Math.PI * 2;
+        const radius = 2.8 + (index % 2) * 0.8;
+        const colorHex = planet.colorHex;
+        const pMesh = new THREE.Mesh(
+          new THREE.SphereGeometry(0.38 + (index % 2) * 0.08, 24, 24),
+          new THREE.MeshStandardMaterial({
+            color: colorHex,
+            emissive: colorHex,
+            emissiveIntensity: 0.35,
+            roughness: 0.3,
+            metalness: 0.25
+          })
+        );
+        pMesh.userData = { index, angle, radius, speed: 0.12 + index * 0.02, baseScale: pMesh.scale.x };
+        pMesh.position.set(Math.cos(angle) * radius, Math.sin(angle * 1.7) * 0.4, Math.sin(angle) * radius * 0.6);
+        universe.add(pMesh);
+        state.planets.push(pMesh);
+      });
+
+      const raycaster = new THREE.Raycaster();
+      const pointer = new THREE.Vector2();
+
+      const selectAt = event => {
+        const rect = uCanvas.getBoundingClientRect();
+        pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+        raycaster.setFromCamera(pointer, camera);
+        const hit = raycaster.intersectObjects(state.planets)[0];
+        if (hit) showPlanet(hit.object.userData.index);
+      };
+
+      uCanvas.addEventListener('pointermove', event => {
+        const rect = uCanvas.getBoundingClientRect();
+        pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+        raycaster.setFromCamera(pointer, camera);
+        const hit = raycaster.intersectObjects(state.planets)[0];
+        uCanvas.style.cursor = hit ? 'pointer' : 'default';
+        if (hit) {
+          hoverName.textContent = planetItems[hit.object.userData.index].name;
+          hoverLabel.classList.add('is-visible');
+          hoverLabel.style.left = `${Math.min(event.clientX - rect.left + 16, rect.width - 160)}px`;
+          hoverLabel.style.top = `${Math.max(event.clientY - rect.top - 20, 10)}px`;
+        } else {
+          hoverLabel.classList.remove('is-visible');
+        }
+        state.planets.forEach(p => {
+          p.scale.setScalar(p === hit?.object ? p.userData.baseScale * 1.25 : p.userData.baseScale);
+        });
+      });
+
+      uCanvas.addEventListener('click', selectAt);
+
+      const resize = () => {
+        const rect = stage.getBoundingClientRect();
+        const width = Math.max(1, Math.floor(rect.width));
+        const height = Math.max(1, Math.floor(rect.height));
+        renderer.setSize(width, height, false);
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+      };
+
+      state.resizeObserver = new ResizeObserver(resize);
+      state.resizeObserver.observe(stage);
+      resize();
+
+      if (loadingEl) loadingEl.textContent = `${definition.title} GALAXY ONLINE`;
+
+      const render = time => {
+        if (state.paused) return;
+        const seconds = time * 0.001;
+        state.planets.forEach(p => {
+          const data = p.userData;
+          const angle = data.angle + seconds * data.speed;
+          p.position.x = Math.cos(angle) * data.radius;
+          p.position.z = Math.sin(angle) * data.radius * 0.6;
+          p.position.y = Math.sin(angle * 1.7) * 0.4;
+        });
+
+        // Rotate Brain Core hemispheres organically
+        leftH.rotation.y = seconds * 0.15;
+        rightH.rotation.y = -seconds * 0.15;
+        cereb.rotation.y = seconds * 0.08;
+
+        // Rotate text orbit cylinder
+        textOrbit.rotation.y = -seconds * 0.18;
+
+        orbitRings.forEach((ring, i) => { ring.rotation.z = seconds * (i + 1) * 0.025; });
+
+        const targetPlanet = state.focusIndex === null ? null : state.planets[state.focusIndex];
+        const lookTarget = targetPlanet ? targetPlanet.position : new THREE.Vector3(0, 0, 0);
+        const desiredCamera = targetPlanet
+          ? new THREE.Vector3(targetPlanet.position.x * 0.75, targetPlanet.position.y * 0.75 + 0.35, targetPlanet.position.z + 3.2)
+          : new THREE.Vector3(Math.sin(seconds * 0.15) * 0.4, 1.5, 11);
+
+        camera.position.lerp(desiredCamera, targetPlanet ? 0.04 : 0.015);
+        camera.lookAt(lookTarget);
+        renderer.render(scene, camera);
+        state.animationId = requestAnimationFrame(render);
+      };
+
+      state.resume = () => {
+        if (!state.paused && !state.animationId) state.animationId = requestAnimationFrame(render);
+      };
+      state.pause = () => {
+        state.paused = true;
+        window.cancelAnimationFrame(state.animationId);
+        state.animationId = null;
+      };
+      state.paused = document.hidden;
+      state.resume();
+    } catch (err) {
+      console.warn('Three.js init failed, using 2D fallback:', err);
+      fallback();
     }
-    particleGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
-    scene.add(new THREE.Points(particleGeometry, new THREE.PointsMaterial({ color: 0x8bc9ff, size: 0.025, transparent: true, opacity: 0.65 })));
-    projects.forEach((project, index) => {
-      const angle = (index / projects.length) * Math.PI * 2;
-      const radius = 2.8 + (index % 2) * 0.75;
-      const planet = new THREE.Mesh(new THREE.SphereGeometry(0.42 + (index % 2) * 0.08, 20, 20), new THREE.MeshStandardMaterial({ color: planetColors[index], emissive: planetColors[index], emissiveIntensity: 0.2, roughness: 0.38, metalness: 0.2 }));
-      planet.userData = { index, angle, radius, speed: 0.12 + index * 0.015, baseScale: planet.scale.x };
-      planet.position.set(Math.cos(angle) * radius, Math.sin(angle * 1.7) * 0.55, Math.sin(angle) * radius * 0.62);
-      universe.add(planet);
-      state.planets.push(planet);
-    });
-    const raycaster = new THREE.Raycaster();
-    const pointer = new THREE.Vector2();
-    const selectAt = event => {
-      const rect = canvas.getBoundingClientRect();
-      pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-      pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-      raycaster.setFromCamera(pointer, camera);
-      const hit = raycaster.intersectObjects(state.planets)[0];
-      if (hit) showProject(hit.object.userData.index);
+  };
+
+  if (window.THREE && !prefersReducedMotion.matches && !window.matchMedia('(max-width: 700px)').matches) {
+    initThree();
+  } else if (!prefersReducedMotion.matches && !window.matchMedia('(max-width: 700px)').matches) {
+    const onReady = () => {
+      window.removeEventListener('three-ready', onReady);
+      if (!state.paused && !state.renderer) initThree();
     };
-    canvas.addEventListener('pointermove', event => {
-      const rect = canvas.getBoundingClientRect();
-      pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-      pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-      raycaster.setFromCamera(pointer, camera);
-      const hit = raycaster.intersectObjects(state.planets)[0];
-      canvas.style.cursor = hit ? 'pointer' : 'default';
-      hoverLabel.textContent = hit ? projects[hit.object.userData.index].name : '';
-      hoverLabel.classList.toggle('is-visible', Boolean(hit));
-      state.planets.forEach(planet => { planet.scale.setScalar(planet === hit?.object ? planet.userData.baseScale * 1.22 : planet.userData.baseScale); });
-    });
-    canvas.addEventListener('click', selectAt);
-    const resize = () => { const rect = stage.getBoundingClientRect(); renderer.setSize(rect.width, rect.height, false); camera.aspect = rect.width / Math.max(1, rect.height); camera.updateProjectionMatrix(); };
-    state.resizeObserver = new ResizeObserver(resize);
-    state.resizeObserver.observe(stage);
-    resize();
-    loading.textContent = 'PROJECT NETWORK ONLINE';
-    const render = time => {
-      if (state.paused) return;
-      const seconds = time * 0.001;
-      state.planets.forEach(planet => { const data = planet.userData; const angle = data.angle + seconds * data.speed; planet.position.x = Math.cos(angle) * data.radius; planet.position.z = Math.sin(angle) * data.radius * 0.62; planet.position.y = Math.sin(angle * 1.7) * 0.55; });
-      core.rotation.y = seconds * 0.18;
-      core.rotation.x = Math.sin(seconds * 0.2) * 0.12;
-      orbitRings.forEach((ring, index) => { ring.rotation.z = seconds * (index + 1) * 0.025; });
-      const targetPlanet = state.focusIndex === null ? null : state.planets[state.focusIndex];
-      const lookTarget = targetPlanet ? targetPlanet.position : new THREE.Vector3(0, 0, 0);
-      const desiredCamera = targetPlanet ? new THREE.Vector3(targetPlanet.position.x * 0.72, targetPlanet.position.y * 0.72 + 0.35, targetPlanet.position.z + 3.4) : new THREE.Vector3(Math.sin(seconds * 0.16) * 0.35, 1.5, 11);
-      camera.position.lerp(desiredCamera, targetPlanet ? 0.035 : 0.012);
-      camera.lookAt(lookTarget);
-      renderer.render(scene, camera);
-      state.animationId = requestAnimationFrame(render);
-    };
-    state.resume = () => { if (!state.paused && !state.animationId) state.animationId = requestAnimationFrame(render); };
-    state.pause = () => { state.paused = true; window.cancelAnimationFrame(state.animationId); state.animationId = null; };
-    state.paused = document.hidden;
-    state.resume();
+    window.addEventListener('three-ready', onReady);
+    window.setTimeout(() => {
+      if (!window.THREE && !state.renderer) fallback();
+      else if (window.THREE && !state.renderer) initThree();
+    }, 500);
+  } else {
+    fallback();
   }
 
   state.resume ||= () => { state.paused = false; };
   state.pause ||= () => { state.paused = true; };
-  state.visibilityHandler = () => { state.paused = document.hidden; if (!state.paused) state.resume(); };
+  state.visibilityHandler = () => {
+    state.paused = document.hidden;
+    if (!state.paused) state.resume();
+  };
   document.addEventListener('visibilitychange', state.visibilityHandler);
-  state.dispose = () => { state.pause(); state.resizeObserver?.disconnect(); state.caseStudyObserver?.disconnect(); if (state.caseStudyScrollHandler) windowElement.querySelector('.os-window-body')?.removeEventListener('scroll', state.caseStudyScrollHandler); state.renderer?.dispose(); document.removeEventListener('visibilitychange', state.visibilityHandler); };
+  state.dispose = () => {
+    state.pause();
+    state.resizeObserver?.disconnect();
+    state.caseStudyObserver?.disconnect();
+    if (state.caseStudyScrollHandler) windowElement.querySelector('.os-window-body')?.removeEventListener('scroll', state.caseStudyScrollHandler);
+    state.renderer?.dispose();
+    document.removeEventListener('visibilitychange', state.visibilityHandler);
+  };
   windowElement.projectUniverse = state;
   return content;
 };
@@ -1036,6 +1832,7 @@ const windowManager = {
       if (other.id !== id) other.element.classList.remove('is-active');
     });
     instance.element.projectUniverse?.resume();
+    instance.element.digitalBrain?.resume();
     this.activeId = id;
   },
   create(appId) {
@@ -1075,7 +1872,14 @@ const windowManager = {
       moduleIntro.innerHTML = `<span class="os-module-label">${definition.label}</span><p>${definition.intro}</p><span class="os-module-state"><i aria-hidden="true"></i> MODULE ONLINE</span>`;
       body.append(moduleIntro);
     }
-    body.append(appId === 'projects' ? createProjectUniverse(content, element) : content);
+    if (appId === 'core') {
+      // For RAGHAV CORE, we need to append content first so the brain canvas is in DOM,
+      // then wire up the brain logic
+      body.append(content);
+      createDigitalBrain(content, element);
+    } else {
+      body.append(createUniverseModule(appId, content, element));
+    }
 
     const task = document.createElement('button');
     task.className = 'os-task';
@@ -1088,6 +1892,7 @@ const windowManager = {
       instance.element.classList.remove('is-minimized');
       this.focus(id);
       instance.element.projectUniverse?.resume();
+      instance.element.digitalBrain?.resume();
     });
 
     const instance = { id, appId, element, task, drag: null };
@@ -1113,6 +1918,7 @@ const windowManager = {
     element.querySelector('.window-close').addEventListener('click', event => {
       event.stopPropagation();
       element.projectUniverse?.pause();
+      element.digitalBrain?.pause();
       this.close(id);
     });
     element.querySelector('.window-minimize').addEventListener('click', event => {
@@ -1120,6 +1926,7 @@ const windowManager = {
       element.classList.add('is-minimized');
       instance.task.classList.remove('is-active');
       element.projectUniverse?.pause();
+      element.digitalBrain?.pause();
     });
     element.querySelector('.window-maximize').addEventListener('click', event => {
       event.stopPropagation();
@@ -1154,6 +1961,7 @@ const windowManager = {
     window.setTimeout(() => {
       instance.element.remove();
       instance.element.projectUniverse?.dispose();
+      instance.element.digitalBrain?.dispose();
       instance.task.remove();
       this.instances.delete(id);
       const next = [...this.instances.values()].pop();

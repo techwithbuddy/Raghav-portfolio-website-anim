@@ -4173,7 +4173,7 @@ body.archive-open .desktop {
         grid-template-columns: 1fr;
         grid-template-rows: 320px 1fr;
     }
-    
+
     .brain-graph-panel {
         border-right: none;
         border-bottom: 1px solid rgba(157, 78, 221, 0.15);
@@ -4203,4 +4203,4 @@ body.archive-open .desktop {
         transform: none !important;
     }
 }
-}
+
