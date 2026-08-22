@@ -34,7 +34,7 @@
     <main class="os-environment" id="os-environment" aria-label="Raghav OS desktop">
         <header class="system-bar">
             <div class="system-brand"><span class="system-dot" aria-hidden="true"></span><strong>RAGHAV OS</strong><span class="system-state">SYSTEM ONLINE</span></div>
-            <div class="system-meta"><time id="system-time" datetime="">00:00</time><span class="system-status"><span class="status-dot" aria-hidden="true"></span>READY</span></div>
+            <div class="system-meta"><button class="recruiter-mode-toggle" id="recruiter-mode-toggle" type="button">⚡ RECRUITER MODE</button><time id="system-time" datetime="">00:00</time><span class="system-status"><span class="status-dot" aria-hidden="true"></span>READY</span></div>
         </header>
 
         <section class="desktop" aria-labelledby="desktop-title">
@@ -62,6 +62,10 @@
         <div class="os-window-layer" id="os-window-layer" aria-live="polite"></div>
         <nav class="os-taskbar" id="os-taskbar" aria-label="Open Raghav OS applications"></nav>
     </main>
+
+    <aside class="recruiter-mode" id="recruiter-mode" hidden aria-label="Recruiter Mode">
+        <div class="recruiter-mode-shell" id="recruiter-mode-shell"></div>
+    </aside>
 
     <div class="cursor-dot"></div>
     <div class="cursor-ring"></div>
