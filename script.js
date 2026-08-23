@@ -251,6 +251,35 @@ const readProjectData = source => [...source.querySelectorAll('.project-card')].
   };
 });
 
+// Shared, single source of truth for skills/experience/achievements data — used by both
+// the RAGHAV CORE universe module and RECRUITER MODE (Phase 9) so nothing is duplicated
+// or re-authored in two places.
+const skillsData = [
+  { name: 'Languages', color: '#9d4edd', items: ['C', 'C++', 'Python', 'JavaScript'] },
+  { name: 'Web Frontend', color: '#f472b6', items: ['HTML', 'CSS', 'React'] },
+  { name: 'Backend & DB', color: '#38bdf8', items: ['DSA', 'OOP', 'MySQL', 'Networks'] },
+  { name: 'Tools & Specialized', color: '#a3e635', items: ['Git', 'AI/ML', 'Cybersec'] }
+];
+
+const readExperienceData = source => [...source.querySelectorAll('.timeline-item')].map(item => {
+  const role = item.querySelector('h3')?.textContent.trim() || 'Role';
+  const date = item.querySelector('.exp-date')?.textContent.trim() || '';
+  const company = item.querySelector('.exp-company-row a')?.textContent.trim() || item.querySelector('.exp-company-link')?.textContent.trim() || 'Company';
+  const companyUrl = item.querySelector('.exp-company-row a')?.href || item.querySelector('.exp-company-link')?.href || '';
+  const companyLogo = item.querySelector('.company-logo')?.src || '';
+  const details = [...item.querySelectorAll('.exp-details li')].map(li => li.textContent.trim());
+  return { role, date, company, companyUrl, companyLogo, details };
+});
+
+const readAchievementsData = source => [...source.querySelectorAll('.achievement-card')].map(card => {
+  const title = card.querySelector('h3')?.textContent.trim() || 'Achievement';
+  const icon = card.querySelector('.achievement-icon')?.textContent.trim() || '🏆';
+  const tag = card.querySelector('.achievement-tag')?.textContent.trim() || '';
+  const description = card.querySelector('p')?.textContent.trim() || '';
+  const year = card.querySelector('.achievement-year')?.textContent.trim() || '';
+  return { title, icon, tag, description, year };
+});
+
 const createDigitalBrain = (source, windowElement) => {
   // Ensure content is appended before querying sub-elements
   if (!source.parentElement) {
@@ -868,32 +897,6 @@ const createUniverseModule = (appId, source, windowElement) => {
     const highlight = card.querySelector('.card-highlight')?.textContent.trim() || '';
     return { title, icon, text, highlight };
   });
-
-  const readExperienceData = source => [...source.querySelectorAll('.timeline-item')].map(item => {
-    const role = item.querySelector('h3')?.textContent.trim() || 'Role';
-    const date = item.querySelector('.exp-date')?.textContent.trim() || '';
-    const company = item.querySelector('.exp-company-row a')?.textContent.trim() || item.querySelector('.exp-company-link')?.textContent.trim() || 'Company';
-    const companyUrl = item.querySelector('.exp-company-row a')?.href || item.querySelector('.exp-company-link')?.href || '';
-    const companyLogo = item.querySelector('.company-logo')?.src || '';
-    const details = [...item.querySelectorAll('.exp-details li')].map(li => li.textContent.trim());
-    return { role, date, company, companyUrl, companyLogo, details };
-  });
-
-  const readAchievementsData = source => [...source.querySelectorAll('.achievement-card')].map(card => {
-    const title = card.querySelector('h3')?.textContent.trim() || 'Achievement';
-    const icon = card.querySelector('.achievement-icon')?.textContent.trim() || '🏆';
-    const tag = card.querySelector('.achievement-tag')?.textContent.trim() || '';
-    const description = card.querySelector('p')?.textContent.trim() || '';
-    const year = card.querySelector('.achievement-year')?.textContent.trim() || '';
-    return { title, icon, tag, description, year };
-  });
-
-  const skillsData = [
-    { name: 'Languages', color: '#9d4edd', items: ['C', 'C++', 'Python', 'JavaScript'] },
-    { name: 'Web Frontend', color: '#f472b6', items: ['HTML', 'CSS', 'React'] },
-    { name: 'Backend & DB', color: '#38bdf8', items: ['DSA', 'OOP', 'MySQL', 'Networks'] },
-    { name: 'Tools & Specialized', color: '#a3e635', items: ['Git', 'AI/ML', 'Cybersec'] }
-  ];
 
   const contactData = [
     { name: 'Email', icon: '✉️', color: '#ea4335', value: 'raghavsharmahhps07@gmail.com', url: 'mailto:raghavsharmahhps07@gmail.com' },
@@ -2666,3 +2669,195 @@ const sectionObserver = new IntersectionObserver((entries) => {
 }, { threshold: 0.45, rootMargin: '-12% 0px -45% 0px' });
 
 animatedSections.forEach(section => sectionObserver.observe(section));
+
+
+// ============================================================
+// PHASE 9 — RECRUITER MODE
+// A fast, ~60-90 second professional path through the SAME data
+// already on the site. Nothing here is invented: every field is
+// read live from existing DOM sections (#about, #experience,
+// #achievements, #contact, #resume) or the shared skillsData /
+// readProjectData sources declared above. Recruiter Mode is an
+// alternative overlay — it never removes the immersive RAGHAV OS
+// experience underneath.
+// ============================================================
+const recruiterToggle = document.getElementById('recruiter-mode-toggle');
+const recruiterMode = document.getElementById('recruiter-mode');
+const recruiterShell = document.getElementById('recruiter-mode-shell');
+
+if (recruiterToggle && recruiterMode && recruiterShell) {
+  let recruiterBuilt = false;
+  let lastFocusedBeforeRecruiter = null;
+
+  const rmEscapeHtml = (str = '') => str.replace(/[&<>"']/g, char => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[char]));
+
+  const rmIsOpenSource = (text = '') => /gssoc|open source|osci|girlscript/i.test(text);
+
+  const buildRecruiterMode = () => {
+    const aboutText = document.querySelector('.about-description')?.textContent.trim().replace(/\s+/g, ' ')
+      || 'B.Tech Computer Science student and developer, focused on clean, useful digital experiences.';
+
+    const projects = readProjectData(document);
+    const experience = readExperienceData(document);
+    const achievements = readAchievementsData(document);
+    const openSourceItems = [
+      ...experience.filter(item => rmIsOpenSource(item.company) || rmIsOpenSource(item.role)),
+      ...achievements.filter(item => rmIsOpenSource(item.title) || rmIsOpenSource(item.tag) || rmIsOpenSource(item.description))
+    ];
+
+    const emailLink = document.getElementById('contact-email');
+    const linkedinLink = document.getElementById('contact-linkedin');
+    const githubLink = document.getElementById('contact-github');
+
+    const skillsHtml = skillsData.map(group => `
+      <div class="rm-skill-group">
+        <span class="rm-skill-group-label">${rmEscapeHtml(group.name)}</span>
+        <div class="rm-skill-pills">
+          ${group.items.map(item => `<span class="rm-pill" style="--pill-color:${group.color}">${rmEscapeHtml(item)}</span>`).join('')}
+        </div>
+      </div>`).join('');
+
+    const projectsHtml = projects.map(project => `
+      <article class="rm-project-card">
+        <div class="rm-project-top">
+          <h4>${rmEscapeHtml(project.name)}</h4>
+          <div class="rm-project-links">
+            ${project.github ? `<a href="${project.github}" target="_blank" rel="noopener">GitHub ↗</a>` : ''}
+            ${project.demo && project.demo !== '#' ? `<a href="${project.demo}" target="_blank" rel="noopener">Live ↗</a>` : ''}
+          </div>
+        </div>
+        <p>${rmEscapeHtml(project.description)}</p>
+        <div class="rm-tags">${project.technologies.map(t => `<span>${rmEscapeHtml(t)}</span>`).join('')}</div>
+      </article>`).join('');
+
+    const experienceHtml = experience.map(item => `
+      <div class="rm-exp-item">
+        <div class="rm-exp-row">
+          <strong>${rmEscapeHtml(item.role)}</strong>
+          <span class="rm-exp-date">${rmEscapeHtml(item.date)}</span>
+        </div>
+        <div class="rm-exp-company">${item.companyUrl ? `<a href="${item.companyUrl}" target="_blank" rel="noopener">${rmEscapeHtml(item.company)}</a>` : rmEscapeHtml(item.company)}</div>
+        ${item.details[0] ? `<p>${rmEscapeHtml(item.details[0])}</p>` : ''}
+      </div>`).join('');
+
+    const achievementsHtml = achievements.map(item => `
+      <div class="rm-achievement">
+        <span class="rm-ach-icon" aria-hidden="true">${item.icon}</span>
+        <div>
+          <div class="rm-ach-head"><strong>${rmEscapeHtml(item.title)}</strong>${item.year ? `<span class="rm-ach-year">${rmEscapeHtml(item.year)}</span>` : ''}</div>
+          <p>${rmEscapeHtml(item.description)}</p>
+        </div>
+      </div>`).join('');
+
+    const openSourceHtml = openSourceItems.length ? openSourceItems.map(item => `
+      <div class="rm-os-item">
+        <strong>${rmEscapeHtml(item.title || item.role)}</strong>
+        <span>${rmEscapeHtml(item.company || item.tag || '')}</span>
+      </div>`).join('') : '<p class="rm-empty">Open-source involvement is detailed in the Experience and Achievements sections above.</p>';
+
+    recruiterShell.innerHTML = `
+      <div class="rm-panel" role="document">
+        <header class="rm-header">
+          <div class="rm-header-main">
+            <p class="rm-eyebrow">FAST PROFESSIONAL PATH</p>
+            <h1>RAGHAV SHARMA</h1>
+            <p class="rm-degree">B.Tech Computer Science</p>
+          </div>
+          <button type="button" class="rm-exit" id="recruiter-exit-btn">EXIT RECRUITER MODE ×</button>
+        </header>
+
+        <div class="rm-quick-actions">
+          ${githubLink ? `<a href="${githubLink.href}" target="_blank" rel="noopener" class="rm-quick-btn">GitHub ↗</a>` : ''}
+          ${linkedinLink ? `<a href="${linkedinLink.href}" target="_blank" rel="noopener" class="rm-quick-btn">LinkedIn ↗</a>` : ''}
+          <a href="./resume.pdf" download="Raghav_Sharma_Resume.pdf" class="rm-quick-btn rm-quick-btn-primary">Download Resume ↓</a>
+          ${emailLink ? `<a href="${emailLink.href}" class="rm-quick-btn">Email</a>` : ''}
+        </div>
+
+        <section class="rm-section">
+          <h2>Short Intro</h2>
+          <p class="rm-intro">${rmEscapeHtml(aboutText)}</p>
+        </section>
+
+        <section class="rm-section">
+          <h2>Technical Skills</h2>
+          <div class="rm-skills">${skillsHtml}</div>
+        </section>
+
+        <section class="rm-section">
+          <h2>Best Projects</h2>
+          <div class="rm-projects">${projectsHtml}</div>
+        </section>
+
+        <section class="rm-section">
+          <h2>Experience</h2>
+          <div class="rm-experience">${experienceHtml}</div>
+        </section>
+
+        <section class="rm-section">
+          <h2>Achievements</h2>
+          <div class="rm-achievements">${achievementsHtml}</div>
+        </section>
+
+        <section class="rm-section">
+          <h2>Open Source</h2>
+          <div class="rm-open-source">${openSourceHtml}</div>
+        </section>
+
+        <section class="rm-section rm-resume-section">
+          <h2>Resume</h2>
+          <p>Full profile snapshot — education, skills, experience and certifications in one PDF.</p>
+          <div class="rm-resume-actions">
+            <a href="./resume.pdf" download="Raghav_Sharma_Resume.pdf" class="rm-quick-btn rm-quick-btn-primary">Download Resume ↓</a>
+            <a href="./resume.pdf" target="_blank" rel="noopener" class="rm-quick-btn">View Resume ↗</a>
+          </div>
+        </section>
+
+        <footer class="rm-contact-footer">
+          <h2>Contact</h2>
+          <div class="rm-contact-links">
+            ${emailLink ? `<a href="${emailLink.href}">✉️ raghavsharmahhps07@gmail.com</a>` : ''}
+            ${linkedinLink ? `<a href="${linkedinLink.href}" target="_blank" rel="noopener">💼 linkedin.com/in/raghavsharma1402</a>` : ''}
+            ${githubLink ? `<a href="${githubLink.href}" target="_blank" rel="noopener">🐙 github.com/techwithbuddy</a>` : ''}
+          </div>
+          <p class="rm-footer-note">Designed &amp; built by Raghav Sharma</p>
+        </footer>
+      </div>`;
+
+    recruiterShell.querySelector('#recruiter-exit-btn')?.addEventListener('click', closeRecruiterMode);
+    recruiterBuilt = true;
+  };
+
+  function openRecruiterMode() {
+    if (!recruiterBuilt) buildRecruiterMode();
+    lastFocusedBeforeRecruiter = document.activeElement;
+    recruiterMode.hidden = false;
+    document.body.classList.add('recruiter-active');
+    osEnvironment?.setAttribute('aria-hidden', 'true');
+    recruiterToggle.setAttribute('aria-pressed', 'true');
+    recruiterToggle.classList.add('is-active');
+    window.requestAnimationFrame(() => recruiterMode.classList.add('is-open'));
+    window.setTimeout(() => recruiterShell.querySelector('.rm-exit')?.focus(), prefersReducedMotion.matches ? 0 : 80);
+  }
+
+  function closeRecruiterMode() {
+    recruiterMode.classList.remove('is-open');
+    document.body.classList.remove('recruiter-active');
+    osEnvironment?.removeAttribute('aria-hidden');
+    recruiterToggle.setAttribute('aria-pressed', 'false');
+    recruiterToggle.classList.remove('is-active');
+    window.setTimeout(() => { recruiterMode.hidden = true; }, prefersReducedMotion.matches ? 0 : 260);
+    (lastFocusedBeforeRecruiter || recruiterToggle).focus();
+  }
+
+  recruiterToggle.setAttribute('aria-pressed', 'false');
+  recruiterToggle.addEventListener('click', () => {
+    if (recruiterMode.hidden) openRecruiterMode();
+    else closeRecruiterMode();
+  });
+
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && !recruiterMode.hidden) closeRecruiterMode();
+  });
+}

@@ -4433,3 +4433,448 @@ body.archive-open .desktop {
 @media (max-width: 700px) {
     .protocol-hint { right: 0.7rem; bottom: 3.4rem; max-width: 75vw; }
 }
+
+/* ============================================================
+   PHASE 9 — RECRUITER MODE
+   A clean, professional, light-themed fast-path overlay. It sits
+   on top of the RAGHAV OS experience (never removing it) and gives
+   recruiters a ~60-90 second scan: intro, skills, projects,
+   experience, achievements, open source, resume, contact.
+   ============================================================ */
+
+.recruiter-mode-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.85rem;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: var(--os-text);
+    background: rgba(157, 78, 221, 0.12);
+    border: 1px solid rgba(157, 78, 221, 0.4);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease, color 0.2s ease;
+}
+
+.recruiter-mode-toggle:hover,
+.recruiter-mode-toggle:focus-visible {
+    background: rgba(157, 78, 221, 0.24);
+    border-color: rgba(157, 78, 221, 0.7);
+    transform: translateY(-1px);
+}
+
+.recruiter-mode-toggle.is-active {
+    background: linear-gradient(135deg, #9d4edd, #f472b6);
+    border-color: transparent;
+    color: #0c0714;
+}
+
+.recruiter-mode {
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    overflow-y: auto;
+    background: #f4f2fa;
+    opacity: 0;
+    transition: opacity 0.28s ease;
+    -webkit-overflow-scrolling: touch;
+}
+
+.recruiter-mode.is-open {
+    opacity: 1;
+}
+
+.recruiter-mode[hidden] {
+    display: none;
+}
+
+.rm-panel {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: clamp(1.5rem, 5vw, 3.5rem) clamp(1.25rem, 5vw, 2.5rem) 4rem;
+    color: #1c1830;
+    font-family: 'Outfit', sans-serif;
+}
+
+.rm-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid #e4dff2;
+    margin-bottom: 1.5rem;
+}
+
+.rm-eyebrow {
+    margin: 0 0 0.4rem;
+    font-family: 'Syncopate', sans-serif;
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
+    color: #9d4edd;
+    text-transform: uppercase;
+}
+
+.rm-header-main h1 {
+    margin: 0;
+    font-size: clamp(1.7rem, 4vw, 2.4rem);
+    letter-spacing: 0.01em;
+    color: #120c24;
+}
+
+.rm-degree {
+    margin: 0.25rem 0 0;
+    font-size: 1rem;
+    color: #4c4568;
+    font-weight: 500;
+}
+
+.rm-exit {
+    flex-shrink: 0;
+    padding: 0.6rem 1.1rem;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: #fff;
+    background: #1c1830;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.rm-exit:hover,
+.rm-exit:focus-visible {
+    background: #33294f;
+    transform: translateY(-1px);
+}
+
+.rm-quick-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-bottom: 2.25rem;
+}
+
+.rm-quick-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.55rem 1rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #1c1830;
+    background: #fff;
+    border: 1px solid #e0dbef;
+    border-radius: 9px;
+    text-decoration: none;
+    transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.rm-quick-btn:hover,
+.rm-quick-btn:focus-visible {
+    border-color: #9d4edd;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(157, 78, 221, 0.16);
+}
+
+.rm-quick-btn-primary {
+    color: #fff;
+    background: linear-gradient(135deg, #9d4edd, #7b2ff7);
+    border-color: transparent;
+}
+
+.rm-section {
+    margin-bottom: 2.1rem;
+}
+
+.rm-section h2 {
+    margin: 0 0 0.9rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: #120c24;
+    text-transform: uppercase;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid #e4dff2;
+}
+
+.rm-intro {
+    margin: 0;
+    font-size: 0.98rem;
+    line-height: 1.65;
+    color: #332c50;
+    max-width: 68ch;
+}
+
+.rm-skills {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.rm-skill-group-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: #4c4568;
+    text-transform: uppercase;
+}
+
+.rm-skill-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.rm-pill {
+    padding: 0.3rem 0.65rem;
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: #fff;
+    background: var(--pill-color, #9d4edd);
+    border-radius: 999px;
+}
+
+.rm-projects {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
+}
+
+.rm-project-card {
+    padding: 1.1rem;
+    background: #fff;
+    border: 1px solid #e6e1f3;
+    border-radius: 12px;
+}
+
+.rm-project-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+}
+
+.rm-project-top h4 {
+    margin: 0;
+    font-size: 1rem;
+    color: #120c24;
+}
+
+.rm-project-links {
+    display: flex;
+    gap: 0.6rem;
+    font-size: 0.7rem;
+}
+
+.rm-project-links a {
+    color: #9d4edd;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.rm-project-links a:hover { text-decoration: underline; }
+
+.rm-project-card p {
+    margin: 0.5rem 0 0.7rem;
+    font-size: 0.85rem;
+    line-height: 1.55;
+    color: #4c4568;
+}
+
+.rm-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.rm-tags span {
+    padding: 0.2rem 0.55rem;
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: #4c4568;
+    background: #f1eefa;
+    border-radius: 999px;
+}
+
+.rm-experience {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+
+.rm-exp-item {
+    padding: 0.9rem 1.05rem;
+    background: #fff;
+    border: 1px solid #e6e1f3;
+    border-left: 3px solid #9d4edd;
+    border-radius: 10px;
+}
+
+.rm-exp-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+}
+
+.rm-exp-row strong {
+    font-size: 0.92rem;
+    color: #120c24;
+}
+
+.rm-exp-date {
+    font-size: 0.72rem;
+    color: #7a7396;
+    font-weight: 600;
+}
+
+.rm-exp-company {
+    margin-top: 0.15rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.rm-exp-company a {
+    color: #7b2ff7;
+    text-decoration: none;
+}
+
+.rm-exp-company a:hover { text-decoration: underline; }
+
+.rm-exp-item p {
+    margin: 0.4rem 0 0;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: #4c4568;
+}
+
+.rm-achievements {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 0.9rem;
+}
+
+.rm-achievement {
+    display: flex;
+    gap: 0.7rem;
+    padding: 0.9rem 1rem;
+    background: #fff;
+    border: 1px solid #e6e1f3;
+    border-radius: 10px;
+}
+
+.rm-ach-icon {
+    font-size: 1.3rem;
+    line-height: 1;
+}
+
+.rm-ach-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.5rem;
+}
+
+.rm-ach-head strong {
+    font-size: 0.86rem;
+    color: #120c24;
+}
+
+.rm-ach-year {
+    font-size: 0.68rem;
+    color: #7a7396;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.rm-achievement p {
+    margin: 0.3rem 0 0;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: #4c4568;
+}
+
+.rm-open-source {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+}
+
+.rm-os-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 0.6rem 0.9rem;
+    background: #fff;
+    border: 1px solid #e6e1f3;
+    border-radius: 9px;
+    font-size: 0.78rem;
+}
+
+.rm-os-item strong { color: #120c24; }
+.rm-os-item span { color: #7a7396; font-size: 0.72rem; }
+
+.rm-empty {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #7a7396;
+}
+
+.rm-resume-section p {
+    margin: 0 0 0.9rem;
+    font-size: 0.85rem;
+    color: #4c4568;
+}
+
+.rm-resume-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+}
+
+.rm-contact-footer {
+    padding-top: 1.5rem;
+    border-top: 2px solid #e4dff2;
+}
+
+.rm-contact-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 0.9rem;
+}
+
+.rm-contact-links a {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #1c1830;
+    text-decoration: none;
+}
+
+.rm-contact-links a:hover { color: #9d4edd; }
+
+.rm-footer-note {
+    margin: 0;
+    font-size: 0.72rem;
+    color: #9a92b3;
+}
+
+body.recruiter-active {
+    overflow: hidden;
+}
+
+@media (max-width: 640px) {
+    .rm-header { flex-direction: column; align-items: stretch; }
+    .rm-exit { align-self: flex-start; }
+}
