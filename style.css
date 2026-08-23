@@ -1,4 +1,11 @@
 :root {
+    /* PHASE 10 — cinematic motion language */
+    --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --motion-ease-enter: cubic-bezier(0.16, 1, 0.3, 1);
+    --motion-ease-exit: cubic-bezier(0.7, 0, 0.84, 0);
+    --motion-fast: 180ms;
+    --motion-ui: 280ms;
+    --motion-cinematic: 520ms;
     --primary: #9d4edd;
     --primary-glow: rgba(157, 78, 221, 0.4);
     --bg-glass: rgba(255, 255, 255, 0.05);
@@ -202,16 +209,18 @@ section[id].is-visible> :nth-child(4) {
     max-height: calc(100vh - 4rem);
     transform: translate(-50%, -50%) scale(1);
     opacity: 1;
-    transition: opacity 0.22s ease, transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), width 0.22s ease, height 0.22s ease;
+    transition: opacity var(--motion-ui) var(--motion-ease), transform var(--motion-ui) var(--motion-ease), filter var(--motion-ui) var(--motion-ease); will-change: transform, opacity, filter;
 }
 
 .os-window.is-opening {
     opacity: 0;
+    filter: blur(10px);
     transform: translate(-50%, -50%) scale(0.94);
 }
 
 .os-window.is-closing {
     opacity: 0;
+    filter: blur(8px);
     transform: translate(-50%, -50%) scale(0.96);
 }
 
@@ -238,7 +247,9 @@ section[id].is-visible> :nth-child(4) {
 }
 
 .os-window.is-maximized.is-closing {
-    transform: scale(0.98);
+    opacity: 0;
+    filter: blur(7px);
+    transform: scale(0.985);
 }
 
 .os-window-header {
@@ -488,16 +499,21 @@ section[id].is-visible> :nth-child(4) {
     }
 
     .os-window.is-opening {
-        transform: none;
+        opacity: 0;
+        filter: blur(8px);
+        transform: scale(0.975);
     }
 
     .os-window:not(.is-opening):not(.is-closing) {
         transform: none !important;
+        filter: none;
     }
 
     .os-window.is-closing,
     .os-window.is-maximized.is-closing {
-        transform: translateY(12px);
+        opacity: 0;
+        filter: blur(7px);
+        transform: translateY(12px) scale(0.985);
     }
 
     .os-window.is-maximized {
@@ -583,6 +599,10 @@ section[id].is-visible> :nth-child(4) {
     background: radial-gradient(circle at 50% 52%, transparent 0 10%, rgba(98, 214, 255, 0.07) 10.2%, transparent 10.5% 20%, rgba(178, 154, 255, 0.04) 20.2%, transparent 20.5%);
 }
 
+.universe-stage {
+    isolation: isolate;
+    perspective: 1200px;
+}
 .universe-canvas {
     position: absolute;
     inset: 0;
@@ -4877,4 +4897,170 @@ body.recruiter-active {
 @media (max-width: 640px) {
     .rm-header { flex-direction: column; align-items: stretch; }
     .rm-exit { align-self: flex-start; }
+}
+
+
+/* ============================================================
+   PHASE 10 — CINEMATIC INTERACTION POLISH
+   One motion language: transform + opacity + selective blur.
+   No layout-property animation.
+   ============================================================ */
+
+.os-window,
+.recruiter-mode,
+.boot-screen,
+.universe-case-study,
+.raghav-terminal-line,
+.terminal-command,
+.terminal-success,
+.terminal-error,
+.terminal-help {
+    will-change: transform, opacity;
+}
+
+.universe-case-study {
+    transform-origin: 50% 50%;
+    transition: opacity var(--motion-cinematic) var(--motion-ease),
+                transform var(--motion-cinematic) var(--motion-ease),
+                filter var(--motion-cinematic) var(--motion-ease);
+}
+
+.universe-case-study[hidden] {
+    display: none;
+}
+
+.universe-case-study:not([hidden]) {
+    animation: phase10CaseStudyIn var(--motion-cinematic) var(--motion-ease) both;
+}
+
+@keyframes phase10CaseStudyIn {
+    from { opacity: 0; filter: blur(8px); transform: scale(0.985) translateY(12px); }
+    to   { opacity: 1; filter: blur(0); transform: scale(1) translateY(0); }
+}
+
+/* Terminal command execution: command appears immediately, result settles in. */
+.raghav-terminal-line.phase10-executed {
+    animation: phase10TerminalLine 280ms var(--motion-ease) both;
+}
+
+@keyframes phase10TerminalLine {
+    from { opacity: 0; filter: blur(4px); transform: translateY(7px); }
+    to   { opacity: 1; filter: blur(0); transform: translateY(0); }
+}
+
+.raghav-terminal.is-executing .raghav-terminal-form {
+    transform: translateZ(0);
+    opacity: 0.78;
+    transition: opacity var(--motion-fast) var(--motion-ease);
+}
+
+.raghav-terminal.is-executing .raghav-terminal-run {
+    transform: scale(0.96);
+    transition: transform var(--motion-fast) var(--motion-ease);
+}
+
+.raghav-terminal .raghav-terminal-run {
+    transition: transform var(--motion-fast) var(--motion-ease),
+                background-color var(--motion-fast) var(--motion-ease);
+}
+
+/* Recruiter Mode: clean, quiet transition rather than a dramatic overlay. */
+.recruiter-mode {
+    opacity: 0;
+    filter: blur(6px);
+    transform: scale(0.985);
+    transition: opacity var(--motion-cinematic) var(--motion-ease),
+                filter var(--motion-cinematic) var(--motion-ease),
+                transform var(--motion-cinematic) var(--motion-ease);
+}
+
+.recruiter-mode.is-open {
+    opacity: 1;
+    filter: blur(0);
+    transform: scale(1);
+}
+
+.recruiter-mode.is-closing {
+    opacity: 0;
+    filter: blur(6px);
+    transform: scale(0.985);
+}
+
+/* Boot: the OS is revealed by letting the boot layer leave the viewport. */
+.boot-screen {
+    opacity: 1;
+    filter: blur(0);
+    transform: scale(1);
+    transition: opacity var(--motion-cinematic) var(--motion-ease-exit),
+                filter var(--motion-cinematic) var(--motion-ease-exit),
+                transform var(--motion-cinematic) var(--motion-ease-exit);
+    will-change: opacity, transform, filter;
+}
+
+.boot-screen.is-complete {
+    opacity: 0;
+    filter: blur(14px);
+    transform: scale(1.035);
+    transition: opacity 620ms var(--motion-ease-exit),
+                filter 620ms var(--motion-ease-exit),
+                transform 620ms var(--motion-ease-exit);
+}
+
+.boot-screen.is-complete .boot-panel {
+    transform: scale(0.98);
+    opacity: 0;
+    filter: blur(8px);
+    transition: opacity 420ms var(--motion-ease-exit),
+                transform 420ms var(--motion-ease-exit),
+                filter 420ms var(--motion-ease-exit);
+}
+
+/* Subtle OS desktop settling after boot. */
+.os-environment {
+    opacity: 0;
+    transform: scale(0.995);
+    filter: blur(3px);
+    transition: opacity 560ms var(--motion-ease),
+                transform 560ms var(--motion-ease),
+                filter 560ms var(--motion-ease);
+}
+
+body.os-ready .os-environment {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+}
+
+/* Reduced motion means no cinematic interpolation, only state changes. */
+@media (prefers-reduced-motion: reduce) {
+    .os-window,
+    .os-window.is-opening,
+    .os-window.is-closing,
+    .boot-screen,
+    .boot-screen.is-complete,
+    .boot-screen.is-complete .boot-panel,
+    .os-environment,
+    .recruiter-mode,
+    .recruiter-mode.is-open,
+    .recruiter-mode.is-closing,
+    .universe-case-study,
+    .raghav-terminal-line.phase10-executed {
+        animation: none !important;
+        transition: none !important;
+        filter: none !important;
+    }
+
+    .os-window.is-opening {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+    .os-window.is-closing {
+        opacity: 0;
+    }
+
+    .os-environment {
+        opacity: 1;
+        transform: none;
+    }
 }
