@@ -164,6 +164,12 @@ section[id].is-visible> :nth-child(4) {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
+    .hero-typing-cursor,
+    .typing-cursor {
+        animation: none !important;
+    }
+
     html {
         scroll-behavior: auto;
     }
@@ -1368,6 +1374,47 @@ section[id].is-visible> :nth-child(4) {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+.hero-type-line {
+    position: relative;
+}
+
+.hero-type-line .hero-typed-content {
+    display: inline;
+}
+
+.hero-typing-cursor {
+    display: inline-block;
+    margin-left: 0.08em;
+    color: #ff5a5f;
+    font-weight: 500;
+    animation: heroCursorBlink 0.75s steps(1, end) infinite;
+}
+
+.hero-type-line:not(.hero-is-typing) .hero-typing-cursor {
+    opacity: 0;
+}
+
+.hero-type-line.hero-is-complete .hero-typing-cursor {
+    opacity: 0;
+}
+
+@keyframes heroCursorBlink {
+    0%, 48% { opacity: 1; }
+    49%, 100% { opacity: 0; }
+}
+
+.hero-name-line {
+    min-height: 0.84em;
+}
+
+.hero-description-type {
+    min-height: 5.7em;
+}
+
+.hero-description-type .hero-typing-cursor {
+    vertical-align: baseline;
 }
 
 .hero-intro {
@@ -5063,4 +5110,61 @@ body.os-ready .os-environment {
         opacity: 1;
         transform: none;
     }
+}
+
+
+/* ============================================================
+   PHASE 11 — PERSONAL IDENTITY LAYER
+   Subtle signature system: identity is felt throughout the OS,
+   without adding invented claims or distracting from the work.
+   ============================================================ */
+.identity-signature {
+    font-family: 'Syncopate', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.13em;
+    font-size: 0.58rem;
+    color: rgba(126, 231, 196, 0.72);
+    text-shadow: 0 0 14px rgba(126, 231, 196, 0.12);
+}
+
+.identity-signature--boot {
+    margin: -0.55rem 0 1.35rem;
+    font-size: 0.54rem;
+    color: rgba(98, 214, 255, 0.72);
+}
+
+.identity-chip {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 0.7rem;
+    padding-left: 0.7rem;
+    border-left: 1px solid rgba(126, 231, 196, 0.18);
+    color: rgba(126, 231, 196, 0.48);
+    font: 0.5rem 'Courier New', ui-monospace, monospace;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.identity-microcopy {
+    margin-top: 0.55rem !important;
+    color: rgba(157, 229, 201, 0.5) !important;
+    font: 0.58rem 'Courier New', ui-monospace, monospace !important;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.identity-signature--desktop {
+    margin-top: 1rem;
+    padding-left: 0.75rem;
+    border-left: 2px solid rgba(98, 214, 255, 0.28);
+}
+
+@media (max-width: 900px) {
+    .identity-chip { display: none; }
+}
+
+@media (max-width: 700px) {
+    .identity-signature--boot { line-height: 1.7; }
+    .identity-microcopy { line-height: 1.6 !important; }
 }
