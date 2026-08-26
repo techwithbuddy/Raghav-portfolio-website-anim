@@ -3,37 +3,120 @@ const canvas = document.getElementById("video-canvas");
 const context = canvas.getContext("2d");
 const cursorDot = document.querySelector('.cursor-dot');
 const cursorRing = document.querySelector('.cursor-ring');
-const typingText = document.querySelector('.typing-text');
+// Sophisticated Developer Terminal Typing Engine (Hero / Raghav OS)
+const heroTerminalText = document.getElementById('hero-terminal-text') || document.querySelector('.hero .typing-text');
+const terminalCommandEl = document.querySelector('.term-cmd');
+const terminalTabs = document.querySelectorAll('.term-tab');
 
-if (typingText) {
-  const roles = ['Developer', 'Full Stack Engineer', 'Problem Solver', 'Creator'];
-  let roleIndex = 0;
+if (heroTerminalText) {
+  const terminalStreams = {
+    all: {
+      cmd: 'raghav.stream_journey()',
+      lines: [
+        'Engineering high-impact web apps, AI tools & backend architectures.',
+        'Built AuraSense (AI accessibility assistant) & ShikshaFlow (EdTech platform).',
+        'Currently mastering backend scalability, Kotlin & low-level system internals.',
+        'Open source contributor @ GSSoC \'26 & Campus Lead @ OSCI.',
+        'Translating complex engineering challenges into clean, reliable software.'
+      ]
+    },
+    builds: {
+      cmd: 'raghav.list_flagship_builds()',
+      lines: [
+        'AuraSense: AI-driven accessibility & audio assistant for visually impaired users.',
+        'ShikshaFlow: Remote EdTech platform streamlining academic workflows.',
+        'NetProbe: High-speed multi-threaded port scanner for security audits.',
+        'GNDU Attendance: Scalable campus attendance system with normalized database schemas.'
+      ]
+    },
+    stack: {
+      cmd: 'raghav.inspect_tech_arsenal()',
+      lines: [
+        'Languages: Python, JavaScript, Java, C, C++, Kotlin.',
+        'Web & UI: Modern CSS3, HTML5, ES6+ JavaScript, React, Clean UX.',
+        'Backend & DB: DSA, OOP, MySQL, Computer Networks, Linux Systems.',
+        'Tools: Git & GitHub, AI/ML Tooling, Raw Sockets, Cybersecurity basics.'
+      ]
+    },
+    direction: {
+      cmd: 'raghav.current_direction()',
+      lines: [
+        'Mastering advanced backend architecture, caching, and scalable APIs.',
+        'Diving deeper into JVM internals, Kotlin, and concurrent systems.',
+        'Expanding open-source leadership and building high-utility community software.'
+      ]
+    }
+  };
+
+  let activeTopic = 'all';
+  let lineIndex = 0;
   let charIndex = 0;
   let isDeleting = false;
+  let typingTimer = null;
+
+  const getActiveLines = () => terminalStreams[activeTopic]?.lines || terminalStreams.all.lines;
 
   const typeLoop = () => {
-    const currentWord = roles[roleIndex];
+    const lines = getActiveLines();
+    const currentLine = lines[lineIndex % lines.length];
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      heroTerminalText.textContent = currentLine;
+      return;
+    }
 
     if (!isDeleting) {
       charIndex++;
-      typingText.textContent = currentWord.slice(0, charIndex);
-      if (charIndex === currentWord.length) {
+      heroTerminalText.textContent = currentLine.slice(0, charIndex);
+
+      if (charIndex === currentLine.length) {
         isDeleting = true;
-        setTimeout(typeLoop, 1200);
+        typingTimer = setTimeout(typeLoop, 2200);
         return;
       }
+
+      // Natural human variation: slight delay after punctuation
+      const lastChar = currentLine[charIndex - 1];
+      let delay = 36 + Math.floor(Math.random() * 32);
+      if (['.', ',', ':', '&', '('].includes(lastChar)) delay += 140;
+      typingTimer = setTimeout(typeLoop, delay);
     } else {
       charIndex--;
-      typingText.textContent = currentWord.slice(0, charIndex);
+      heroTerminalText.textContent = currentLine.slice(0, charIndex);
+
       if (charIndex === 0) {
         isDeleting = false;
-        roleIndex = (roleIndex + 1) % roles.length;
+        lineIndex = (lineIndex + 1) % lines.length;
+        typingTimer = setTimeout(typeLoop, 350);
+        return;
       }
-    }
 
-    const speed = isDeleting ? 60 : 110;
-    setTimeout(typeLoop, speed);
+      const backspaceDelay = 18 + Math.floor(Math.random() * 16);
+      typingTimer = setTimeout(typeLoop, backspaceDelay);
+    }
   };
+
+  // Interactive Terminal Topic Tabs
+  terminalTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const topic = tab.dataset.topic;
+      if (!terminalStreams[topic] || activeTopic === topic) return;
+
+      terminalTabs.forEach(t => t.classList.toggle('is-active', t === tab));
+      activeTopic = topic;
+      lineIndex = 0;
+      charIndex = 0;
+      isDeleting = false;
+
+      if (terminalCommandEl && terminalStreams[topic].cmd) {
+        terminalCommandEl.textContent = terminalStreams[topic].cmd;
+      }
+
+      clearTimeout(typingTimer);
+      heroTerminalText.textContent = '';
+      typeLoop();
+    });
+  });
 
   typeLoop();
 }
@@ -110,7 +193,7 @@ const animateCursor = () => {
 };
 animateCursor();
 
-const interactiveSelectors = 'a, button, input, textarea, .project-card, .achievement-card, .social-icon, .resume-btn, .contact-social-item, .btn-send, .nav-links a, .nav-logo a';
+const interactiveSelectors = 'a, button, input, textarea, .project-card, .achievement-card, .social-icon, .resume-btn, .contact-social-item, .btn-send, .nav-links a, .nav-logo a, .btn-hero-primary, .btn-hero-secondary, .hero-resume-view-btn, .build-chip, .term-tab, .hero-social-badge';
 
 document.querySelectorAll(interactiveSelectors).forEach((element) => {
   element.addEventListener('mouseenter', () => cursorRing.classList.add('active'));
