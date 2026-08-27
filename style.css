@@ -6080,6 +6080,7 @@ body.os-ready .os-environment {
         line-height: 1.6 !important;
     }
 }
+
 /* ============================================================
    PROJECTS — ENGINEERING SHOWCASE UPGRADE
    ============================================================ */
@@ -6112,8 +6113,8 @@ body.os-ready .os-environment {
 .showcase-system-label,
 .showcase-type,
 .showcase-card-index,
-.showcase-problem > span,
-.showcase-detail-grid section > span,
+.showcase-problem>span,
+.showcase-detail-grid section>span,
 .showcase-status {
     font-family: 'Outfit', sans-serif;
     letter-spacing: 0.12em;
@@ -6378,7 +6379,7 @@ body.os-ready .os-environment {
     background: rgba(98, 214, 255, 0.035);
 }
 
-.showcase-problem > span {
+.showcase-problem>span {
     color: var(--showcase-cyan);
     font-size: 0.5rem;
 }
@@ -6515,7 +6516,7 @@ body.os-ready .os-environment {
     background: rgba(3, 9, 18, 0.4);
 }
 
-.showcase-detail-grid section > span {
+.showcase-detail-grid section>span {
     color: #738ba4;
     font-size: 0.49rem;
 }
@@ -6532,7 +6533,7 @@ body.os-ready .os-environment {
     padding-left: 1rem;
 }
 
-.showcase-detail-grid li + li {
+.showcase-detail-grid li+li {
     margin-top: 0.2rem;
 }
 
@@ -6602,6 +6603,7 @@ body.os-ready .os-environment {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
     .showcase-filter,
     .showcase-project-card,
     .showcase-card-glow,
@@ -6761,14 +6763,14 @@ body.os-ready .os-environment {
     gap: 0.55rem;
 }
 
-.legacy-portfolio .projects-section .project-detail-grid > div {
+.legacy-portfolio .projects-section .project-detail-grid>div {
     padding: 0.7rem;
     border: 1px solid rgba(145, 190, 226, 0.1);
     border-radius: 9px;
     background: rgba(3, 9, 18, 0.4);
 }
 
-.legacy-portfolio .projects-section .project-detail-grid > div > span {
+.legacy-portfolio .projects-section .project-detail-grid>div>span {
     color: #738ba4;
     font-size: 0.48rem;
     letter-spacing: 0.1em;
@@ -6787,7 +6789,7 @@ body.os-ready .os-environment {
     padding-left: 1rem;
 }
 
-.legacy-portfolio .projects-section .project-detail-grid li + li {
+.legacy-portfolio .projects-section .project-detail-grid li+li {
     margin-top: 0.18rem;
 }
 
@@ -6800,5 +6802,1149 @@ body.os-ready .os-environment {
 @media (max-width: 520px) {
     .legacy-portfolio .projects-section .project-detail-grid {
         grid-template-columns: 1fr;
+    }
+}
+
+/* ============================================================
+   MOBILE EXPERIENCE AUDIT — 320 / 375 / 390 / 414 / 768px
+   Mobile is a deliberate composition, not a squeezed desktop.
+   ============================================================ */
+
+@media (max-width: 900px) {
+    .os-window {
+        width: min(var(--window-width), calc(100vw - 1.5rem));
+        max-width: calc(100vw - 1.5rem);
+    }
+
+    .os-window-body {
+        overscroll-behavior: contain;
+    }
+
+    .os-module-intro {
+        padding: .85rem 1rem;
+    }
+
+    .project-universe,
+    .digital-brain-container {
+        min-width: 0;
+    }
+}
+
+@media (max-width: 700px) {
+
+    html,
+    body {
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+        overflow-x: hidden;
+        -webkit-text-size-adjust: 100%;
+    }
+
+    .os-environment,
+    .desktop,
+    .os-window-layer,
+    .os-window,
+    .os-window-body,
+    .os-window-source,
+    .project-universe,
+    .digital-brain-container,
+    .legacy-portfolio {
+        min-width: 0;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* OS top bar */
+    .system-bar {
+        min-height: 52px;
+        height: auto;
+        padding: .55rem .75rem;
+        gap: .55rem;
+    }
+
+    .system-brand {
+        min-width: 0;
+        gap: .45rem;
+    }
+
+    .system-brand strong {
+        font-size: .62rem;
+        letter-spacing: .07em;
+    }
+
+    .system-meta {
+        min-width: 0;
+        margin-left: auto;
+        gap: .35rem;
+    }
+
+    .system-meta #system-time,
+    .system-status {
+        display: none;
+    }
+
+    .recruiter-mode-toggle {
+        min-height: 42px;
+        padding: .58rem .72rem;
+        font-size: .57rem;
+        letter-spacing: .04em;
+        white-space: nowrap;
+    }
+
+    /* OS home */
+    .desktop {
+        min-height: calc(100dvh - 52px);
+        padding: 2.35rem .9rem 6.5rem;
+    }
+
+    .desktop-heading {
+        max-width: 100%;
+    }
+
+    .desktop-heading .eyebrow {
+        font-size: .56rem;
+        line-height: 1.5;
+        letter-spacing: .1em;
+    }
+
+    .desktop-heading h2 {
+        max-width: 100%;
+        font-size: clamp(2rem, 13vw, 3.25rem);
+        line-height: .98;
+        overflow-wrap: anywhere;
+    }
+
+    .desktop-heading>p:last-child {
+        margin-top: .8rem;
+        font-size: .82rem;
+        line-height: 1.55;
+    }
+
+    .desktop-icons {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: .6rem;
+        width: 100%;
+        margin-top: 2.2rem;
+    }
+
+    .desktop-icon {
+        min-width: 0;
+        min-height: 88px;
+        padding: .65rem .4rem;
+        gap: .5rem;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        font-size: .56rem;
+        letter-spacing: .06em;
+        overflow-wrap: anywhere;
+    }
+
+    .app-glyph {
+        width: 46px;
+        height: 46px;
+        font-size: 1.35rem;
+    }
+
+    .desktop-prompt {
+        position: static;
+        max-width: 100%;
+        margin-top: 1.45rem;
+        font-size: .56rem;
+        line-height: 1.65;
+        text-align: left;
+    }
+
+    .archive-toggle {
+        position: static;
+        width: 100%;
+        min-height: 44px;
+        margin-top: 1rem;
+        padding-inline: .7rem;
+        font-size: .55rem;
+    }
+
+    .protocol-hint {
+        right: .7rem;
+        bottom: 4.15rem;
+        max-width: calc(100vw - 1.4rem);
+        font-size: .52rem;
+    }
+
+    /* Full-screen app windows on phones */
+    .os-window-layer {
+        inset: 52px 0 0;
+        z-index: 40;
+    }
+
+    .os-window {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        max-width: none;
+        height: 100%;
+        max-height: none;
+        min-width: 0;
+        min-height: 0;
+        border: 0;
+        border-radius: 0;
+        resize: none;
+        box-shadow: none;
+        backdrop-filter: none;
+    }
+
+    .os-window-header {
+        flex: 0 0 48px;
+        min-width: 0;
+        padding: 0 .45rem 0 .7rem;
+        cursor: default;
+    }
+
+    .os-window-title {
+        min-width: 0;
+        gap: .35rem;
+        font-size: .63rem;
+    }
+
+    .window-brand,
+    .window-divider {
+        display: none;
+    }
+
+    .os-window-title strong {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .os-window-controls {
+        gap: .15rem;
+    }
+
+    .window-control {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        font-size: 1.05rem;
+    }
+
+    .window-minimize,
+    .window-maximize {
+        display: none;
+    }
+
+    .os-window-body {
+        height: calc(100% - 48px);
+        overflow: auto;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+    }
+
+    .os-module-intro {
+        grid-template-columns: minmax(0, 1fr);
+        gap: .35rem;
+        padding: .72rem .85rem;
+    }
+
+    .os-module-state {
+        grid-column: auto;
+        grid-row: auto;
+        font-size: .5rem;
+    }
+
+    .os-module-intro p {
+        grid-column: auto;
+        font-size: .72rem;
+        line-height: 1.45;
+    }
+
+    /* Bottom app switcher */
+    .os-taskbar {
+        left: .55rem;
+        right: .55rem;
+        bottom: max(.55rem, env(safe-area-inset-bottom));
+        width: auto;
+        max-width: none;
+        overflow-x: auto;
+        justify-content: flex-start;
+        padding: .28rem;
+        transform: none;
+        scrollbar-width: none;
+        border-radius: 12px;
+    }
+
+    .os-taskbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    .os-task {
+        flex: 0 0 auto;
+        min-height: 42px;
+        padding: .45rem .62rem;
+        font-size: .56rem;
+        white-space: nowrap;
+    }
+
+    /* Project Universe */
+    .project-universe {
+        grid-template-columns: 1fr;
+        grid-template-areas: "stage" "access" "panel";
+        grid-template-rows: minmax(220px, 34dvh) auto auto;
+        height: auto;
+        min-height: 100%;
+        overflow: visible;
+    }
+
+    .universe-stage {
+        min-height: 220px;
+    }
+
+    .universe-hud {
+        padding: .65rem .75rem;
+    }
+
+    .universe-title {
+        max-width: 62%;
+        font-size: .65rem;
+        line-height: 1.35;
+    }
+
+    .universe-reset,
+    .access-btn,
+    .back-to-universe {
+        min-height: 42px;
+    }
+
+    .universe-reset {
+        padding: .55rem .65rem;
+        font-size: .52rem;
+    }
+
+    .universe-case-study,
+    .universe-case-study[hidden] {
+        position: relative;
+        max-height: none;
+        overflow: visible;
+        border-left: 0;
+        border-top: 1px solid rgba(255, 255, 255, .07);
+        transform: none;
+    }
+
+    .case-study-heading {
+        gap: .65rem;
+        padding: .9rem .8rem;
+    }
+
+    .case-study-body {
+        padding: 0 .8rem .8rem;
+    }
+
+    .case-study-top {
+        padding: .7rem .8rem;
+    }
+
+    /* Core */
+    .digital-brain-container {
+        grid-template-columns: 1fr;
+        grid-template-rows: 230px auto;
+        min-height: 0;
+        height: auto;
+    }
+
+    .brain-graph-panel {
+        min-height: 230px;
+    }
+
+    .brain-console-panel {
+        min-height: 360px;
+    }
+
+    .brain-console-header,
+    .brain-console-output {
+        padding-inline: .75rem;
+    }
+
+    .brain-console-output {
+        min-height: 210px;
+        font-size: .68rem;
+    }
+
+    .brain-console-questions {
+        padding: .7rem;
+    }
+
+    .question-btn {
+        min-height: 42px;
+        padding: .55rem .7rem;
+        font-size: .64rem;
+        line-height: 1.35;
+    }
+
+    /* Terminal */
+    .raghav-terminal {
+        min-height: 100%;
+        height: auto;
+    }
+
+    .raghav-terminal-bar {
+        min-height: 44px;
+        padding: .65rem .75rem;
+        font-size: .62rem;
+    }
+
+    .raghav-terminal-output {
+        min-height: 0;
+        max-height: none;
+        padding: .85rem .75rem;
+    }
+
+    .raghav-terminal-line {
+        font-size: .7rem;
+        line-height: 1.6;
+        overflow-wrap: anywhere;
+    }
+
+    .raghav-terminal-form {
+        position: sticky;
+        bottom: 0;
+        gap: .35rem;
+        padding: .65rem .7rem;
+    }
+
+    .raghav-terminal-prompt {
+        display: none;
+    }
+
+    .raghav-terminal-input {
+        min-height: 44px;
+        font-size: .78rem;
+    }
+
+    .raghav-terminal-run {
+        min-width: 58px;
+        min-height: 44px;
+        padding-inline: .6rem;
+    }
+
+    .raghav-terminal-hint {
+        padding: .55rem .7rem .7rem;
+        font-size: .54rem;
+        line-height: 1.5;
+    }
+
+    /* Legacy archive */
+    .legacy-portfolio .navbar {
+        top: .65rem;
+        width: calc(100% - 1rem);
+        max-width: none;
+        grid-template-columns: auto auto;
+        padding: .65rem .7rem;
+        border-radius: 16px;
+    }
+
+    .legacy-portfolio .nav-logo h2 {
+        font-size: 1rem;
+    }
+
+    .legacy-portfolio .resume-btn {
+        min-height: 40px;
+        padding: .55rem .75rem;
+        font-size: .7rem;
+    }
+
+    .legacy-portfolio .nav-links {
+        gap: .85rem;
+        padding: .1rem .05rem .15rem;
+    }
+
+    .legacy-portfolio .nav-links a {
+        flex: 0 0 auto;
+        min-height: 40px;
+        padding: .65rem .1rem;
+        font-size: .72rem;
+    }
+
+    /* Legacy hero */
+    .legacy-portfolio .hero {
+        min-height: auto;
+        padding: 6.2rem .9rem 3rem;
+    }
+
+    .legacy-portfolio .hero-container {
+        width: 100%;
+        gap: 2rem;
+    }
+
+    .legacy-portfolio .hero-text {
+        width: 100%;
+    }
+
+    .hero-status-pill {
+        max-width: 100%;
+        flex-wrap: wrap;
+        line-height: 1.35;
+        font-size: .55rem;
+        padding: .38rem .62rem;
+    }
+
+    .status-divider {
+        display: none;
+    }
+
+    .legacy-portfolio .hero-title {
+        width: 100%;
+        font-size: clamp(2.55rem, 15vw, 4rem);
+        line-height: .96;
+        letter-spacing: -.045em;
+    }
+
+    .hero-greeting {
+        font-size: .62em;
+    }
+
+    .legacy-portfolio .hero-terminal {
+        width: 100%;
+        border-radius: 14px;
+    }
+
+    .legacy-portfolio .terminal-bar {
+        min-height: 42px;
+        padding: .65rem .7rem;
+    }
+
+    .legacy-portfolio .term-title {
+        min-width: 0;
+        font-size: .58rem;
+    }
+
+    .legacy-portfolio .term-path,
+    .legacy-portfolio .term-mode {
+        display: none;
+    }
+
+    .legacy-portfolio .term-session-badge {
+        font-size: .5rem;
+    }
+
+    .legacy-portfolio .terminal-body {
+        min-height: 0;
+        padding: .75rem;
+    }
+
+    .legacy-portfolio .terminal-prompt-line {
+        gap: .35rem;
+        overflow-wrap: anywhere;
+    }
+
+    .legacy-portfolio .term-cmd {
+        min-width: 0;
+        overflow-wrap: anywhere;
+        font-size: .62rem;
+    }
+
+    .legacy-portfolio .terminal-output {
+        font-size: .76rem;
+        line-height: 1.55;
+    }
+
+    .legacy-portfolio .terminal-filters {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: .35rem;
+        padding: .45rem;
+    }
+
+    .legacy-portfolio .term-tab {
+        min-height: 40px;
+        padding: .55rem .45rem;
+        font-size: .58rem;
+    }
+
+    .legacy-portfolio .hero-description {
+        font-size: .88rem;
+        line-height: 1.65;
+    }
+
+    .legacy-portfolio .hero-builds-strip,
+    .legacy-portfolio .hero-actions,
+    .legacy-portfolio .hero-resume-group,
+    .legacy-portfolio .hero-social-strip {
+        width: 100%;
+    }
+
+    .legacy-portfolio .builds-chips {
+        grid-template-columns: 1fr;
+        width: 100%;
+    }
+
+    .legacy-portfolio .build-chip {
+        min-height: 48px;
+    }
+
+    .legacy-portfolio .btn-hero-primary,
+    .legacy-portfolio .btn-hero-secondary,
+    .legacy-portfolio .hero-resume-view-btn {
+        min-height: 46px;
+    }
+
+    .legacy-portfolio .hero-social-badge {
+        min-height: 46px;
+    }
+
+    /* Section rhythm */
+    .legacy-portfolio .about-section,
+    .legacy-portfolio .skills-section,
+    .legacy-portfolio .projects-section,
+    .legacy-portfolio .experience-section,
+    .legacy-portfolio .resume-section,
+    .legacy-portfolio .contact-section {
+        min-height: auto;
+        padding: 4rem .9rem;
+    }
+
+    .legacy-portfolio .section-header {
+        width: 100%;
+        margin-bottom: 2rem;
+    }
+
+    .legacy-portfolio .section-title {
+        font-size: clamp(1.85rem, 9vw, 2.7rem);
+        line-height: 1.05;
+    }
+
+    .legacy-portfolio .section-subtitle {
+        margin-top: .85rem;
+        font-size: .82rem;
+        line-height: 1.55;
+    }
+
+    /* Skills */
+    .legacy-portfolio .skills-container {
+        height: min(420px, 90vw);
+        min-height: 300px;
+        border-radius: 18px;
+    }
+
+    /* Projects */
+    .legacy-portfolio .projects-grid {
+        grid-template-columns: 1fr;
+        gap: .85rem;
+        margin-top: .8rem;
+    }
+
+    .legacy-portfolio .projects-section .project-card {
+        width: 100%;
+        min-width: 0;
+        border-radius: 16px;
+    }
+
+    .legacy-portfolio .projects-section .project-card-topline,
+    .legacy-portfolio .projects-section .project-content {
+        padding-left: .85rem;
+        padding-right: .85rem;
+    }
+
+    .legacy-portfolio .projects-section .project-header {
+        gap: .65rem;
+    }
+
+    .legacy-portfolio .projects-section .project-header h3 {
+        font-size: 1.2rem;
+        line-height: 1.1;
+    }
+
+    .legacy-portfolio .projects-section .project-links {
+        gap: .25rem;
+    }
+
+    .legacy-portfolio .projects-section .project-links a {
+        min-width: 40px;
+        min-height: 40px;
+        padding: .45rem;
+        box-sizing: border-box;
+    }
+
+    .legacy-portfolio .projects-section .project-links a svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .legacy-portfolio .projects-section .project-problem {
+        margin-top: .8rem;
+        padding: .7rem;
+        font-size: .72rem;
+    }
+
+    .legacy-portfolio .projects-section .project-desc {
+        font-size: .72rem;
+        line-height: 1.6;
+    }
+
+    .legacy-portfolio .projects-section .project-detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .legacy-portfolio .projects-section .project-expand {
+        min-height: 44px;
+    }
+
+    /* Timeline */
+    .legacy-portfolio .timeline-container {
+        margin-top: 1.5rem;
+        padding-left: 0;
+    }
+
+    .legacy-portfolio .timeline-line {
+        left: 12px;
+        width: 2px;
+        transform: none;
+    }
+
+    .legacy-portfolio .timeline-item,
+    .legacy-portfolio .timeline-item.left,
+    .legacy-portfolio .timeline-item.right {
+        justify-content: flex-start;
+        margin-bottom: 1.1rem;
+        padding-left: 0;
+    }
+
+    .legacy-portfolio .timeline-dot {
+        left: 12px;
+        top: 1.05rem;
+        width: 14px;
+        height: 14px;
+        border-width: 3px;
+    }
+
+    .legacy-portfolio .timeline-content {
+        width: calc(100% - 2.1rem);
+        margin-left: 2.1rem;
+        padding: 1rem;
+        border-radius: 14px;
+    }
+
+    .legacy-portfolio .timeline-item:hover .timeline-content {
+        transform: none;
+    }
+
+    .legacy-portfolio .timeline-content::before,
+    .legacy-portfolio .timeline-item.left .timeline-content::before,
+    .legacy-portfolio .timeline-item.right .timeline-content::before {
+        display: block;
+        left: -8px;
+        right: auto;
+        top: 1.1rem;
+        border-top-width: 7px;
+        border-bottom-width: 7px;
+        border-right: 7px solid rgba(255, 255, 255, .05);
+        border-left: 0;
+    }
+
+    .legacy-portfolio .exp-header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: .5rem;
+    }
+
+    .legacy-portfolio .exp-header h3 {
+        font-size: 1.05rem;
+        line-height: 1.25;
+    }
+
+    .legacy-portfolio .exp-date {
+        font-size: .65rem;
+        padding: .3rem .55rem;
+    }
+
+    .legacy-portfolio .exp-company-link {
+        min-width: 0;
+        font-size: .84rem;
+        overflow-wrap: anywhere;
+    }
+
+    .legacy-portfolio .exp-details li {
+        font-size: .74rem;
+        line-height: 1.55;
+    }
+
+    /* Achievements */
+    .legacy-portfolio .achievements-grid {
+        grid-template-columns: 1fr;
+        gap: .8rem;
+    }
+
+    .legacy-portfolio .achievement-card {
+        min-width: 0;
+        padding: 1rem;
+        border-radius: 14px;
+    }
+
+    /* Resume */
+    .legacy-portfolio .resume-card {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        padding: 1rem;
+        border-radius: 18px;
+    }
+
+    .legacy-portfolio .resume-preview {
+        width: 100%;
+    }
+
+    .legacy-portfolio .resume-mock {
+        width: min(190px, 60vw);
+        min-height: 250px;
+    }
+
+    .legacy-portfolio .resume-info h3 {
+        font-size: 1.55rem;
+    }
+
+    .legacy-portfolio .resume-tagline {
+        font-size: .84rem;
+        line-height: 1.55;
+    }
+
+    .legacy-portfolio .resume-highlights {
+        gap: .7rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .legacy-portfolio .resume-highlight-item {
+        align-items: flex-start;
+        font-size: .8rem;
+        line-height: 1.45;
+    }
+
+    .legacy-portfolio .resume-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .legacy-portfolio .btn-resume-download,
+    .legacy-portfolio .btn-resume-view {
+        width: 100%;
+        min-height: 46px;
+        justify-content: center;
+        box-sizing: border-box;
+    }
+
+    /* Contact */
+    .legacy-portfolio .contact-container {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .legacy-portfolio .contact-heading {
+        font-size: 1.4rem;
+    }
+
+    .legacy-portfolio .contact-subtext {
+        font-size: .84rem;
+        line-height: 1.6;
+    }
+
+    .legacy-portfolio .contact-socials {
+        gap: .55rem;
+    }
+
+    .legacy-portfolio .contact-social-item {
+        min-width: 0;
+        min-height: 58px;
+        padding: .65rem;
+        border-radius: 12px;
+    }
+
+    .legacy-portfolio .cs-info {
+        min-width: 0;
+    }
+
+    .legacy-portfolio .cs-value {
+        max-width: 100%;
+        font-size: .72rem;
+        overflow-wrap: anywhere;
+    }
+
+    .legacy-portfolio .contact-form {
+        width: 100%;
+        padding: 1rem;
+        gap: 1rem;
+        border-radius: 16px;
+    }
+
+    .legacy-portfolio .form-group input,
+    .legacy-portfolio .form-group textarea {
+        min-height: 46px;
+        padding: .75rem .85rem;
+        font-size: .88rem;
+    }
+
+    .legacy-portfolio .form-group textarea {
+        min-height: 130px;
+    }
+
+    .legacy-portfolio .btn-send {
+        width: 100%;
+        min-height: 48px;
+    }
+
+    .legacy-portfolio a,
+    .legacy-portfolio button,
+    .os-environment button,
+    .os-environment a {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .legacy-portfolio .project-card:hover,
+    .legacy-portfolio .achievement-card:hover,
+    .legacy-portfolio .about-card:hover,
+    .legacy-portfolio .timeline-content:hover,
+    .legacy-portfolio .resume-card:hover {
+        transform: none;
+    }
+
+    /* Recruiter Mode */
+    .recruiter-mode {
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .rm-panel {
+        width: calc(100% - 1rem);
+        max-width: none;
+        padding: .35rem 0 2.5rem;
+    }
+
+    .rm-header {
+        min-height: 48px;
+        padding: .5rem 0;
+    }
+
+    .rm-header-brand {
+        min-width: 0;
+        font-size: .56rem;
+    }
+
+    .rm-exit {
+        min-height: 42px;
+        padding: .58rem .7rem;
+        font-size: .58rem;
+        white-space: nowrap;
+    }
+
+    .rm-hero {
+        padding: 1.65rem 0 1.75rem;
+        gap: 1rem;
+    }
+
+    .rm-hero h1 {
+        font-size: clamp(2.25rem, 14vw, 3.5rem);
+        line-height: .96;
+        overflow-wrap: anywhere;
+    }
+
+    .rm-role {
+        font-size: .84rem;
+        line-height: 1.4;
+    }
+
+    .rm-intro {
+        margin: .9rem 0 1.1rem;
+        font-size: .84rem;
+        line-height: 1.6;
+    }
+
+    .rm-hero-actions,
+    .rm-final-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+        width: 100%;
+    }
+
+    .rm-btn {
+        width: 100%;
+        min-height: 46px;
+        box-sizing: border-box;
+    }
+
+    .rm-hero-facts {
+        border-radius: 8px;
+    }
+
+    .rm-hero-facts div {
+        padding: .78rem .85rem;
+    }
+
+    .rm-section {
+        padding: 1.8rem 0;
+    }
+
+    .rm-section-heading {
+        grid-template-columns: 1.7rem minmax(0, 1fr);
+        gap: .45rem;
+        margin-bottom: .9rem;
+    }
+
+    .rm-section-heading h2 {
+        font-size: 1.25rem;
+    }
+
+    .rm-skills,
+    .rm-achievements {
+        grid-template-columns: 1fr;
+    }
+
+    .rm-project-card {
+        grid-template-columns: 1.7rem minmax(0, 1fr);
+        gap: .55rem;
+        padding: .85rem;
+    }
+
+    .rm-project-top {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: .65rem;
+    }
+
+    .rm-project-links {
+        justify-content: flex-start;
+        width: 100%;
+    }
+
+    .rm-project-links a {
+        min-height: 40px;
+    }
+
+    .rm-exp-row,
+    .rm-education-card,
+    .rm-final-cta,
+    .rm-footer {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .rm-final-actions {
+        width: 100%;
+    }
+
+    .rm-final-actions .rm-btn {
+        flex: 1 1 auto;
+    }
+
+    .rm-footer-links {
+        gap: .55rem;
+    }
+}
+
+@media (max-width:414px) {
+    .system-brand strong {
+        font-size: .56rem;
+    }
+
+    .recruiter-mode-toggle {
+        max-width: 142px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .desktop {
+        padding-inline: .72rem;
+    }
+
+    .desktop-icons {
+        gap: .45rem;
+    }
+
+    .desktop-icon {
+        min-height: 82px;
+        font-size: .52rem;
+    }
+
+    .app-glyph {
+        width: 42px;
+        height: 42px;
+        font-size: 1.2rem;
+    }
+
+    .legacy-portfolio .hero {
+        padding-inline: .72rem;
+    }
+
+    .legacy-portfolio .hero-title {
+        font-size: clamp(2.35rem, 15vw, 3.45rem);
+    }
+
+    .legacy-portfolio .hero-terminal .term-controls {
+        display: none;
+    }
+
+    .legacy-portfolio .section-title {
+        font-size: clamp(1.7rem, 9vw, 2.35rem);
+    }
+}
+
+@media (max-width:360px) {
+    .system-bar {
+        padding-inline: .6rem;
+    }
+
+    .recruiter-mode-toggle {
+        max-width: 128px;
+        padding-inline: .55rem;
+        font-size: .52rem;
+    }
+
+    .desktop-heading h2 {
+        font-size: 1.95rem;
+    }
+
+    .legacy-portfolio .hero-status-pill {
+        font-size: .5rem;
+    }
+
+    .legacy-portfolio .hero-title {
+        font-size: 2.25rem;
+    }
+
+    .legacy-portfolio .terminal-filters {
+        grid-template-columns: 1fr;
+    }
+
+    .legacy-portfolio .resume-mock {
+        width: 155px;
+        min-height: 215px;
+    }
+}
+
+@media (min-width:701px) and (max-width:900px) {
+    .system-bar {
+        padding-inline: 1rem;
+    }
+
+    .desktop {
+        padding-inline: 2rem;
+    }
+
+    .desktop-icons {
+        grid-template-columns: repeat(3, minmax(110px, 1fr));
+        max-width: 520px;
+        gap: .8rem;
+    }
+
+    .os-window {
+        width: min(var(--window-width), calc(100vw - 2rem));
+        max-width: calc(100vw - 2rem);
+    }
+
+    .project-universe {
+        grid-template-columns: 1fr;
+        grid-template-areas: "stage" "access" "panel";
+        grid-template-rows: 300px auto auto;
+    }
+
+    .digital-brain-container {
+        grid-template-columns: 1fr;
+        grid-template-rows: 300px 1fr;
     }
 }
