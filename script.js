@@ -969,7 +969,179 @@ const createDigitalBrain = (source, windowElement) => {
   return source;
 };
 
+
+const createProjectShowcase = (source, windowElement) => {
+  const escapeHtml = (value = '') => String(value).replace(/[&<>"']/g, char => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[char]));
+
+  const readShowcaseProjects = root => [...root.querySelectorAll('.project-card')].map((card, index) => ({
+    name: card.querySelector('h3')?.textContent.trim() || `Project ${index + 1}`,
+    type: card.querySelector('.project-type')?.textContent.trim() || 'ENGINEERING BUILD',
+    description: card.querySelector('.project-desc')?.textContent.trim() || '',
+    problem: card.dataset.problem || '',
+    build: card.dataset.build || card.querySelector('.project-desc')?.textContent.trim() || '',
+    features: (card.dataset.features || '').split('|').map(item => item.trim()).filter(Boolean),
+    contribution: card.dataset.contribution || '',
+    status: card.dataset.status || '',
+    categories: (card.dataset.category || '').split(/\s+/).map(item => item.trim().toLowerCase()).filter(Boolean),
+    technologies: [...card.querySelectorAll('.tech-stack-tags span')].map(tag => tag.textContent.trim()).filter(Boolean),
+    github: card.querySelector('.github-link')?.href || '',
+    demo: (() => {
+      const href = card.querySelector('.demo-link')?.getAttribute('href') || '';
+      return href && href !== '#' ? href : '';
+    })(),
+    featured: card.dataset.featured === 'true'
+  }));
+
+  const projects = readShowcaseProjects(source);
+  const filters = ['all', ...new Set(projects.flatMap(project => [
+    ...project.categories,
+    ...project.technologies.map(tech => tech.toLowerCase())
+  ]))];
+  const filterLabels = new Map([
+    ['all', 'All Projects'],
+    ['ai/ml', 'AI / ML'],
+    ['accessibility', 'Accessibility'],
+    ['python', 'Python'],
+    ['web', 'Web'],
+    ['edtech', 'EdTech'],
+    ['backend', 'Backend'],
+    ['networking', 'Networking'],
+    ['cybersecurity', 'Cybersecurity'],
+    ['database', 'Database'],
+    ['management', 'Management']
+  ]);
+
+  const cardMarkup = (project, index) => {
+    const filterTokens = [...new Set([...project.categories, ...project.technologies.map(tech => tech.toLowerCase())])].join(' ');
+    const featureList = project.features.length
+      ? `<ul>${project.features.map(feature => `<li>${escapeHtml(feature)}</li>`).join('')}</ul>`
+      : `<p class="project-detail-muted">No additional feature breakdown is provided in the project data.</p>`;
+    const links = [
+      project.github ? `<a href="${escapeHtml(project.github)}" target="_blank" rel="noopener noreferrer" class="showcase-link showcase-link--ghost">GitHub <span aria-hidden="true">↗</span></a>` : '',
+      project.demo ? `<a href="${escapeHtml(project.demo)}" target="_blank" rel="noopener noreferrer" class="showcase-link showcase-link--primary">Live Demo <span aria-hidden="true">↗</span></a>` : ''
+    ].filter(Boolean).join('');
+
+    return `
+      <article class="showcase-project-card ${project.featured ? 'is-featured' : ''}" data-project-card data-filters="${escapeHtml(filterTokens)}" data-featured="${project.featured ? 'true' : 'false'}">
+        <div class="showcase-card-glow" aria-hidden="true"></div>
+        <div class="showcase-card-header">
+          <div class="showcase-card-index"><span>${String(index + 1).padStart(2, '0')}</span>${project.featured ? '<b>FEATURED BUILD</b>' : ''}</div>
+          ${project.status ? `<span class="showcase-status"><i aria-hidden="true"></i>${escapeHtml(project.status)}</span>` : ''}
+        </div>
+        <div class="showcase-card-main">
+          <div class="showcase-title-row">
+            <div>
+              <p class="showcase-type">${escapeHtml(project.type)}</p>
+              <h3>${escapeHtml(project.name)}</h3>
+            </div>
+            <div class="showcase-mini-links" aria-label="${escapeHtml(project.name)} links">
+              ${project.github ? `<a href="${escapeHtml(project.github)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(project.name)} GitHub">GH</a>` : ''}
+              ${project.demo ? `<a href="${escapeHtml(project.demo)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(project.name)} live demo">↗</a>` : ''}
+            </div>
+          </div>
+          <div class="showcase-problem"><span>PROBLEM</span><p>${escapeHtml(project.problem || project.description)}</p></div>
+          <p class="showcase-description">${escapeHtml(project.description)}</p>
+          <div class="showcase-tech" aria-label="Technologies used">
+            ${project.technologies.map(tech => `<span>${escapeHtml(tech)}</span>`).join('')}
+          </div>
+          <div class="showcase-actions">
+            ${links}
+            <button type="button" class="showcase-expand" aria-expanded="false" aria-controls="project-details-${index}"><span>Inspect case study</span><span class="showcase-expand-icon" aria-hidden="true">+</span></button>
+          </div>
+          <div class="showcase-details" id="project-details-${index}" hidden>
+            <div class="showcase-detail-grid">
+              <section><span>WHAT I BUILT</span><p>${escapeHtml(project.build)}</p></section>
+              <section><span>KEY FEATURES</span>${featureList}</section>
+              <section><span>MY CONTRIBUTION</span><p>${escapeHtml(project.contribution || 'Contribution details are not specified in the available project data.')}</p></section>
+              ${project.status ? `<section><span>STATUS</span><p>${escapeHtml(project.status)}</p></section>` : ''}
+            </div>
+          </div>
+        </div>
+      </article>`;
+  };
+
+  const content = document.createElement('section');
+  content.className = 'project-showcase';
+  content.setAttribute('aria-label', 'Project case studies');
+  content.innerHTML = `
+    <header class="showcase-toolbar">
+      <div class="showcase-toolbar-copy">
+        <span class="showcase-system-label">PROJECT ARCHIVE / RAGHAV OS</span>
+        <p>Engineering work documented by problem, implementation, and proof.</p>
+      </div>
+      <div class="showcase-count"><strong>${String(projects.length).padStart(2, '0')}</strong><span>PROJECTS</span></div>
+    </header>
+    <div class="showcase-filters" role="toolbar" aria-label="Filter projects by technology or category">
+      ${filters.map((filter, index) => `<button type="button" class="showcase-filter ${index === 0 ? 'is-active' : ''}" data-filter="${escapeHtml(filter)}" aria-pressed="${index === 0 ? 'true' : 'false'}">${escapeHtml(filterLabels.get(filter) || filter.replace(/(^|[-_ ])([a-z])/g, (_, prefix, letter) => `${prefix}${letter.toUpperCase()}`))}</button>`).join('')}
+    </div>
+    <div class="showcase-grid">
+      ${projects.map(cardMarkup).join('')}
+    </div>
+    <p class="showcase-empty" hidden>No projects match this filter.</p>
+    <div class="project-access-list" aria-hidden="true">
+      ${projects.map((project, index) => `<button type="button" tabindex="-1" data-project-index="${index}">${escapeHtml(project.name)}</button>`).join('')}
+    </div>`;
+
+  const cards = [...content.querySelectorAll('[data-project-card]')];
+  const emptyState = content.querySelector('.showcase-empty');
+  const filterButtons = [...content.querySelectorAll('.showcase-filter')];
+
+  const setFilter = filter => {
+    filterButtons.forEach(button => {
+      const active = button.dataset.filter === filter;
+      button.classList.toggle('is-active', active);
+      button.setAttribute('aria-pressed', String(active));
+    });
+    let visibleCount = 0;
+    cards.forEach(card => {
+      const visible = filter === 'all' || card.dataset.filters.split(' ').includes(filter);
+      card.classList.toggle('is-filtered-out', !visible);
+      if (visible) visibleCount += 1;
+    });
+    emptyState.hidden = visibleCount !== 0;
+  };
+
+  filterButtons.forEach(button => button.addEventListener('click', () => setFilter(button.dataset.filter)));
+
+  cards.forEach(card => {
+    const button = card.querySelector('.showcase-expand');
+    const details = card.querySelector('.showcase-details');
+    if (!button || !details) return;
+    button.addEventListener('click', () => {
+      const open = button.getAttribute('aria-expanded') === 'true';
+      button.setAttribute('aria-expanded', String(!open));
+      details.hidden = open;
+      card.classList.toggle('is-expanded', !open);
+    });
+  });
+
+  const accessButtons = [...content.querySelectorAll('.project-access-list button')];
+  accessButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const index = Number(button.dataset.projectIndex);
+      const card = cards[index];
+      if (!card) return;
+      card.scrollIntoView({ behavior: prefersReducedMotion.matches ? 'auto' : 'smooth', block: 'center' });
+      const expand = card.querySelector('.showcase-expand');
+      if (expand?.getAttribute('aria-expanded') !== 'true') expand?.click();
+    });
+  });
+
+  const state = {
+    paused: false,
+    resume() { this.paused = false; },
+    pause() { this.paused = true; },
+    dispose() { }
+  };
+  windowElement.projectUniverse = state;
+  return content;
+};
+
 const createUniverseModule = (appId, source, windowElement) => {
+  if (appId === 'projects') return createProjectShowcase(source, windowElement);
+
   const PLANET_COLORS = ['#62d6ff', '#b29aff', '#7ee7c4', '#ffb86b', '#a3e635', '#f472b6'];
   const PLANET_COLORS_HEX = [0x62d6ff, 0xb29aff, 0x7ee7c4, 0xffb86b, 0xa3e635, 0xf472b6];
 
@@ -1139,40 +1311,7 @@ const createUniverseModule = (appId, source, windowElement) => {
   const hoverName = content.querySelector('.hover-label-name');
   const planetDot = content.querySelector('.case-study-planet-dot');
 
-  const PROJECT_META = [
-    {
-      problem: 'Visually impaired users struggle to interact with digital systems designed only for sighted people.',
-      idea: 'Build an AI-powered sensory assistant that bridges the accessibility gap with smart audio feedback and adaptive UI.',
-      build: 'Built with Python and AI/ML libraries. Features a custom accessibility layer with real-time audio cues and a high-contrast adaptive interface.',
-      challenge: 'Balancing real-time audio performance with AI inference speed without causing noticeable lag for users.',
-      solution: 'Optimized the AI pipeline to run inference asynchronously, keeping audio feedback under 120ms response time.',
-      result: 'A functional accessibility tool deployed on Vercel — AuraSense — demonstrating human-centered AI design.'
-    },
-    {
-      problem: 'Remote learning suffers from fragmented tools and poor workflow management for both teachers and students.',
-      idea: 'A unified EdTech platform that brings lesson delivery, student tracking, and communication into one seamless experience.',
-      build: 'Full-stack web application with a modern frontend and backend infrastructure optimized for concurrent classroom use.',
-      challenge: 'Designing a UI simple enough for all age groups while packing in enough features to be genuinely useful for educators.',
-      solution: 'Iterative UX research with a component-based architecture that allows educators to customize their workflow.',
-      result: 'ShikshaFlow went live on Vercel — an end-to-end EdTech platform that simplifies remote education management.'
-    },
-    {
-      problem: 'Security auditors need fast, reliable visibility into open ports and services on networked devices.',
-      idea: 'A CLI-based port scanner that delivers fast, accurate results for cybersecurity professionals and students.',
-      build: 'Written in Python, using raw socket programming and multi-threaded scanning for maximum speed and accuracy.',
-      challenge: 'Handling network timeouts, false positives, and scanning a large port range within acceptable time limits.',
-      solution: 'Implemented concurrent socket connections with configurable thread pools and smart timeout management.',
-      result: 'NetProbe — a robust open-source port scanner used for learning and cybersecurity auditing tasks.'
-    },
-    {
-      problem: 'University attendance tracking is manual, error-prone, and lacks real-time visibility for faculty and students.',
-      idea: 'A digital attendance system that automates tracking, generates analytics, and provides a clean dashboard for all stakeholders.',
-      build: 'Web-based management system with a database backend for persistent record storage and a responsive UI for all devices.',
-      challenge: 'Ensuring data integrity across concurrent updates while keeping the interface fast and intuitive for faculty.',
-      solution: 'Designed a normalised database schema with transaction-safe operations and a lightweight frontend dashboard.',
-      result: 'GNDU Attendance System deployed on Vercel — actively used for managing student attendance at the university level.'
-    }
-  ];
+
 
   const state = {
     paused: false,
@@ -2705,6 +2844,22 @@ const initSkillsPhysics = (targetContainer = document.getElementById('physics-ca
 const animatedSections = [...document.querySelectorAll('section[id]')];
 const animatedTargets = '.about-card, .project-card, .timeline-item, .achievement-card, .resume-card, .contact-social-item, .contact-form';
 const sectionLinks = [...document.querySelectorAll('.nav-links a[href^="#"]')];
+
+// The legacy archive uses the same project-detail markup as the OS showcase.
+// Keep its expandable case-study controls functional when the archive is opened.
+document.querySelector('.legacy-portfolio')?.addEventListener('click', event => {
+  const button = event.target.closest('.project-expand');
+  if (!button) return;
+  const details = button.nextElementSibling;
+  if (!details || !details.classList.contains('project-details')) return;
+  const isOpen = button.getAttribute('aria-expanded') === 'true';
+  button.setAttribute('aria-expanded', String(!isOpen));
+  details.hidden = isOpen;
+  button.closest('.project-card')?.classList.toggle('is-expanded', !isOpen);
+  const icon = button.querySelector('.project-expand-icon');
+  if (icon) icon.textContent = isOpen ? '+' : '×';
+});
+
 
 animatedSections.forEach(section => {
   section.querySelectorAll(animatedTargets).forEach((element, index) => {
