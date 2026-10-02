@@ -163,28 +163,39 @@ const cursor = {
   x: window.innerWidth / 2,
   y: window.innerHeight / 2,
   ringX: window.innerWidth / 2,
-  ringY: window.innerHeight / 2
+  ringY: window.innerHeight / 2,
+  vx: 0,
+  vy: 0,
+  lastMovedAt: performance.now()
 };
 
 window.addEventListener('pointermove', (event) => {
   const now = performance.now();
   const elapsed = Math.max(16, now - (cursor.lastMovedAt || now));
-  const distance = Math.hypot(event.clientX - cursor.x, event.clientY - cursor.y);
+  const dx = event.clientX - cursor.x;
+  const dy = event.clientY - cursor.y;
+  const distance = Math.hypot(dx, dy);
+  
+  cursor.vx = (dx / elapsed) * 16;
+  cursor.vy = (dy / elapsed) * 16;
   cursor.x = event.clientX;
   cursor.y = event.clientY;
   cursor.lastMovedAt = now;
+  
   cursorDot.style.left = `${event.clientX}px`;
   cursorDot.style.top = `${event.clientY}px`;
+  
   if (typeof backgroundState !== 'undefined') {
     backgroundState.pointerX = (event.clientX / Math.max(1, window.innerWidth)) - 0.5;
     backgroundState.pointerY = (event.clientY / Math.max(1, window.innerHeight)) - 0.5;
-    backgroundState.motionEnergy = Math.min(1, backgroundState.motionEnergy + (distance / elapsed) * 0.09);
+    backgroundState.motionEnergy = Math.min(1.5, backgroundState.motionEnergy + (distance / elapsed) * 0.12);
   }
 });
 
 const animateCursor = () => {
-  cursor.ringX += (cursor.x - cursor.ringX) * 0.12;
-  cursor.ringY += (cursor.y - cursor.ringY) * 0.12;
+  // Spring-damper interpolation for cursor ring
+  cursor.ringX += (cursor.x - cursor.ringX) * 0.18;
+  cursor.ringY += (cursor.y - cursor.ringY) * 0.18;
 
   cursorRing.style.left = `${cursor.ringX}px`;
   cursorRing.style.top = `${cursor.ringY}px`;
@@ -193,7 +204,7 @@ const animateCursor = () => {
 };
 animateCursor();
 
-const interactiveSelectors = 'a, button, input, textarea, .project-card, .achievement-card, .social-icon, .resume-btn, .contact-social-item, .btn-send, .nav-links a, .nav-logo a, .btn-hero-primary, .btn-hero-secondary, .hero-resume-view-btn, .build-chip, .term-tab, .hero-social-badge';
+const interactiveSelectors = 'a, button, input, textarea, .desktop-icon, .tree-link, .project-card, .achievement-card, .about-card, .sidebar-widget, .social-icon, .resume-btn, .contact-social-item, .btn-send, .nav-links a, .nav-logo a, .btn-hero-primary, .btn-hero-secondary, .hero-resume-view-btn, .build-chip, .term-tab, .hero-social-badge, .archive-toggle, .protocol-hint, .recruiter-mode-toggle';
 
 document.querySelectorAll(interactiveSelectors).forEach((element) => {
   element.addEventListener('mouseenter', () => cursorRing.classList.add('active'));
@@ -203,13 +214,49 @@ document.querySelectorAll(interactiveSelectors).forEach((element) => {
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 const lowPowerDevice = window.matchMedia('(pointer: coarse)').matches || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) || (navigator.deviceMemory && navigator.deviceMemory <= 4);
 const atmosphereProfiles = {
-  default: { fill: '5, 8, 18', glow: '98, 214, 255', boost: 1, drift: 1 },
-  projects: { fill: '7, 11, 25', glow: '244, 114, 182', boost: 1.24, drift: 1.22 },
-  core: { fill: '7, 10, 25', glow: '178, 154, 255', boost: 0.78, drift: 0.72 },
-  terminal: { fill: '4, 15, 10', glow: '126, 231, 196', boost: 0.86, drift: 0.78 },
-  contact: { fill: '7, 14, 20', glow: '126, 231, 196', boost: 0.68, drift: 0.62 }
+  default: { fill: '9, 11, 16', glow: '0, 240, 255', boost: 1, drift: 1 },
+  projects: { fill: '8, 12, 22', glow: '88, 166, 255', boost: 1.15, drift: 1.1 },
+  core: { fill: '12, 8, 25', glow: '168, 85, 247', boost: 0.9, drift: 0.8 },
+  terminal: { fill: '4, 15, 10', glow: '16, 185, 129', boost: 0.9, drift: 0.8 },
+  contact: { fill: '8, 14, 20', glow: '0, 240, 255', boost: 0.85, drift: 0.7 }
 };
-const backgroundState = { width: 0, height: 0, particles: [], animationId: null, paused: false, pointerX: 0, pointerY: 0, motionEnergy: 0, depth: 0, atmosphere: 'default' };
+
+const backgroundState = { 
+  width: 0, 
+  height: 0, 
+  particles: [], 
+  waves: [], 
+  animationId: null, 
+  paused: false, 
+  pointerX: 0, 
+  pointerY: 0, 
+  motionEnergy: 0, 
+  depth: 0, 
+  atmosphere: 'default',
+  physicsEnabled: true 
+};
+
+// Radial wave propagation on click
+window.addEventListener('pointerdown', (event) => {
+  if (prefersReducedMotion.matches || !backgroundState.physicsEnabled) return;
+  const isInteractive = event.target.closest('button, a, input, textarea, select, .os-window, .sidebar-widget, .desktop-icon');
+  
+  // Create subtle radial wave from click
+  backgroundState.waves.push({
+    x: event.clientX,
+    y: event.clientY,
+    radius: 4,
+    maxRadius: isInteractive ? 120 : 260,
+    speed: 5.5,
+    alpha: isInteractive ? 0.18 : 0.38,
+    color: '0, 240, 255'
+  });
+  
+  // Cap concurrent waves for performance
+  if (backgroundState.waves.length > 5) {
+    backgroundState.waves.shift();
+  }
+});
 
 const resizeCanvas = () => {
   const dpr = Math.min(2, Math.max(1, window.devicePixelRatio || 1));
@@ -223,45 +270,139 @@ const resizeCanvas = () => {
 };
 
 const createParticles = () => {
-  const count = prefersReducedMotion.matches ? 14 : lowPowerDevice ? Math.min(24, Math.max(14, Math.floor(window.innerWidth / 46))) : Math.min(42, Math.max(22, Math.floor(window.innerWidth / 32)));
+  const count = prefersReducedMotion.matches ? 12 : lowPowerDevice ? Math.min(20, Math.max(12, Math.floor(window.innerWidth / 50))) : Math.min(48, Math.max(26, Math.floor(window.innerWidth / 28)));
   backgroundState.particles = Array.from({ length: count }, (_, index) => ({
-    x: Math.random(),
-    y: Math.random(),
-    radius: 0.5 + Math.random() * 1.5,
-    speed: 0.00008 + Math.random() * 0.00014,
-    phase: index * 0.7,
-    color: index % 3 === 0 ? '56, 189, 248' : index % 3 === 1 ? '129, 140, 248' : '167, 139, 250'
+    originX: Math.random(),
+    originY: Math.random(),
+    x: 0,
+    y: 0,
+    vx: (Math.random() - 0.5) * 0.2,
+    vy: (Math.random() - 0.5) * 0.2,
+    dispX: 0,
+    dispY: 0,
+    radius: 0.6 + Math.random() * 1.6,
+    speed: 0.00008 + Math.random() * 0.00016,
+    phase: index * 0.6,
+    color: index % 4 === 0 ? '0, 240, 255' : index % 4 === 1 ? '168, 85, 247' : index % 4 === 2 ? '16, 185, 129' : '88, 166, 255'
   }));
 };
 
 const drawAmbientBackground = time => {
   if (backgroundState.paused) return;
-  const { width, height, particles } = backgroundState;
+  const { width, height, particles, waves } = backgroundState;
   const profile = atmosphereProfiles[backgroundState.atmosphere] || atmosphereProfiles.default;
   const motionAllowed = !prefersReducedMotion.matches && !lowPowerDevice;
+  
   backgroundState.motionEnergy *= 0.94;
   context.clearRect(0, 0, width, height);
-  context.fillStyle = `rgba(${profile.fill}, 0.36)`;
+  
+  // Ambient fill
+  context.fillStyle = `rgba(${profile.fill}, 0.42)`;
   context.fillRect(0, 0, width, height);
 
-  const glowX = width * (0.5 + backgroundState.pointerX * (motionAllowed ? 0.12 : 0.035));
-  const glowY = height * (0.38 + backgroundState.pointerY * (motionAllowed ? 0.08 : 0.02) + backgroundState.depth * 0.025);
-  const glow = context.createRadialGradient(glowX, glowY, 0, glowX, glowY, Math.max(width, height) * 0.52);
-  glow.addColorStop(0, `rgba(${profile.glow}, ${0.06 + backgroundState.motionEnergy * 0.045})`);
+  // Soft cursor ambient glow
+  const glowX = width * (0.5 + backgroundState.pointerX * (motionAllowed ? 0.16 : 0.04));
+  const glowY = height * (0.38 + backgroundState.pointerY * (motionAllowed ? 0.12 : 0.03) + backgroundState.depth * 0.025);
+  const glow = context.createRadialGradient(glowX, glowY, 0, glowX, glowY, Math.max(width, height) * 0.55);
+  glow.addColorStop(0, `rgba(${profile.glow}, ${0.05 + backgroundState.motionEnergy * 0.04})`);
   glow.addColorStop(1, `rgba(${profile.glow}, 0)`);
   context.fillStyle = glow;
   context.fillRect(0, 0, width, height);
 
+  // 1. Process and Draw Radial Click Waves (Physics Wave Propagation)
+  for (let w = waves.length - 1; w >= 0; w--) {
+    const wave = waves[w];
+    wave.radius += wave.speed;
+    wave.alpha *= 0.94;
+
+    if (wave.alpha < 0.01 || wave.radius > wave.maxRadius) {
+      waves.splice(w, 1);
+      continue;
+    }
+
+    context.save();
+    context.beginPath();
+    context.strokeStyle = `rgba(${wave.color}, ${wave.alpha})`;
+    context.lineWidth = Math.max(1, (1 - wave.radius / wave.maxRadius) * 2.2);
+    context.arc(wave.x, wave.y, wave.radius, 0, Math.PI * 2);
+    context.stroke();
+    context.restore();
+  }
+
+  // 2. Process Particles with Physics Force Field (Cursor Repulsion & Spring Return)
+  const cursorX = cursor.x;
+  const cursorY = cursor.y;
+  const forceRadius = 90;
+
   particles.forEach(particle => {
     const drift = motionAllowed ? Math.sin(time * particle.speed * profile.drift * (1 + backgroundState.motionEnergy * 0.8) + particle.phase) * 0.018 : 0;
-    const parallax = motionAllowed ? particle.radius * 5 : 0;
-    const x = (particle.x + drift) * width + backgroundState.pointerX * parallax;
-    const y = (particle.y + Math.cos(time * particle.speed * profile.drift + particle.phase) * (motionAllowed ? 0.012 : 0)) * height + backgroundState.pointerY * parallax + backgroundState.depth * particle.radius * 0.6;
+    const parallax = motionAllowed ? particle.radius * 4.5 : 0;
+    
+    // Base target position
+    const targetX = (particle.originX + drift) * width + backgroundState.pointerX * parallax;
+    const targetY = (particle.originY + Math.cos(time * particle.speed * profile.drift + particle.phase) * (motionAllowed ? 0.012 : 0)) * height + backgroundState.pointerY * parallax + backgroundState.depth * particle.radius * 0.6;
+
+    // Calculate cursor interaction force field
+    if (motionAllowed && backgroundState.physicsEnabled) {
+      const distToCursor = Math.hypot(cursorX - (targetX + particle.dispX), cursorY - (targetY + particle.dispY));
+      if (distToCursor < forceRadius && distToCursor > 1) {
+        const force = (1 - distToCursor / forceRadius) * 4.5;
+        const angle = Math.atan2((targetY + particle.dispY) - cursorY, (targetX + particle.dispX) - cursorX);
+        particle.vx += Math.cos(angle) * force * 0.3;
+        particle.vy += Math.sin(angle) * force * 0.3;
+      }
+
+      // Check click waves pushing particles
+      waves.forEach(wave => {
+        const distToWaveCenter = Math.hypot(wave.x - (targetX + particle.dispX), wave.y - (targetY + particle.dispY));
+        const diff = Math.abs(distToWaveCenter - wave.radius);
+        if (diff < 24) {
+          const waveForce = (1 - diff / 24) * wave.alpha * 3.5;
+          const waveAngle = Math.atan2((targetY + particle.dispY) - wave.y, (targetX + particle.dispX) - wave.x);
+          particle.vx += Math.cos(waveAngle) * waveForce;
+          particle.vy += Math.sin(waveAngle) * waveForce;
+        }
+      });
+
+      // Spring-damper return to equilibrium
+      particle.dispX += particle.vx;
+      particle.dispY += particle.vy;
+      particle.vx *= 0.88;
+      particle.vy *= 0.88;
+      particle.dispX *= 0.92;
+      particle.dispY *= 0.92;
+    }
+
+    particle.x = targetX + particle.dispX;
+    particle.y = targetY + particle.dispY;
+
+    // Draw particle node
     context.beginPath();
-    context.fillStyle = `rgba(${particle.color}, ${0.29 + backgroundState.motionEnergy * 0.16})`;
-    context.arc(x, y, particle.radius * profile.boost, 0, Math.PI * 2);
+    context.fillStyle = `rgba(${particle.color}, ${0.32 + backgroundState.motionEnergy * 0.18})`;
+    context.arc(particle.x, particle.y, particle.radius * profile.boost, 0, Math.PI * 2);
     context.fill();
   });
+
+  // 3. Draw Faint Proximity Constellation Lines (Scientific Physics Visualization)
+  if (motionAllowed && !lowPowerDevice) {
+    const maxLinkDist = 75;
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const p1 = particles[i];
+        const p2 = particles[j];
+        const dist = Math.hypot(p1.x - p2.x, p1.y - p2.y);
+        if (dist < maxLinkDist) {
+          const alpha = (1 - dist / maxLinkDist) * 0.14;
+          context.beginPath();
+          context.strokeStyle = `rgba(0, 240, 255, ${alpha})`;
+          context.lineWidth = 0.65;
+          context.moveTo(p1.x, p1.y);
+          context.lineTo(p2.x, p2.y);
+          context.stroke();
+        }
+      }
+    }
+  }
 
   if (!prefersReducedMotion.matches) backgroundState.animationId = requestAnimationFrame(drawAmbientBackground);
 };
@@ -302,16 +443,16 @@ const legacyPortfolio = document.querySelector('.legacy-portfolio');
 const windowLayer = document.getElementById('os-window-layer');
 const taskbar = document.getElementById('os-taskbar');
 const appDefinitions = {
-  core: { title: 'RAGHAV CORE', icon: '🧠', source: '#core', width: 880, label: 'COGNITIVE NEURAL ENGINE', intro: 'Interactive knowledge map and digital brain index.' },
-  projects: { title: 'PROJECTS', icon: '📁', source: '#projects', width: 720 },
-  about: { title: 'ABOUT', icon: '👤', source: '#about', width: 680, label: 'IDENTITY MODULE', intro: 'The person, principles, and direction behind the system.' },
-  skills: { title: 'SKILLS', icon: '🧩', source: '#skills', width: 760, label: 'CAPABILITY MODULE', intro: 'A live map of the tools and disciplines in the workspace.' },
-  experience: { title: 'EXPERIENCE', icon: '◈', source: '#experience', width: 800, label: 'FIELD LOG MODULE', intro: 'A timeline of real-world involvement, leadership, and contribution.' },
-  achievements: { title: 'ACHIEVEMENTS', icon: '🏆', source: '#achievements', width: 800, label: 'MILESTONE MODULE', intro: 'Selected milestones, certifications, and recognition.' },
-  resume: { title: 'RESUME', icon: '📄', source: '#resume', width: 800, label: 'PROFILE MODULE', intro: 'A complete professional snapshot, ready for inspection.' },
-  contact: { title: 'CONTACT', icon: '📡', source: '#contact', width: 760, label: 'OPEN CHANNEL MODULE', intro: 'A direct channel for projects, opportunities, and conversation.' },
-  terminal: { title: 'TERMINAL', icon: '⌘', source: '#terminal', width: 860, label: 'RAGHAV TERMINAL', intro: 'A safe, simulated command line for exploring this portfolio.' },
-  debug: { title: 'DEBUG THE SYSTEM', icon: '⚡', source: '#debug', width: 760, label: 'HIDDEN PROTOCOL', intro: 'Catch corrupted code fragments before the system loses integrity.' }
+  core: { title: 'TECHWITHBUDDY CORE', icon: '🧠', source: '#core', width: 880, label: 'COGNITIVE NEURAL ENGINE', intro: 'Interactive knowledge map and digital brain index.' },
+  projects: { title: 'PROJECTS', icon: '📁', source: '#projects', width: 780, label: 'ENGINEERING REPOSITORIES', intro: 'Flagship engineering builds, live demos and case studies.' },
+  about: { title: 'ABOUT', icon: '👤', source: '#about', width: 680, label: 'IDENTITY MODULE', intro: 'The developer, principles, and direction behind TechWithBuddy OS.' },
+  skills: { title: 'TECH STACK', icon: '🧩', source: '#skills', width: 760, label: 'CAPABILITY ARSENAL', intro: 'A live interactive map of languages, frameworks, and tools.' },
+  experience: { title: 'EXPERIENCE', icon: '◈', source: '#experience', width: 800, label: 'FIELD LOG MODULE', intro: 'Timeline of internships, open-source leadership, and contributions.' },
+  achievements: { title: 'ACHIEVEMENTS', icon: '🏆', source: '#achievements', width: 800, label: 'MILESTONES & HONORS', intro: 'Selected milestones, credentials, and recognition.' },
+  resume: { title: 'RESUME', icon: '📄', source: '#resume', width: 800, label: 'DEVELOPER PROFILE', intro: 'A complete professional snapshot, ready for inspection and download.' },
+  contact: { title: 'CONTACT', icon: '📡', source: '#contact', width: 760, label: 'OPEN COMMUNICATIONS CHANNEL', intro: 'Direct messaging portal and verified developer links.' },
+  terminal: { title: 'TERMINAL', icon: '⌘', source: '#terminal', width: 860, label: 'TECHWITHBUDDY TERMINAL', intro: 'Interactive developer shell for inspecting this portfolio.' },
+  debug: { title: 'DEBUG PROTOCOL', icon: '⚡', source: '#debug', width: 760, label: 'HIDDEN SYSTEM PROTOCOL', intro: 'Catch corrupted code fragments before the system loses integrity.' }
 };
 
 const setOsAtmosphere = appId => {
@@ -2184,16 +2325,22 @@ const createRaghavTerminal = (windowElement) => {
   const commands = ['help', 'about', 'projects', 'skills', 'experience', 'achievements', 'resume', 'contact', 'github', 'linkedin', 'clear', 'neofetch', 'whoami', 'pwd', 'ls', 'date', 'sudo hire-raghav', 'coffee', 'matrix', 'secret', 'sudo', 'rm -rf /', 'hack'];
   const terminal = document.createElement('section');
   terminal.className = 'raghav-terminal';
-  terminal.setAttribute('aria-label', 'Raghav simulated terminal');
+  terminal.setAttribute('aria-label', 'TechWithBuddy simulated terminal');
   terminal.innerHTML = `
-    <div class="raghav-terminal-bar"><span class="terminal-window-dot terminal-window-dot--red"></span><span class="terminal-window-dot terminal-window-dot--yellow"></span><span class="terminal-window-dot terminal-window-dot--green"></span><span>RAGHAV@OS:~$</span><span class="terminal-safe-state">SIMULATION MODE</span></div>
+    <div class="raghav-terminal-bar">
+      <span class="terminal-window-dot terminal-window-dot--red"></span>
+      <span class="terminal-window-dot terminal-window-dot--yellow"></span>
+      <span class="terminal-window-dot terminal-window-dot--green"></span>
+      <span>raghav@techwithbuddy:~$</span>
+      <span class="terminal-safe-state">TECHWITHBUDDY OS v2.0</span>
+    </div>
     <div class="raghav-terminal-output" role="log" aria-live="polite" aria-label="Terminal output"></div>
     <form class="raghav-terminal-form" autocomplete="off">
-      <label class="raghav-terminal-prompt" for="raghav-terminal-input-${windowElement.id}">RAGHAV@OS:~$</label>
+      <label class="raghav-terminal-prompt" for="raghav-terminal-input-${windowElement.id}">raghav@techwithbuddy:~$</label>
       <input id="raghav-terminal-input-${windowElement.id}" class="raghav-terminal-input" type="text" inputmode="text" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Type a simulated terminal command" placeholder="Type help to see commands" />
       <button type="submit" class="raghav-terminal-run">RUN</button>
     </form>
-    <p class="raghav-terminal-hint">↑↓ history · Tab autocomplete · <kbd>Enter</kbd> run · simulated portfolio terminal only</p>`;
+    <p class="raghav-terminal-hint">↑↓ history · Tab autocomplete · <kbd>Enter</kbd> run · TechWithBuddy OS developer shell</p>`;
 
   const output = terminal.querySelector('.raghav-terminal-output');
   const form = terminal.querySelector('.raghav-terminal-form');
@@ -2221,32 +2368,32 @@ const createRaghavTerminal = (windowElement) => {
     output.append(line);
     output.scrollTop = output.scrollHeight;
   };
-  const showHelp = () => print(`AVAILABLE COMMANDS\n\nhelp          show this command reference\nabout         profile summary\nprojects      featured project directory\nskills        technical capabilities\nexperience    experience timeline\nachievements  selected milestones\nresume        resume details\ncontact       contact channels\ngithub        open GitHub profile\nlinkedin      open LinkedIn profile\nwhoami        identity details\npwd           current simulated location\nls            list portfolio modules\ndate          local date and time\nneofetch      RAGHAV OS system card\nclear         clear this terminal\n\nFUN COMMANDS\nsudo hire-raghav · coffee · matrix · secret · sudo · rm -rf / · hack`, 'terminal-help');
+  const showHelp = () => print(`AVAILABLE COMMANDS\n\nhelp          show this command reference\nabout         developer profile & ethos\nprojects      flagship engineering repositories\nskills        technical stack & capabilities\nexperience    career timeline & contributions\nachievements  selected milestones & certifications\nresume        resume PDF snapshot & download\ncontact       direct messaging & channels\ngithub        open GitHub profile\nlinkedin      open LinkedIn profile\nwhoami        developer identity\npwd           current simulated workspace\nls            list workspace directory\ndate          local date and time\nneofetch      TECHWITHBUDDY OS system card\nclear         clear this terminal\n\nFUN COMMANDS\nsudo hire-raghav · coffee · matrix · secret · sudo · rm -rf / · hack`, 'terminal-help');
 
   const run = rawCommand => {
     const command = rawCommand.trim().toLowerCase().replace(/\s+/g, ' ');
     if (!command) return;
-    print(`RAGHAV@OS:~$ ${rawCommand.trim()}`, 'terminal-command');
+    print(`raghav@techwithbuddy:~$ ${rawCommand.trim()}`, 'terminal-command');
     if (!history.length || history.at(-1) !== rawCommand.trim()) history.push(rawCommand.trim());
     historyIndex = history.length;
 
     const results = {
       help: showHelp,
       about: () => print('Raghav Sharma\nB.Tech CSE student and developer focused on clean, useful digital experiences.\nBuilder · problem solver · open-source contributor.'),
-      projects: () => print('FEATURED PROJECTS\n• AuraSense — accessibility-focused AI assistance\n• ShikshaFlow — streamlined EdTech platform\n• NetProbe — port scanner\n• GNDU Attendance System — attendance management'),
+      projects: () => print('FEATURED PROJECTS\n• AuraSense — accessibility-focused AI assistant\n• ShikshaFlow — streamlined EdTech platform\n• NetProbe — port scanner & security audit\n• GNDU Attendance System — campus database management'),
       skills: () => print('LANGUAGES: C, C++, Python, JavaScript\nWEB: HTML, CSS, React\nFOUNDATIONS: DSA, OOP, MySQL, Networks\nTOOLS: Git, AI/ML, Cybersecurity'),
-      experience: () => print('EXPERIENCE LOG\n• Acmegrade — Aug 2026–Present\n• SmartED Innovations — Aug 2026–Present\n• Open Source Connect India — Aug 2026–Present\n• GirlScript Summer of Code — May 2026–Present'),
-      achievements: () => print('MILESTONES\n• Open-source and leadership contributions\n• Technical certifications in Java and AI\n• Community and internship recognition'),
+      experience: () => print('EXPERIENCE LOG\n• Acmegrade — Aug 2026–Present (Data Science Intern)\n• SmartED Innovations — Aug 2026–Present (Campus Ambassador)\n• Open Source Connect India — Aug 2026–Present (Campus Lead)\n• GirlScript Summer of Code — May 2026–Present (Contributor)'),
+      achievements: () => print('MILESTONES\n• Open-source and leadership contributions (GSSoC, OSCI)\n• Technical certifications in Java and Web Development\n• Mentored internships & community recognition'),
       resume: () => { print('RESUME READY\nA PDF profile is available for viewing or download.'); printLink('Open resume.pdf ↗', './resume.pdf'); },
       contact: () => { print('OPEN CHANNELS\nEmail: raghavsharmahhps07@gmail.com\nGitHub: techwithbuddy\nLinkedIn: raghavsharma1402'); },
       github: () => { print('Opening GitHub profile...'); printLink('github.com/techwithbuddy ↗', 'https://github.com/techwithbuddy'); },
       linkedin: () => { print('Opening LinkedIn profile...'); printLink('linkedin.com/in/raghavsharma1402 ↗', 'https://www.linkedin.com/in/raghavsharma1402/'); },
-      whoami: () => print('Raghav Sharma\nB.Tech CSE\nDeveloper\nBuilder\nOpen Source Contributor'),
-      pwd: () => print('/home/raghav/portfolio  (simulated)'),
-      ls: () => print('about/  achievements/  contact/  experience/  projects/  resume.pdf  skills/'),
+      whoami: () => print('Raghav Sharma\nComputer Science Student\nDeveloper • Builder • Learner\nOpen Source Contributor'),
+      pwd: () => print('/home/raghav/techwithbuddy-os  (simulated)'),
+      ls: () => print('about/  achievements/  contact/  experience/  projects/  resume.pdf  skills/  core.brain'),
       date: () => print(new Date().toLocaleString([], { dateStyle: 'full', timeStyle: 'medium' })),
-      neofetch: () => print('      RRRR    RAGHAV OS\n     RR  RR   ─────────────\n     RRRR     User: raghav\n     RR RR    Role: Developer / Builder\n     RR  RR   Stack: HTML · CSS · JavaScript\n              Status: Online'),
-      coffee: () => print('  ( (\n   ) )   Brewing focus...\n........\n|      |]  Coffee deployed. ☕'),
+      neofetch: () => print('  ████████╗██╗    ██╗██████╗      TECHWITHBUDDY OS\n  ╚══██╔══╝██║    ██║██╔══██╗     ────────────────\n     ██║   ██║ █╗ ██║██████╔╝     OS: TechWithBuddy OS v2.0\n     ██║   ██║███╗██║██╔══██╗     User: raghav@techwithbuddy\n     ██║   ╚███╔███╔╝██████╔╝     Kernel: Linux / Web v2.4.0\n     ╚═╝    ╚══╝╚══╝ ╚═════╝      Stack: Python · React · Node · MySQL\n                                  Uptime: Online & Ready'),
+      coffee: () => print('  ( (\n   ) )   Brewing developer focus...\n........\n|      |]  Coffee deployed. ☕'),
       matrix: () => print(Array.from({ length: 8 }, () => Array.from({ length: 34 }, () => Math.random() > 0.55 ? '1' : '0').join('')).join('\n'), 'terminal-matrix'),
       secret: () => { print('🔐 SECRET UNLOCKED\nThe best interfaces make people feel capable.\nNow go build something memorable.\n\nCLUE: Some system overrides respond to a developer shortcut.'); triggerEasterEgg('SECRET MODE UNLOCKED', 'The terminal remembers those who explore beyond the prompt.'); },
       sudo: () => print('sudo: a portfolio terminal has no superuser privileges. Nice try. 🙂'),
@@ -2255,8 +2402,27 @@ const createRaghavTerminal = (windowElement) => {
       'sudo hire-raghav': () => {
         print('Checking permissions...');
         print('████████████████████ 100%', 'terminal-success');
-        print('Permission granted.\n\nOpening contact...', 'terminal-success');
+        print('Permission granted.\n\nOpening contact portal...', 'terminal-success');
         window.setTimeout(() => windowManager.create('contact'), prefersReducedMotion.matches ? 0 : 350);
+      },
+      physics: () => {
+        print('TECHWITHBUDDY OS PHYSICS ENGINE v2.0\n' +
+              '───────────────────────────────────\n' +
+              'Engine Status: ONLINE (60fps Target)\n' +
+              'Gravity: ACTIVE (Virtual 9.8 m/s² On Boot & Orbits)\n' +
+              'Spring Physics: ACTIVE (Hooke\'s Law F = -kx - cv)\n' +
+              'Particle Field: ACTIVE (Force-field Repulsion & Proximity Links)\n' +
+              'Magnetic UI: ACTIVE (Subtle Pointer Attraction)\n' +
+              'Window Inertia: ACTIVE (Momentum Coasting & Viewport Bounce)\n' +
+              'Wave Propagation: ACTIVE (Radial Event Waves)\n' +
+              `Reduced Motion: ${prefersReducedMotion.matches ? 'ENABLED (Physics Suspended)' : 'DISABLED (Physics Full Mode)'}`, 'terminal-success');
+      },
+      'physics --status': () => {
+        print(`Physics Engine: ONLINE\nGravity: ACTIVE\nSpring System: ACTIVE\nParticle Field: ACTIVE\nInteraction Field: ACTIVE\n\n> system ready_`, 'terminal-success');
+      },
+      'physics --toggle': () => {
+        backgroundState.physicsEnabled = !backgroundState.physicsEnabled;
+        print(`Physics Engine interactions are now ${backgroundState.physicsEnabled ? 'ACTIVE' : 'DISABLED'}.`, 'terminal-success');
       }
     };
     if (command === 'clear') {
@@ -2305,6 +2471,13 @@ const windowManager = {
     instance.element.debugGame?.resume();
     this.activeId = id;
     setOsAtmosphere(instance.appId);
+    
+    // Update top bar breadcrumb
+    const breadcrumbEl = document.getElementById('active-breadcrumb');
+    if (breadcrumbEl) {
+      breadcrumbEl.textContent = instance.appId;
+    }
+
     this.instances.forEach(other => {
       if (other.id === id) return;
       other.element.projectUniverse?.pause();
@@ -2327,7 +2500,12 @@ const windowManager = {
     element.style.setProperty('--window-width', `${definition.width}px`);
     element.innerHTML = `
       <header class="os-window-header">
-        <div class="os-window-title" id="${id}-title"><span class="window-brand">RAGHAV OS</span><span class="window-divider">/</span><strong>${definition.icon} ${definition.title}</strong></div>
+        <div class="os-window-title" id="${id}-title">
+          <span class="window-brand">TECHWITHBUDDY OS</span>
+          <span class="window-divider">/</span>
+          <strong class="window-app-name">${definition.icon} ${definition.title}</strong>
+        </div>
+        <div class="os-window-path">~/techwithbuddy/${appId}</div>
         <div class="os-window-controls">
           <button type="button" class="window-control window-minimize" aria-label="Minimize ${definition.title}">−</button>
           <button type="button" class="window-control window-maximize" aria-label="Maximize ${definition.title}">□</button>
@@ -2350,7 +2528,7 @@ const windowManager = {
       body.append(moduleIntro);
     }
     if (appId === 'core') {
-      // For RAGHAV CORE, we need to append content first so the brain canvas is in DOM,
+      // For TECHWITHBUDDY CORE, we need to append content first so the brain canvas is in DOM,
       // then wire up the brain logic
       body.append(content);
       createDigitalBrain(content, element);
@@ -2389,16 +2567,22 @@ const windowManager = {
     }, prefersReducedMotion.matches ? 0 : 30);
 
     if (appId === 'skills') {
-      const clonedPhysics = element.querySelector(`#${id}-physics-canvas`);
-      if (clonedPhysics) window.setTimeout(() => initSkillsPhysics(clonedPhysics), 80);
+      const orbitalContainer = element.querySelector('.orbital-skills-system');
+      if (orbitalContainer) window.setTimeout(() => initOrbitalSkillsSystem(orbitalContainer), 80);
     }
   },
   bind(instance) {
     const { element, id } = instance;
     const header = element.querySelector('.os-window-header');
+    let vx = 0, vy = 0;
+    let lastX = 0, lastY = 0;
+    let lastTime = 0;
+    let inertiaRaf = null;
+
     element.addEventListener('pointerdown', () => this.focus(id));
     element.querySelector('.window-close').addEventListener('click', event => {
       event.stopPropagation();
+      if (inertiaRaf) cancelAnimationFrame(inertiaRaf);
       element.projectUniverse?.pause();
       element.digitalBrain?.pause();
       element.debugGame?.pause();
@@ -2406,6 +2590,7 @@ const windowManager = {
     });
     element.querySelector('.window-minimize').addEventListener('click', event => {
       event.stopPropagation();
+      if (inertiaRaf) cancelAnimationFrame(inertiaRaf);
       element.classList.add('is-minimized');
       instance.task.classList.remove('is-active');
       element.projectUniverse?.pause();
@@ -2414,29 +2599,95 @@ const windowManager = {
       if (this.activeId === id) {
         this.activeId = null;
         setOsAtmosphere('default');
+        const breadcrumbEl = document.getElementById('active-breadcrumb');
+        if (breadcrumbEl) breadcrumbEl.textContent = 'desktop';
       }
     });
     element.querySelector('.window-maximize').addEventListener('click', event => {
       event.stopPropagation();
+      if (inertiaRaf) cancelAnimationFrame(inertiaRaf);
       element.classList.toggle('is-maximized');
       this.focus(id);
     });
     header.addEventListener('pointerdown', event => {
       if (this.isMobile() || event.target.closest('button') || element.classList.contains('is-maximized')) return;
+      if (inertiaRaf) cancelAnimationFrame(inertiaRaf);
       const rect = element.getBoundingClientRect();
       instance.drag = { offsetX: event.clientX - rect.left, offsetY: event.clientY - rect.top };
+      lastX = event.clientX;
+      lastY = event.clientY;
+      lastTime = performance.now();
+      vx = 0;
+      vy = 0;
       element.classList.add('is-dragging');
       header.setPointerCapture(event.pointerId);
     });
     header.addEventListener('pointermove', event => {
       if (!instance.drag) return;
-      element.style.left = `${Math.max(8, event.clientX - instance.drag.offsetX)}px`;
-      element.style.top = `${Math.max(66, event.clientY - instance.drag.offsetY)}px`;
+      const now = performance.now();
+      const dt = Math.max(16, now - lastTime);
+      const dx = event.clientX - lastX;
+      const dy = event.clientY - lastY;
+      vx = (dx / dt) * 16;
+      vy = (dy / dt) * 16;
+      lastX = event.clientX;
+      lastY = event.clientY;
+      lastTime = now;
+
+      const nextX = Math.max(8, Math.min(window.innerWidth - element.offsetWidth - 8, event.clientX - instance.drag.offsetX));
+      const nextY = Math.max(56, Math.min(window.innerHeight - 80, event.clientY - instance.drag.offsetY));
+      element.style.left = `${nextX}px`;
+      element.style.top = `${nextY}px`;
       element.style.transform = 'none';
     });
     header.addEventListener('pointerup', () => {
+      if (!instance.drag) return;
       instance.drag = null;
       element.classList.remove('is-dragging');
+
+      // Physical momentum coasting & boundary bounce
+      if (!prefersReducedMotion.matches && (Math.abs(vx) > 0.8 || Math.abs(vy) > 0.8)) {
+        let curX = parseFloat(element.style.left) || element.offsetLeft;
+        let curY = parseFloat(element.style.top) || element.offsetTop;
+        const damping = 0.90;
+        const restitution = 0.35;
+
+        const coast = () => {
+          vx *= damping;
+          vy *= damping;
+          curX += vx;
+          curY += vy;
+
+          const minX = 8;
+          const maxX = Math.max(minX, window.innerWidth - element.offsetWidth - 8);
+          const minY = 56;
+          const maxY = Math.max(minY, window.innerHeight - 80);
+
+          if (curX <= minX) {
+            curX = minX;
+            vx = -vx * restitution;
+          } else if (curX >= maxX) {
+            curX = maxX;
+            vx = -vx * restitution;
+          }
+
+          if (curY <= minY) {
+            curY = minY;
+            vy = -vy * restitution;
+          } else if (curY >= maxY) {
+            curY = maxY;
+            vy = -vy * restitution;
+          }
+
+          element.style.left = `${curX.toFixed(1)}px`;
+          element.style.top = `${curY.toFixed(1)}px`;
+
+          if (Math.hypot(vx, vy) > 0.18) {
+            inertiaRaf = requestAnimationFrame(coast);
+          }
+        };
+        inertiaRaf = requestAnimationFrame(coast);
+      }
     });
     header.addEventListener('keydown', event => {
       if (event.key === 'Enter' && !this.isMobile()) element.classList.toggle('is-maximized');
@@ -2454,10 +2705,13 @@ const windowManager = {
       instance.task.remove();
       this.instances.delete(id);
       const next = [...this.instances.values()].pop();
-      if (next) this.focus(next.id);
-      else {
+      if (next) {
+        this.focus(next.id);
+      } else {
         this.activeId = null;
         setOsAtmosphere('default');
+        const breadcrumbEl = document.getElementById('active-breadcrumb');
+        if (breadcrumbEl) breadcrumbEl.textContent = 'desktop';
       }
     }, prefersReducedMotion.matches ? 0 : 220);
   },
@@ -2468,38 +2722,80 @@ const windowManager = {
 
 const enterOs = () => {
   if (!bootScreen) return;
-  window.clearTimeout(window.raghavBootTimer);
+  window.clearTimeout(window.twbBootTimer);
+  try {
+    sessionStorage.setItem('twb_booted', '1');
+  } catch (e) {}
   bootScreen.classList.add('is-complete');
   document.body.classList.add('os-ready');
   window.setTimeout(() => {
     bootScreen.hidden = true;
     osEnvironment?.querySelector('.desktop-icon')?.focus();
-  }, prefersReducedMotion.matches ? 0 : 520);
+  }, prefersReducedMotion.matches ? 0 : 420);
 };
 
 const runBootSequence = () => {
   if (!bootScreen || !bootProgressBar || !bootProgressLabel) return;
-  const messages = ['Loading personal environment...', 'Loading projects...', 'Loading skills...', 'Loading experience...', 'Loading creativity...'];
-  const duration = prefersReducedMotion.matches ? 0 : 1500;
+  
+  const hasBootedBefore = (() => {
+    try { return sessionStorage.getItem('twb_booted') === '1'; } catch(e) { return false; }
+  })();
+
+  const steps = [
+    { id: 'bstep-core', label: 'CORE SYSTEM', pct: 0.20 },
+    { id: 'bstep-interface', label: 'INTERFACE ENVIRONMENT', pct: 0.40 },
+    { id: 'bstep-projects', label: 'PROJECT REPOSITORIES', pct: 0.60 },
+    { id: 'bstep-archive', label: 'PORTFOLIO ARCHIVE', pct: 0.80 },
+    { id: 'bstep-profile', label: 'DEVELOPER PROFILE', pct: 1.00 }
+  ];
+
+  const logMessages = [
+    '> Initializing core runtime...',
+    '> Loading interface & window environment...',
+    '> Connecting project database & repositories...',
+    '> Indexing portfolio archive (/techwithbuddy/archive)...',
+    '> User profile verified. Welcome, Raghav_'
+  ];
+
+  const duration = prefersReducedMotion.matches ? 0 : hasBootedBefore ? 650 : 1600;
   const startedAt = performance.now();
 
   const updateBoot = now => {
     const progress = duration === 0 ? 1 : Math.max(0, Math.min(1, (now - startedAt) / duration));
-    const messageIndex = Math.min(messages.length - 1, Math.floor(progress * messages.length));
-    if (bootLog && bootLog.textContent !== messages[messageIndex]) bootLog.textContent = messages[messageIndex];
+    
+    // Update step checkmarks
+    steps.forEach((step, idx) => {
+      const stepEl = document.getElementById(step.id);
+      if (stepEl) {
+        if (progress >= step.pct) {
+          stepEl.classList.add('is-complete');
+          stepEl.innerHTML = `<span class="bstep-icon">✓</span> ${step.label}`;
+        }
+      }
+    });
+
+    const msgIdx = Math.min(logMessages.length - 1, Math.floor(progress * logMessages.length));
+    if (bootLog && bootLog.textContent !== logMessages[msgIdx]) {
+      bootLog.textContent = logMessages[msgIdx];
+    }
+
     bootProgressBar.style.width = `${Math.round(progress * 100)}%`;
     bootProgressLabel.textContent = `${Math.round(progress * 100)}%`;
-    if (progress < 1) window.requestAnimationFrame(updateBoot);
-    else {
-      bootStatus.textContent = 'SYSTEM READY';
+
+    if (progress < 1) {
+      window.requestAnimationFrame(updateBoot);
+    } else {
+      bootStatus.textContent = 'SYSTEM READY. Welcome, Raghav_';
       bootEnter.classList.add('is-ready');
-      window.raghavBootTimer = window.setTimeout(enterOs, 350);
+      window.twbBootTimer = window.setTimeout(enterOs, hasBootedBefore ? 150 : 400);
     }
   };
 
   window.requestAnimationFrame(updateBoot);
 };
 
+const bootSkip = document.getElementById('boot-skip');
+bootSkip?.addEventListener('click', enterOs);
 bootEnter?.addEventListener('click', enterOs);
 runBootSequence();
 
@@ -2513,12 +2809,23 @@ const updateClock = () => {
 updateClock();
 window.setInterval(updateClock, 30000);
 
+// App launches via Desktop Icons
 document.querySelectorAll('.desktop-icon').forEach(icon => {
   icon.addEventListener('click', () => {
     const appId = icon.dataset.app;
     if (appDefinitions[appId]) windowManager.create(appId);
     if (desktopPrompt) desktopPrompt.textContent = `${appDefinitions[appId]?.title || appId.toUpperCase()} module initialized.`;
     document.querySelectorAll('.desktop-icon').forEach(item => item.classList.toggle('is-selected', item === icon));
+  });
+});
+
+// App launches via File Explorer Tree links
+document.querySelectorAll('.tree-link').forEach(link => {
+  link.addEventListener('click', () => {
+    const appId = link.dataset.app;
+    if (appDefinitions[appId]) windowManager.create(appId);
+    if (desktopPrompt) desktopPrompt.textContent = `${appDefinitions[appId]?.title || appId.toUpperCase()} module opened from explorer.`;
+    document.querySelectorAll('.tree-link').forEach(item => item.classList.toggle('is-active', item === link));
   });
 });
 
@@ -2529,7 +2836,7 @@ archiveToggle?.addEventListener('click', () => {
   document.body.classList.toggle('archive-open', !legacyPortfolio.hidden);
   if (!legacyPortfolio.hidden) {
     legacyPortfolio.querySelector('.navbar a')?.focus();
-    if (!skillsInitialized) initSkillsPhysics();
+    window.setTimeout(() => initOrbitalSkillsSystem(), 50);
   }
 });
 
@@ -2537,7 +2844,7 @@ document.addEventListener('keydown', event => {
   if (event.key === 'Escape') {
     if (bootScreen && !bootScreen.hidden) enterOs();
     if (windowManager.activeId) windowManager.closeActive();
-    if (desktopPrompt) desktopPrompt.textContent = 'Select an application to initialize a module.';
+    if (desktopPrompt) desktopPrompt.textContent = 'Select an application or double-click a file to initialize a module.';
     document.querySelectorAll('.desktop-icon').forEach(icon => icon.classList.remove('is-selected'));
   }
 });
@@ -2634,16 +2941,296 @@ systemBrand?.addEventListener('click', () => {
   }
 });
 
-// Matter.js Physics Animation for Skills Section
-const initializedSkillContainers = new WeakSet();
-let skillsInitialized = false;
-const initSkillsPhysics = (targetContainer = document.getElementById('physics-canvas-container')) => {
-  const container = targetContainer;
-  if (!container || initializedSkillContainers.has(container) || !window.Matter) return;
-  initializedSkillContainers.add(container);
-  if (container.id === 'physics-canvas-container') skillsInitialized = true;
+// ============================================================
+// PHYSICS-BASED INTERACTION SYSTEM (MAGNETIC UI, 3D TILT & ORBITS)
+// ============================================================
 
-  // module aliases
+const activeOrbitalSystems = new WeakMap();
+
+const initOrbitalSkillsSystem = (targetContainer = null) => {
+  const containers = targetContainer 
+    ? [targetContainer] 
+    : document.querySelectorAll('.orbital-skills-system');
+
+  containers.forEach(container => {
+    if (!container) return;
+    const layer = container.querySelector('.orbital-nodes-layer') || container.querySelector('#orbital-nodes-layer');
+    if (!layer) return;
+
+    if (activeOrbitalSystems.has(container)) {
+      cancelAnimationFrame(activeOrbitalSystems.get(container));
+      activeOrbitalSystems.delete(container);
+    }
+
+    layer.innerHTML = '';
+
+    const switchBtns = container.querySelectorAll('.orbital-switch-btn');
+    const orbitalStage = container.querySelector('.orbital-stage-layer');
+    const matterContainer = container.querySelector('.physics-canvas-container') || container.querySelector('#physics-canvas-container') || container.parentElement?.querySelector('#physics-canvas-container') || container.parentElement?.querySelector('[id$="-physics-canvas"]');
+    const modeTitle = container.querySelector('.orbital-title-text');
+    const hudStatus = container.querySelector('.orbital-hud-status');
+    const hudTip = container.querySelector('.orbital-hud-tip') || container.querySelector('.hud-tip');
+
+    if (!container.dataset.viewSwitchBound) {
+      container.dataset.viewSwitchBound = 'true';
+      switchBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const view = btn.dataset.view;
+          switchBtns.forEach(b => b.classList.toggle('is-active', b === btn));
+
+          if (view === 'matter') {
+            if (activeOrbitalSystems.has(container)) {
+              cancelAnimationFrame(activeOrbitalSystems.get(container));
+              activeOrbitalSystems.delete(container);
+            }
+            if (orbitalStage) {
+              orbitalStage.style.display = 'none';
+            } else {
+              container.querySelectorAll('.orbital-ring, .orbital-center-core, .orbital-nodes-layer').forEach(el => el.style.display = 'none');
+            }
+            if (matterContainer) {
+              matterContainer.style.display = 'block';
+              initSkillsPhysics(matterContainer);
+            }
+            if (modeTitle) modeTitle.textContent = 'PHYSICS 2D RIGID BODY SIMULATION // MATTER.JS';
+            if (hudStatus) hudStatus.textContent = 'SIMULATION: ZERO-G COLLISION DYNAMICS';
+            if (hudTip) hudTip.innerHTML = '⚡ Drag &amp; toss capability bubbles • Zero-G collisions';
+          } else {
+            if (matterContainer) {
+              matterContainer.style.display = 'none';
+              pauseSkillsPhysics(matterContainer);
+            }
+            if (orbitalStage) {
+              orbitalStage.style.display = 'block';
+            } else {
+              container.querySelectorAll('.orbital-ring, .orbital-center-core, .orbital-nodes-layer').forEach(el => el.style.display = '');
+            }
+            if (modeTitle) modeTitle.textContent = 'PHYSICS ORBITAL SYSTEM // RAGHAV CORE';
+            if (hudStatus) hudStatus.textContent = 'GRAVITATIONAL CONSTANT: G = 1.0';
+            if (hudTip) hudTip.innerHTML = '⚡ Hover skill to decelerate orbit &amp; attract to cursor';
+            initOrbitalSkillsSystem(container);
+          }
+        });
+      });
+    }
+
+    const skills = [
+      { name: 'React', category: 'Web UI & Architecture', radius: 110, speed: 0.00085, angle: 0, icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/react/react-original.svg' },
+      { name: 'JavaScript', category: 'Core Language', radius: 110, speed: 0.00085, angle: Math.PI, icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/javascript/javascript-original.svg' },
+      { name: 'Python', category: 'Backend & Data Science', radius: 170, speed: 0.00062, angle: Math.PI * 0.25, icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg' },
+      { name: 'C++', category: 'Systems & DSA', radius: 170, speed: 0.00062, angle: Math.PI * 1.25, icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/cplusplus/cplusplus-original.svg' },
+      { name: 'AI', category: 'AuraSense & Intelligence', radius: 170, speed: 0.00062, angle: Math.PI * 0.75, glyph: '🤖' },
+      { name: 'Git', category: 'Version Control & GitHub', radius: 225, speed: 0.00042, angle: Math.PI * 0.1, icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/git/git-original.svg' },
+      { name: 'Web Dev', category: 'Modern Web Engineering', radius: 225, speed: 0.00042, angle: Math.PI * 0.8, glyph: '🌐' },
+      { name: 'Open Source', category: 'GSSoC & OSCI Campus Lead', radius: 225, speed: 0.00042, angle: Math.PI * 1.5, glyph: '🚀' }
+    ];
+
+    const nodeElements = skills.map(skill => {
+      const el = document.createElement('div');
+      el.className = 'orbital-node';
+      el.setAttribute('tabindex', '0');
+      el.setAttribute('role', 'button');
+      el.setAttribute('aria-label', `${skill.name} - ${skill.category}`);
+      el.innerHTML = `
+        ${skill.icon ? `<img src="${skill.icon}" alt="${skill.name}" />` : `<span class="node-glyph">${skill.glyph}</span>`}
+        <div class="orbital-tooltip">
+          <strong>${skill.name}</strong> • ${skill.category}
+        </div>
+      `;
+
+      el.addEventListener('click', () => {
+        if (skill.name === 'React' || skill.name === 'Web Dev') {
+          const projApp = document.querySelector('[data-app="projects"]');
+          if (projApp) projApp.click();
+        } else if (skill.name === 'AI') {
+          const brainApp = document.querySelector('[data-app="core"]');
+          if (brainApp) brainApp.click();
+        } else if (skill.name === 'Open Source') {
+          const expApp = document.querySelector('[data-app="experience"]');
+          if (expApp) expApp.click();
+        }
+      });
+
+      layer.appendChild(el);
+      return { ...skill, el, hovered: false, currentAngle: skill.angle };
+    });
+
+    let lastOrbitalTime = performance.now();
+    let orbitalRaf = null;
+
+    const animateOrbits = (time) => {
+      if (!container.isConnected) {
+        cancelAnimationFrame(orbitalRaf);
+        activeOrbitalSystems.delete(container);
+        return;
+      }
+
+      const dt = Math.min(64, time - lastOrbitalTime);
+      lastOrbitalTime = time;
+
+      const width = container.clientWidth || container.offsetWidth || 800;
+      const height = container.clientHeight || container.offsetHeight || 520;
+      const centerX = width / 2;
+      const centerY = height / 2;
+      const motionAllowed = !prefersReducedMotion.matches;
+
+      nodeElements.forEach(item => {
+        if (motionAllowed) {
+          const speed = item.hovered ? item.speed * 0.15 : item.speed;
+          item.currentAngle += speed * dt;
+        }
+
+        const orbitX = centerX + Math.cos(item.currentAngle) * item.radius;
+        const orbitY = centerY + Math.sin(item.currentAngle) * item.radius;
+
+        const finalX = orbitX - 22;
+        const finalY = orbitY - 22;
+        const scale = item.hovered ? 1.28 : 1;
+
+        item.el.style.transform = `translate3d(${finalX.toFixed(1)}px, ${finalY.toFixed(1)}px, 0) scale(${scale})`;
+      });
+
+      orbitalRaf = requestAnimationFrame(animateOrbits);
+      activeOrbitalSystems.set(container, orbitalRaf);
+    };
+
+    nodeElements.forEach(item => {
+      item.el.addEventListener('pointerenter', () => { item.hovered = true; });
+      item.el.addEventListener('pointerleave', () => { item.hovered = false; });
+    });
+
+    orbitalRaf = requestAnimationFrame(animateOrbits);
+    activeOrbitalSystems.set(container, orbitalRaf);
+  });
+};
+
+const initPhysicsInteractions = () => {
+  if (prefersReducedMotion.matches || usesCoarsePointer) return;
+
+  // 1. Magnetic UI Attraction Engine
+  const magneticElements = document.querySelectorAll(
+    '.desktop-icon, .tree-link, .id-btn, .archive-toggle, .protocol-hint, .recruiter-mode-toggle, .term-tab, .boot-enter, .as-close-btn, .window-control'
+  );
+
+  magneticElements.forEach(el => {
+    let animId = null;
+    let targetX = 0, targetY = 0;
+    let currentX = 0, currentY = 0;
+
+    const updateMagnetic = () => {
+      currentX += (targetX - currentX) * 0.22;
+      currentY += (targetY - currentY) * 0.22;
+      el.style.setProperty('--mag-x', `${currentX.toFixed(2)}px`);
+      el.style.setProperty('--mag-y', `${currentY.toFixed(2)}px`);
+
+      if (Math.hypot(targetX - currentX, targetY - currentY) > 0.05) {
+        animId = requestAnimationFrame(updateMagnetic);
+      } else {
+        currentX = targetX;
+        currentY = targetY;
+        el.style.setProperty('--mag-x', `${currentX.toFixed(2)}px`);
+        el.style.setProperty('--mag-y', `${currentY.toFixed(2)}px`);
+        animId = null;
+      }
+    };
+
+    el.addEventListener('pointermove', event => {
+      const rect = el.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const dx = event.clientX - centerX;
+      const dy = event.clientY - centerY;
+
+      targetX = Math.max(-7, Math.min(7, dx * 0.22));
+      targetY = Math.max(-7, Math.min(7, dy * 0.22));
+
+      if (!animId) animId = requestAnimationFrame(updateMagnetic);
+    });
+
+    el.addEventListener('pointerleave', () => {
+      targetX = 0;
+      targetY = 0;
+      if (!animId) animId = requestAnimationFrame(updateMagnetic);
+    });
+  });
+
+  // 2. 3D Card Tilt Physics with Spring Return
+  const tiltCards = document.querySelectorAll(
+    '.desktop-icon, .sidebar-widget, .project-card, .achievement-card, .about-card, .t-stat-card'
+  );
+
+  tiltCards.forEach(card => {
+    let tiltAnimId = null;
+    let targetTiltX = 0, targetTiltY = 0;
+    let currentTiltX = 0, currentTiltY = 0;
+
+    const updateTilt = () => {
+      currentTiltX += (targetTiltX - currentTiltX) * 0.16;
+      currentTiltY += (targetTiltY - currentTiltY) * 0.16;
+      card.style.setProperty('--tilt-x', `${currentTiltX.toFixed(2)}deg`);
+      card.style.setProperty('--tilt-y', `${currentTiltY.toFixed(2)}deg`);
+
+      if (Math.hypot(targetTiltX - currentTiltX, targetTiltY - currentTiltY) > 0.05) {
+        tiltAnimId = requestAnimationFrame(updateTilt);
+      } else {
+        currentTiltX = targetTiltX;
+        currentTiltY = targetTiltY;
+        card.style.setProperty('--tilt-x', `${currentTiltX.toFixed(2)}deg`);
+        card.style.setProperty('--tilt-y', `${currentTiltY.toFixed(2)}deg`);
+        tiltAnimId = null;
+      }
+    };
+
+    card.addEventListener('pointermove', event => {
+      const rect = card.getBoundingClientRect();
+      const relX = (event.clientX - rect.left) / rect.width - 0.5;
+      const relY = (event.clientY - rect.top) / rect.height - 0.5;
+
+      targetTiltX = relY * -8;
+      targetTiltY = relX * 8;
+
+      if (!tiltAnimId) tiltAnimId = requestAnimationFrame(updateTilt);
+    });
+
+    card.addEventListener('pointerleave', () => {
+      targetTiltX = 0;
+      targetTiltY = 0;
+      if (!tiltAnimId) tiltAnimId = requestAnimationFrame(updateTilt);
+    });
+  });
+};
+
+// Initialize interactive physics on load
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    initPhysicsInteractions();
+    initOrbitalSkillsSystem();
+  });
+} else {
+  initPhysicsInteractions();
+  initOrbitalSkillsSystem();
+}
+
+// Matter.js Physics Animation for Skills Section
+const activeMatterEngines = new WeakMap();
+
+const pauseSkillsPhysics = (container) => {
+  if (!container || !activeMatterEngines.has(container)) return;
+  const instance = activeMatterEngines.get(container);
+  if (instance.runner) Matter.Runner.stop(instance.runner);
+};
+
+const initSkillsPhysics = (targetContainer) => {
+  const container = targetContainer || document.getElementById('physics-canvas-container');
+  if (!container) return;
+
+  if (!window.Matter) {
+    window.setTimeout(() => initSkillsPhysics(container), 200);
+    return;
+  }
+
   const Engine = Matter.Engine,
     Render = Matter.Render,
     Runner = Matter.Runner,
@@ -2652,30 +3239,61 @@ const initSkillsPhysics = (targetContainer = document.getElementById('physics-ca
     World = Matter.World,
     Bodies = Matter.Bodies;
 
-  // create an engine
-  const engine = Engine.create();
+  const getDims = () => {
+    let w = container.clientWidth || container.offsetWidth;
+    let h = container.clientHeight || container.offsetHeight;
+    if (!w || !h) {
+      const parent = container.closest('.orbital-skills-system') || container.parentElement;
+      if (parent) {
+        w = w || parent.clientWidth || parent.offsetWidth;
+        h = h || parent.clientHeight || parent.offsetHeight;
+      }
+    }
+    return {
+      width: Math.max(w || 0, 700),
+      height: Math.max(h || 0, 480)
+    };
+  };
 
-  // adjust gravity for a more floating effect
+  const { width, height } = getDims();
+
+  // If already initialized for this container, update dimensions and resume runner
+  if (activeMatterEngines.has(container)) {
+    const inst = activeMatterEngines.get(container);
+    inst.render.canvas.width = width;
+    inst.render.canvas.height = height;
+    inst.render.options.width = width;
+    inst.render.options.height = height;
+    Matter.Body.setPosition(inst.ground, { x: width / 2, y: height + 50 });
+    Matter.Body.setPosition(inst.ceiling, { x: width / 2, y: -50 });
+    Matter.Body.setPosition(inst.leftWall, { x: -50, y: height / 2 });
+    Matter.Body.setPosition(inst.rightWall, { x: width + 50, y: height / 2 });
+    Runner.run(inst.runner, inst.engine);
+    Render.run(inst.render);
+    return;
+  }
+
+  // Create an engine with zero-G floating physics
+  const engine = Engine.create();
   engine.world.gravity.y = 0;
   engine.world.gravity.x = 0;
 
-  // create a renderer
+  // Create renderer
   const render = Render.create({
     element: container,
     engine: engine,
     options: {
-      width: container.clientWidth,
-      height: container.clientHeight,
+      width: width,
+      height: height,
       background: 'transparent',
       wireframes: false,
-      pixelRatio: window.devicePixelRatio
+      pixelRatio: Math.min(window.devicePixelRatio || 1, 2)
     }
   });
 
-  // Tech Stack Categories
   const categories = [
     {
-      color: "#9d4edd", skills: [
+      color: "#a855f7", skills: [
         { label: "C", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/c/c-original.svg" },
         { label: "C++", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/cplusplus/cplusplus-original.svg" },
         { label: "Python", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg" },
@@ -2690,7 +3308,7 @@ const initSkillsPhysics = (targetContainer = document.getElementById('physics-ca
       ]
     },
     {
-      color: "#38bdf8", skills: [
+      color: "#00f0ff", skills: [
         { label: "DSA" },
         { label: "OOP" },
         { label: "MySQL", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mysql/mysql-original.svg" },
@@ -2698,7 +3316,7 @@ const initSkillsPhysics = (targetContainer = document.getElementById('physics-ca
       ]
     },
     {
-      color: "#a3e635", skills: [
+      color: "#10b981", skills: [
         { label: "Git", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/git/git-original.svg" },
         { label: "AI/ML" },
         { label: "Cybersec" }
@@ -2706,22 +3324,18 @@ const initSkillsPhysics = (targetContainer = document.getElementById('physics-ca
     }
   ];
 
-  // Preload images
+  // Preload logo images
   categories.forEach(category => {
     category.skills.forEach(skill => {
       if (skill.logo) {
         const img = new Image();
         img.src = skill.logo;
+        img.crossOrigin = 'anonymous';
         skill.imageObj = img;
       }
     });
   });
 
-  const bodies = [];
-  const width = container.clientWidth;
-  const height = container.clientHeight;
-
-  // Add boundaries (walls)
   const wallOptions = {
     isStatic: true,
     render: { visible: false },
@@ -2736,19 +3350,20 @@ const initSkillsPhysics = (targetContainer = document.getElementById('physics-ca
 
   World.add(engine.world, [ground, ceiling, leftWall, rightWall]);
 
-  // Create skill bubbles
+  const bodies = [];
   categories.forEach(category => {
     category.skills.forEach(skill => {
-      const radius = 45; // Fixed size for nice logos
-      const x = Math.random() * (width - radius * 2) + radius;
-      const y = Math.random() * (height - radius * 2) + radius;
+      const radius = 38;
+      const padding = radius + 25;
+      const x = padding + Math.random() * Math.max(20, width - padding * 2);
+      const y = padding + Math.random() * Math.max(20, height - padding * 2);
 
       const body = Bodies.circle(x, y, radius, {
-        restitution: 1, // perfect bounce
-        friction: 0,
-        frictionAir: 0, // no air resistance
+        restitution: 0.95,
+        friction: 0.002,
+        frictionAir: 0.004,
         render: {
-          fillStyle: 'rgba(255, 255, 255, 0.02)',
+          fillStyle: 'rgba(13, 20, 36, 0.9)',
           strokeStyle: category.color,
           lineWidth: 2
         },
@@ -2759,10 +3374,9 @@ const initSkillsPhysics = (targetContainer = document.getElementById('physics-ca
         }
       });
 
-      // Initial push
       Matter.Body.setVelocity(body, {
-        x: (Math.random() - 0.5) * 4,
-        y: (Math.random() - 0.5) * 4
+        x: (Math.random() - 0.5) * 3.5,
+        y: (Math.random() - 0.5) * 3.5
       });
 
       bodies.push(body);
@@ -2771,73 +3385,97 @@ const initSkillsPhysics = (targetContainer = document.getElementById('physics-ca
 
   World.add(engine.world, bodies);
 
-  // Keep bodies moving
+  // Keep bodies gently moving
   Matter.Events.on(engine, 'beforeUpdate', function () {
     bodies.forEach(body => {
-      // If speed drops too low, give it a tiny nudge
-      if (body.speed < 2) {
+      if (body.speed < 1.2) {
         Matter.Body.applyForce(body, body.position, {
-          x: (Math.random() - 0.5) * 0.002,
-          y: (Math.random() - 0.5) * 0.002
+          x: (Math.random() - 0.5) * 0.0018,
+          y: (Math.random() - 0.5) * 0.0018
         });
       }
     });
   });
 
-  // add mouse control
   const mouse = Mouse.create(render.canvas);
   const mouseConstraint = MouseConstraint.create(engine, {
     mouse: mouse,
     constraint: {
-      stiffness: 0.2,
+      stiffness: 0.25,
       render: { visible: false }
     }
   });
 
-  World.add(engine.world, mouseConstraint);
-
-  // keep the mouse in sync with rendering
+  // Keep mouse in sync with canvas position
   render.mouse = mouse;
 
-  // Custom rendering for logos and text inside bodies
+  // Prevent canvas from capturing vertical page scroll
+  if (mouseConstraint.mouse.element) {
+    mouseConstraint.mouse.element.removeEventListener("mousewheel", mouseConstraint.mouse.mousewheel);
+    mouseConstraint.mouse.element.removeEventListener("DOMMouseScroll", mouseConstraint.mouse.mousewheel);
+  }
+
+  World.add(engine.world, mouseConstraint);
+
+  // Custom rendering for glowing glass bubbles with icons & text
   Matter.Events.on(render, 'afterRender', function () {
     const context = render.context;
-    context.font = "bold 15px 'Outfit', sans-serif";
-    context.textAlign = "center";
-    context.textBaseline = "middle";
+    if (!context) return;
 
     bodies.forEach(body => {
+      if (!body.skillData) return;
       const { label, skillColor, imageObj } = body.skillData;
+      const x = body.position.x;
+      const y = body.position.y;
+      const r = body.circleRadius;
 
+      // Draw bubble background & glow ring
+      context.save();
+      context.beginPath();
+      context.arc(x, y, r, 0, Math.PI * 2);
+      context.fillStyle = 'rgba(11, 18, 32, 0.92)';
+      context.fill();
+      context.lineWidth = 2;
+      context.strokeStyle = skillColor || '#00f0ff';
+      context.shadowColor = skillColor || '#00f0ff';
+      context.shadowBlur = 10;
+      context.stroke();
+      context.restore();
+
+      // Draw icon or text
       if (imageObj && imageObj.complete && imageObj.naturalWidth !== 0) {
-        const size = body.circleRadius * 1.3;
-        context.drawImage(imageObj, body.position.x - size / 2, body.position.y - size / 2, size, size);
+        const iconSize = r * 1.05;
+        context.drawImage(imageObj, x - iconSize / 2, y - iconSize / 2, iconSize, iconSize);
       } else {
-        context.fillStyle = skillColor;
-        context.fillText(label, body.position.x, body.position.y);
+        context.save();
+        context.fillStyle = skillColor || '#ffffff';
+        context.font = "bold 13px 'Outfit', sans-serif";
+        context.textAlign = "center";
+        context.textBaseline = "middle";
+        context.fillText(label, x, y);
+        context.restore();
       }
     });
   });
 
-  // run the renderer
   Render.run(render);
-
-  // create runner
   const runner = Runner.create();
-
-  // run the engine
   Runner.run(runner, engine);
 
-  // Handle Resize
-  window.addEventListener('resize', () => {
-    render.canvas.width = container.clientWidth;
-    render.canvas.height = container.clientHeight;
-    render.options.width = container.clientWidth;
-    render.options.height = container.clientHeight;
+  const instanceState = { engine, runner, render, ground, ceiling, leftWall, rightWall };
+  activeMatterEngines.set(container, instanceState);
 
-    Matter.Body.setPosition(ground, { x: container.clientWidth / 2, y: container.clientHeight + 50 });
-    Matter.Body.setPosition(ceiling, { x: container.clientWidth / 2, y: -50 });
-    Matter.Body.setPosition(rightWall, { x: container.clientWidth + 50, y: container.clientHeight / 2 });
+  window.addEventListener('resize', () => {
+    if (!container.isConnected) return;
+    const { width: nw, height: nh } = getDims();
+    render.canvas.width = nw;
+    render.canvas.height = nh;
+    render.options.width = nw;
+    render.options.height = nh;
+    Matter.Body.setPosition(ground, { x: nw / 2, y: nh + 50 });
+    Matter.Body.setPosition(ceiling, { x: nw / 2, y: -50 });
+    Matter.Body.setPosition(leftWall, { x: -50, y: nh / 2 });
+    Matter.Body.setPosition(rightWall, { x: nw + 50, y: nh / 2 });
   });
 };
 

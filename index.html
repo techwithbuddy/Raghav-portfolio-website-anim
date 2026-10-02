@@ -4,11 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RAGHAV OS | Personal Developer Environment</title>
+    <title>TECHWITHBUDDY OS | Developer Workstation &amp; Portfolio</title>
+    <meta name="description" content="TechWithBuddy OS - Raghav Sharma's personal developer operating system, engineering projects, skills, and portfolio archive.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Syncopate:wght@400;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -16,67 +17,470 @@
 <body>
     <div class="boot-screen" id="boot-screen" role="dialog" aria-modal="true" aria-labelledby="boot-title">
         <div class="boot-panel">
-            <div class="boot-mark" aria-hidden="true">R/OS</div>
-            <p class="boot-kicker">PERSONAL DEVELOPER ENVIRONMENT</p>
-            <h1 id="boot-title">RAGHAV OS</h1>
-            <p class="boot-status" id="boot-status">SYSTEM INITIALIZATION</p>
+            <div class="boot-header-bar">
+                <span class="boot-terminal-tag">TECHWITHBUDDY_BIOS // KERNEL v2.4.0</span>
+                <span class="boot-system-pill">SYS_INIT</span>
+            </div>
+            <div class="boot-mark" aria-hidden="true">TWB/OS</div>
+            <p class="boot-kicker">PERSONAL DEVELOPER OPERATING SYSTEM</p>
+            <h1 id="boot-title">TECHWITHBUDDY OS</h1>
+            <p class="boot-status" id="boot-status">INITIALIZING SYSTEM MODULES...</p>
+            
+            <div class="boot-steps" id="boot-steps" aria-live="polite">
+                <div class="boot-step-item" id="bstep-core"><span class="bstep-icon">○</span> CORE SYSTEM</div>
+                <div class="boot-step-item" id="bstep-interface"><span class="bstep-icon">○</span> INTERFACE ENVIRONMENT</div>
+                <div class="boot-step-item" id="bstep-projects"><span class="bstep-icon">○</span> PROJECT REPOSITORIES</div>
+                <div class="boot-step-item" id="bstep-archive"><span class="bstep-icon">○</span> PORTFOLIO ARCHIVE</div>
+                <div class="boot-step-item" id="bstep-profile"><span class="bstep-icon">○</span> DEVELOPER PROFILE</div>
+            </div>
+
             <div class="boot-log" id="boot-log" aria-live="polite">
-                <span>Loading personal environment...</span>
+                <span>&gt; Loading personal developer environment...</span>
             </div>
             <div class="boot-progress" aria-hidden="true"><span id="boot-progress-bar"></span></div>
             <div class="boot-footer">
-                <span id="boot-progress-label">0%</span>
-                <button class="boot-enter" id="boot-enter" type="button">ENTER RAGHAV OS</button>
+                <div class="boot-metric">
+                    <span class="metric-label">BOOT_PROGRESS</span>
+                    <span id="boot-progress-label">0%</span>
+                </div>
+                <div class="boot-actions">
+                    <button class="boot-skip" id="boot-skip" type="button">SKIP [ESC]</button>
+                    <button class="boot-enter" id="boot-enter" type="button">ENTER TECHWITHBUDDY OS ↵</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <main class="os-environment" id="os-environment" aria-label="Raghav OS desktop">
+    <main class="os-environment" id="os-environment" aria-label="TechWithBuddy OS workstation">
         <header class="system-bar">
-            <div class="system-brand"><span class="system-dot" aria-hidden="true"></span><strong>RAGHAV OS</strong><span
-                    class="system-state">SYSTEM ONLINE</span></div>
-            <div class="system-meta"><button class="recruiter-mode-toggle" id="recruiter-mode-toggle" type="button">⚡
-                    RECRUITER MODE</button><time id="system-time" datetime="">00:00</time><span
-                    class="system-status"><span class="status-dot" aria-hidden="true"></span>READY</span></div>
+            <div class="system-brand-group">
+                <div class="system-brand" title="TechWithBuddy OS System Brand">
+                    <span class="system-dot" aria-hidden="true"></span>
+                    <strong class="system-name">TECHWITHBUDDY <span class="os-tag">OS v2.0</span></strong>
+                    <span class="system-state">ONLINE</span>
+                </div>
+                <div class="system-breadcrumbs" aria-hidden="true">
+                    <span class="crumb-sep">/</span>
+                    <span class="crumb-node">workspace</span>
+                    <span class="crumb-sep">/</span>
+                    <span class="crumb-active" id="active-breadcrumb">desktop</span>
+                </div>
+            </div>
+
+            <div class="system-meta">
+                <div class="system-telemetry" aria-label="System telemetry">
+                    <span class="telemetry-item" title="Network status">
+                        <span class="telemetry-dot"></span>
+                        <span class="telemetry-label">WiFi 100%</span>
+                    </span>
+                    <span class="telemetry-divider">|</span>
+                    <span class="telemetry-item" title="Build integrity">
+                        <span class="telemetry-code">STABLE</span>
+                    </span>
+                </div>
+                <button class="recruiter-mode-toggle" id="recruiter-mode-toggle" type="button" aria-label="Toggle Recruiter Quick Mode">
+                    <span class="rm-bolt">⚡</span>
+                    <span class="rm-label">RECRUITER MODE</span>
+                </button>
+                <time id="system-time" datetime="">00:00</time>
+                <span class="system-status">
+                    <span class="status-dot" aria-hidden="true"></span>
+                    <span class="status-txt">READY</span>
+                </span>
+            </div>
         </header>
 
         <section class="desktop" aria-labelledby="desktop-title">
-            <div class="desktop-heading">
-                <p class="eyebrow">PERSONAL WORKSPACE / 2026</p>
-                <h2 id="desktop-title">RAGHAV OS</h2>
-                <p>Welcome back. Select an environment to explore.</p>
+            <div class="workstation-container">
+                <!-- Left Sidebar: Explorer & Identity Widget -->
+                <aside class="workstation-sidebar">
+                    <!-- File Explorer Navigation -->
+                    <div class="sidebar-widget explorer-widget" aria-label="File Explorer">
+                        <div class="widget-header">
+                            <div class="widget-title">
+                                <svg class="w-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+                                <span>EXPLORER: TECHWITHBUDDY</span>
+                            </div>
+                            <span class="widget-badge">ROOT</span>
+                        </div>
+                        <div class="file-tree" role="tree" aria-label="System files and applications">
+                            <div class="tree-root-label">▾ TECHWITHBUDDY-WORKSPACE</div>
+                            <ul class="tree-list">
+                                <li class="tree-item" role="treeitem">
+                                    <button type="button" class="tree-link" data-app="about">
+                                        <span class="tree-icon icon-md">📄</span>
+                                        <span class="tree-name">README.md</span>
+                                        <span class="tree-tag">about</span>
+                                    </button>
+                                </li>
+                                <li class="tree-item" role="treeitem">
+                                    <button type="button" class="tree-link" data-app="projects">
+                                        <span class="tree-icon icon-folder">📁</span>
+                                        <span class="tree-name">PROJECTS/</span>
+                                        <span class="tree-tag">4 builds</span>
+                                    </button>
+                                </li>
+                                <li class="tree-item" role="treeitem">
+                                    <button type="button" class="tree-link" data-app="skills">
+                                        <span class="tree-icon icon-folder">📁</span>
+                                        <span class="tree-name">SKILLS/</span>
+                                        <span class="tree-tag">stack</span>
+                                    </button>
+                                </li>
+                                <li class="tree-item" role="treeitem">
+                                    <button type="button" class="tree-link" data-app="experience">
+                                        <span class="tree-icon icon-folder">📁</span>
+                                        <span class="tree-name">EXPERIENCE/</span>
+                                        <span class="tree-tag">timeline</span>
+                                    </button>
+                                </li>
+                                <li class="tree-item" role="treeitem">
+                                    <button type="button" class="tree-link" data-app="achievements">
+                                        <span class="tree-icon icon-folder">📁</span>
+                                        <span class="tree-name">ACHIEVEMENTS/</span>
+                                        <span class="tree-tag">milestones</span>
+                                    </button>
+                                </li>
+                                <li class="tree-item" role="treeitem">
+                                    <button type="button" class="tree-link" data-app="resume">
+                                        <span class="tree-icon icon-pdf">📄</span>
+                                        <span class="tree-name">RESUME.pdf</span>
+                                        <span class="tree-tag">cv</span>
+                                    </button>
+                                </li>
+                                <li class="tree-item" role="treeitem">
+                                    <button type="button" class="tree-link" data-app="contact">
+                                        <span class="tree-icon icon-sh">📡</span>
+                                        <span class="tree-name">CONTACT.sh</span>
+                                        <span class="tree-tag">message</span>
+                                    </button>
+                                </li>
+                                <li class="tree-item" role="treeitem">
+                                    <button type="button" class="tree-link" data-app="core">
+                                        <span class="tree-icon icon-brain">🧠</span>
+                                        <span class="tree-name">CORE.brain</span>
+                                        <span class="tree-tag">neural map</span>
+                                    </button>
+                                </li>
+                                <li class="tree-item" role="treeitem">
+                                    <button type="button" class="tree-link" data-app="terminal">
+                                        <span class="tree-icon icon-term">⌘</span>
+                                        <span class="tree-name">TERMINAL.exe</span>
+                                        <span class="tree-tag">shell</span>
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Developer Identity & Whoami Widget -->
+                    <div class="sidebar-widget identity-widget" aria-label="Developer Identity">
+                        <div class="widget-header">
+                            <div class="widget-title">
+                                <span class="term-prompt-green">&gt;</span>
+                                <span>whoami</span>
+                            </div>
+                            <span class="widget-status-online">● ACTIVE</span>
+                        </div>
+                        <div class="identity-body">
+                            <div class="identity-profile-row">
+                                <div class="identity-avatar-frame">
+                                    <img src="./Screenshot 2026-08-18 024744.png" alt="Raghav Sharma" class="identity-avatar-img">
+                                    <span class="avatar-hud-dot"></span>
+                                </div>
+                                <div class="identity-details">
+                                    <h3 class="identity-name">RAGHAV SHARMA</h3>
+                                    <p class="identity-role">Computer Science '26</p>
+                                    <p class="identity-sub">Developer • Builder • Open Source</p>
+                                </div>
+                            </div>
+                            <div class="identity-meta-list">
+                                <div class="id-meta-item">
+                                    <span class="id-meta-k">FOCUS:</span>
+                                    <span class="id-meta-v">Full-Stack, AI &amp; Systems</span>
+                                </div>
+                                <div class="id-meta-item">
+                                    <span class="id-meta-k">GITHUB:</span>
+                                    <a href="https://github.com/techwithbuddy" target="_blank" rel="noopener" class="id-meta-link">techwithbuddy ↗</a>
+                                </div>
+                                <div class="id-meta-item">
+                                    <span class="id-meta-k">LINKEDIN:</span>
+                                    <a href="https://www.linkedin.com/in/raghavsharma1402/" target="_blank" rel="noopener" class="id-meta-link">in/raghavsharma1402 ↗</a>
+                                </div>
+                            </div>
+                            <div class="identity-quick-btns">
+                                <a href="./resume.pdf" download="Raghav_Sharma_Resume.pdf" class="id-btn id-btn-primary">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                    Resume
+                                </a>
+                                <a href="mailto:raghavsharmahhps07@gmail.com" class="id-btn id-btn-ghost">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
+                                    Email
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- System Telemetry Widget -->
+                    <div class="sidebar-widget telemetry-widget" aria-label="System Metrics">
+                        <div class="widget-header">
+                            <div class="widget-title">
+                                <svg class="w-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                <span>SYSTEM STATUS</span>
+                            </div>
+                            <span class="widget-status-dot-green">● ONLINE</span>
+                        </div>
+                        <div class="telemetry-body">
+                            <div class="telemetry-bar-group">
+                                <div class="t-bar-header">
+                                    <span>CORE ENGINE</span>
+                                    <span>86%</span>
+                                </div>
+                                <div class="t-progress"><span class="t-bar-fill" style="width: 86%;"></span></div>
+                            </div>
+                            <div class="telemetry-stats-grid">
+                                <div class="t-stat-card">
+                                    <span class="t-stat-label">REPOSITORIES</span>
+                                    <strong class="t-stat-val">4 ACTIVE</strong>
+                                </div>
+                                <div class="t-stat-card">
+                                    <span class="t-stat-label">OPEN SOURCE</span>
+                                    <strong class="t-stat-val">GSSoC &amp; OSCI</strong>
+                                </div>
+                                <div class="t-stat-card">
+                                    <span class="t-stat-label">BUILD STATE</span>
+                                    <strong class="t-stat-val">STABLE v2.0</strong>
+                                </div>
+                                <div class="t-stat-card">
+                                    <span class="t-stat-label">RUNTIME</span>
+                                    <strong class="t-stat-val">NODE / WEB</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Main Workstation Viewport: Workstation Header, Applications, Interactive Terminal -->
+                <div class="workstation-main">
+                    <!-- Workstation Header Banner -->
+                    <div class="desktop-heading">
+                        <div class="heading-kicker-row">
+                            <span class="eyebrow"><span class="kicker-glow">●</span> DEVELOPER WORKSTATION // TECHWITHBUDDY OS</span>
+                            <span class="env-tag">WORKSPACE 2026</span>
+                        </div>
+                        <h2 id="desktop-title">TECHWITHBUDDY <span class="title-highlight">OS</span></h2>
+                        <p class="desktop-subtext">Welcome to Raghav Sharma's personal developer operating system. Select an application module or command below.</p>
+                    </div>
+
+                    <!-- System Application Launchpad Cards -->
+                    <div class="workstation-section-label">
+                        <span>SYSTEM APPLICATIONS &amp; MODULES</span>
+                        <span class="label-line"></span>
+                    </div>
+
+                    <div class="desktop-icons" role="list" aria-label="TechWithBuddy OS applications">
+                        <button class="desktop-icon" type="button" data-app="projects">
+                            <div class="app-icon-head">
+                                <span class="app-glyph" aria-hidden="true">📁</span>
+                                <span class="app-count-tag">4 REPOS</span>
+                            </div>
+                            <div class="app-info">
+                                <strong class="app-title">PROJECTS</strong>
+                                <span class="app-desc">Flagship engineering builds &amp; live demos</span>
+                            </div>
+                            <div class="app-footer-indicator">
+                                <span>OPEN MODULE</span>
+                                <span class="arrow">→</span>
+                            </div>
+                        </button>
+
+                        <button class="desktop-icon" type="button" data-app="core">
+                            <div class="app-icon-head">
+                                <span class="app-glyph" aria-hidden="true">🧠</span>
+                                <span class="app-count-tag">NEURAL</span>
+                            </div>
+                            <div class="app-info">
+                                <strong class="app-title">TWB CORE</strong>
+                                <span class="app-desc">Interactive cognitive map &amp; brain index</span>
+                            </div>
+                            <div class="app-footer-indicator">
+                                <span>OPEN MODULE</span>
+                                <span class="arrow">→</span>
+                            </div>
+                        </button>
+
+                        <button class="desktop-icon" type="button" data-app="skills">
+                            <div class="app-icon-head">
+                                <span class="app-glyph" aria-hidden="true">🧩</span>
+                                <span class="app-count-tag">14+ TECH</span>
+                            </div>
+                            <div class="app-info">
+                                <strong class="app-title">TECH STACK</strong>
+                                <span class="app-desc">Languages, frameworks &amp; physics canvas</span>
+                            </div>
+                            <div class="app-footer-indicator">
+                                <span>OPEN MODULE</span>
+                                <span class="arrow">→</span>
+                            </div>
+                        </button>
+
+                        <button class="desktop-icon" type="button" data-app="experience">
+                            <div class="app-icon-head">
+                                <span class="app-glyph" aria-hidden="true">◈</span>
+                                <span class="app-count-tag">5 ROLES</span>
+                            </div>
+                            <div class="app-info">
+                                <strong class="app-title">EXPERIENCE</strong>
+                                <span class="app-desc">Internships, campus leadership &amp; contributions</span>
+                            </div>
+                            <div class="app-footer-indicator">
+                                <span>OPEN MODULE</span>
+                                <span class="arrow">→</span>
+                            </div>
+                        </button>
+
+                        <button class="desktop-icon" type="button" data-app="achievements">
+                            <div class="app-icon-head">
+                                <span class="app-glyph" aria-hidden="true">🏆</span>
+                                <span class="app-count-tag">6 CERTS</span>
+                            </div>
+                            <div class="app-info">
+                                <strong class="app-title">ACHIEVEMENTS</strong>
+                                <span class="app-desc">Milestones, honors &amp; certifications</span>
+                            </div>
+                            <div class="app-footer-indicator">
+                                <span>OPEN MODULE</span>
+                                <span class="arrow">→</span>
+                            </div>
+                        </button>
+
+                        <button class="desktop-icon" type="button" data-app="resume">
+                            <div class="app-icon-head">
+                                <span class="app-glyph" aria-hidden="true">📄</span>
+                                <span class="app-count-tag">PDF</span>
+                            </div>
+                            <div class="app-info">
+                                <strong class="app-title">RESUME</strong>
+                                <span class="app-desc">Full CV inspection &amp; instant download</span>
+                            </div>
+                            <div class="app-footer-indicator">
+                                <span>OPEN MODULE</span>
+                                <span class="arrow">→</span>
+                            </div>
+                        </button>
+
+                        <button class="desktop-icon" type="button" data-app="about">
+                            <div class="app-icon-head">
+                                <span class="app-glyph" aria-hidden="true">👤</span>
+                                <span class="app-count-tag">IDENTITY</span>
+                            </div>
+                            <div class="app-info">
+                                <strong class="app-title">ABOUT</strong>
+                                <span class="app-desc">Principles, education &amp; engineering ethos</span>
+                            </div>
+                            <div class="app-footer-indicator">
+                                <span>OPEN MODULE</span>
+                                <span class="arrow">→</span>
+                            </div>
+                        </button>
+
+                        <button class="desktop-icon" type="button" data-app="contact">
+                            <div class="app-icon-head">
+                                <span class="app-glyph" aria-hidden="true">📡</span>
+                                <span class="app-count-tag">PORTAL</span>
+                            </div>
+                            <div class="app-info">
+                                <strong class="app-title">CONTACT</strong>
+                                <span class="app-desc">Direct messaging form &amp; social channels</span>
+                            </div>
+                            <div class="app-footer-indicator">
+                                <span>OPEN MODULE</span>
+                                <span class="arrow">→</span>
+                            </div>
+                        </button>
+
+                        <button class="desktop-icon" type="button" data-app="terminal">
+                            <div class="app-icon-head">
+                                <span class="app-glyph" aria-hidden="true">⌘</span>
+                                <span class="app-count-tag">ZSH</span>
+                            </div>
+                            <div class="app-info">
+                                <strong class="app-title">TERMINAL</strong>
+                                <span class="app-desc">Simulated developer shell &amp; commands</span>
+                            </div>
+                            <div class="app-footer-indicator">
+                                <span>OPEN MODULE</span>
+                                <span class="arrow">→</span>
+                            </div>
+                        </button>
+                    </div>
+
+                    <!-- Interactive Developer Terminal Stream Widget -->
+                    <div class="workstation-terminal-widget" role="region" aria-label="Interactive Developer Console">
+                        <div class="terminal-bar">
+                            <div class="term-controls" aria-hidden="true">
+                                <span class="term-btn red"></span>
+                                <span class="term-btn yellow"></span>
+                                <span class="term-btn green"></span>
+                            </div>
+                            <div class="term-title">
+                                <span class="term-user">raghav@techwithbuddy-os</span>
+                                <span class="term-path">~/workspace/stream</span>
+                                <span class="term-mode">zsh</span>
+                            </div>
+                            <div class="term-session-badge"><span class="term-pulse"></span>STREAM LIVE</div>
+                        </div>
+
+                        <div class="terminal-body">
+                            <div class="terminal-prompt-line">
+                                <span class="term-prompt-symbol">❯</span>
+                                <span class="term-cmd">raghav.stream_journey()</span>
+                            </div>
+                            <div class="terminal-output">
+                                <span class="hero-terminal-text" id="hero-terminal-text" aria-live="polite">Engineering high-impact web apps, AI tools &amp; backend architectures.</span>
+                                <span class="hero-terminal-cursor" aria-hidden="true"></span>
+                            </div>
+                        </div>
+
+                        <div class="terminal-filters" aria-label="Terminal stream topics">
+                            <button type="button" class="term-tab is-active" data-topic="all">
+                                <span class="term-dot"></span><span>Overview</span>
+                            </button>
+                            <button type="button" class="term-tab" data-topic="builds">
+                                <span class="term-dot"></span><span>Flagship Builds</span>
+                            </button>
+                            <button type="button" class="term-tab" data-topic="stack">
+                                <span class="term-dot"></span><span>Tech Arsenal</span>
+                            </button>
+                            <button type="button" class="term-tab" data-topic="direction">
+                                <span class="term-dot"></span><span>Current Focus</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Workstation Prompt & Actions Toolbar -->
+                    <div class="workstation-toolbar">
+                        <div class="desktop-prompt" id="desktop-prompt" role="status" aria-live="polite">Select an application or double-click a file to initialize a module.</div>
+                        <div class="workstation-toolbar-actions">
+                            <button class="archive-toggle" id="archive-toggle" type="button">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon"><path d="M21 8v13H3V8M1 3h22v5H1zM10 12h4"/></svg>
+                                <span>OPEN PORTFOLIO ARCHIVE</span>
+                            </button>
+                            <button class="protocol-hint" id="protocol-hint" type="button" aria-live="polite">
+                                <span aria-hidden="true">?</span> SIGNAL DETECTED
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="desktop-icons" role="list" aria-label="Raghav OS applications">
-                <button class="desktop-icon" type="button" data-app="core"><span class="app-glyph"
-                        aria-hidden="true">🧠</span><span>RAGHAV CORE</span></button>
-                <button class="desktop-icon" type="button" data-app="projects"><span class="app-glyph"
-                        aria-hidden="true">📁</span><span>PROJECTS</span></button>
-                <button class="desktop-icon" type="button" data-app="skills"><span class="app-glyph"
-                        aria-hidden="true">🧩</span><span>SKILLS</span></button>
-                <button class="desktop-icon" type="button" data-app="experience"><span class="app-glyph"
-                        aria-hidden="true">◈</span><span>EXPERIENCE</span></button>
-                <button class="desktop-icon" type="button" data-app="resume"><span class="app-glyph"
-                        aria-hidden="true">📄</span><span>RESUME</span></button>
-                <button class="desktop-icon" type="button" data-app="achievements"><span class="app-glyph"
-                        aria-hidden="true">🏆</span><span>ACHIEVEMENTS</span></button>
-                <button class="desktop-icon" type="button" data-app="about"><span class="app-glyph"
-                        aria-hidden="true">👤</span><span>ABOUT</span></button>
-                <button class="desktop-icon" type="button" data-app="contact"><span class="app-glyph"
-                        aria-hidden="true">📡</span><span>CONTACT</span></button>
-                <button class="desktop-icon" type="button" data-app="terminal"><span class="app-glyph"
-                        aria-hidden="true">⌘</span><span>TERMINAL</span></button>
-            </div>
+
             <button class="desktop-icon hidden-debug-icon" type="button" data-app="debug"
                 aria-label="Unknown system module"><span class="app-glyph"
                     aria-hidden="true">?</span><span>UNKNOWN</span></button>
-            <div class="desktop-prompt" id="desktop-prompt" role="status" aria-live="polite">Select an application to
-                initialize a module.</div>
-            <button class="archive-toggle" id="archive-toggle" type="button">OPEN PORTFOLIO ARCHIVE</button>
-            <button class="protocol-hint" id="protocol-hint" type="button" aria-live="polite"><span
-                    aria-hidden="true">?</span> SIGNAL DETECTED</button>
         </section>
+
         <div class="os-window-layer" id="os-window-layer" aria-live="polite"></div>
-        <nav class="os-taskbar" id="os-taskbar" aria-label="Open Raghav OS applications"></nav>
+        <nav class="os-taskbar" id="os-taskbar" aria-label="Open TechWithBuddy OS applications"></nav>
     </main>
 
     <aside class="recruiter-mode" id="recruiter-mode" hidden aria-label="Recruiter Mode">
@@ -132,11 +536,28 @@
     <section id="debug" style="display:none;" aria-hidden="true"></section>
 
     <div class="scroll-container legacy-portfolio" id="top" hidden>
+        <!-- Archive System Top Banner -->
+        <div class="archive-system-banner" role="region" aria-label="Archive system breadcrumb">
+            <div class="as-banner-inner">
+                <div class="as-path">
+                    <span class="as-dot">●</span>
+                    <code>/techwithbuddy/archive</code>
+                    <span class="as-branch">[main]</span>
+                </div>
+                <div class="as-tree-preview">
+                    <code>├── 2026: projects • experiments • leadership</code>
+                </div>
+                <button class="as-close-btn" type="button" onclick="document.getElementById('archive-toggle').click()">
+                    <span>RETURN TO WORKSTATION ✕</span>
+                </button>
+            </div>
+        </div>
+
         <!-- Navigation -->
         <nav class="navbar">
             <div class="nav-logo">
                 <a href="#top">
-                    <h2>Raghav</h2>
+                    <h2>TechWithBuddy <span class="nav-sub">/ ARCHIVE</span></h2>
                 </a>
             </div>
             <div class="nav-links">
@@ -159,7 +580,7 @@
                 <div class="hero-text">
                     <div class="hero-status-pill">
                         <span class="status-live-dot" aria-hidden="true"></span>
-                        <span class="status-kicker">RAGHAV OS // DEVELOPER ENVIRONMENT</span>
+                        <span class="status-kicker">TECHWITHBUDDY OS // PORTFOLIO ARCHIVE</span>
                         <span class="status-divider">•</span>
                         <span class="status-role">B.Tech CSE '26</span>
                     </div>
@@ -392,11 +813,47 @@
             <div class="section-header">
                 <h2 class="section-title">Tech <span class="highlight">Stack</span></h2>
                 <div class="section-line"></div>
-                <p class="section-subtitle">Grab and throw the skills around!</p>
+                <p class="section-subtitle">Physics-governed skills universe &amp; orbital knowledge system</p>
             </div>
 
             <div class="skills-container">
-                <div id="physics-canvas-container"></div>
+                <div class="orbital-skills-system" id="orbital-skills-system" role="region" aria-label="Orbital Skills Planetary System">
+                    <div class="orbital-controls-bar">
+                        <div class="orbital-title-tag">
+                            <span class="orbital-status-dot"></span>
+                            <span class="orbital-title-text">PHYSICS ORBITAL SYSTEM // RAGHAV CORE</span>
+                        </div>
+                        <div class="orbital-view-switch">
+                            <button type="button" class="orbital-switch-btn is-active" data-view="orbital">ORBITAL SYSTEM</button>
+                            <button type="button" class="orbital-switch-btn" data-view="matter">BALL CANVAS</button>
+                        </div>
+                    </div>
+
+                    <!-- Orbital View Stage -->
+                    <div class="orbital-stage-layer">
+                        <!-- Orbital concentric visual tracks -->
+                        <div class="orbital-ring ring-inner" aria-hidden="true"></div>
+                        <div class="orbital-ring ring-mid" aria-hidden="true"></div>
+                        <div class="orbital-ring ring-outer" aria-hidden="true"></div>
+
+                        <!-- Central Raghav Sun Core -->
+                        <div class="orbital-center-core" title="Raghav Sharma - Core System">
+                            <span>RAGHAV</span>
+                            <span class="core-sub">ENGINEER</span>
+                        </div>
+
+                        <!-- Orbital Nodes rendered dynamically in script.js -->
+                        <div class="orbital-nodes-layer" id="orbital-nodes-layer"></div>
+                    </div>
+
+                    <!-- Matter.js Ball Canvas Stage -->
+                    <div class="physics-canvas-container" id="physics-canvas-container" style="display:none;"></div>
+
+                    <div class="orbital-hud-info">
+                        <span class="orbital-hud-status">GRAVITATIONAL CONSTANT: G = 1.0</span>
+                        <span class="orbital-hud-tip">⚡ Hover skill to decelerate orbit &amp; attract to cursor</span>
+                    </div>
+                </div>
             </div>
         </section>
 
